@@ -10,13 +10,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="MetroFramework" Version="1.2.0.3" />
-    <PackageReference Include="MetroFramework.Design" Version="1.2.0.3" />
-    <PackageReference Include="MetroFramework.Fonts" Version="1.2.0.3" />
-    <PackageReference Include="MetroFramework.RunTime" Version="1.2.0.3" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Compile Update="Properties\Settings.Designer.cs">
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <AutoGen>True</AutoGen>

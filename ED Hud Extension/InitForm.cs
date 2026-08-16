@@ -8,7 +8,7 @@ using System.Windows.Forms;
 
 namespace ED_Hud_Extension
 {
-    public partial class InitForm : MetroFramework.Forms.MetroForm
+    public partial class InitForm : Form
     {
         public InitForm()
         {

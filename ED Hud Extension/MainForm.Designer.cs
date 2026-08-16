@@ -29,14 +29,14 @@
         private void InitializeComponent()
         {
             restartSessionButton = new Button();
-            tabControl = new TabControl();
-            combatPage = new TabPage();
-            label8 = new Label();
-            label7 = new Label();
-            label6 = new Label();
-            label5 = new Label();
-            label4 = new Label();
-            label3 = new Label();
+            combatPanel = new Panel();
+            combatStatTag = new Label();
+            combatLabel = new Label();
+            shipTag = new Label();
+            shieldTag = new Label();
+            hullTag = new Label();
+            targetTag = new Label();
+            rankTag = new Label();
             label2 = new Label();
             label1 = new Label();
             extendBountyTag = new Label();
@@ -52,10 +52,8 @@
             targetPowerLabel = new Label();
             targetShieldsLabel = new Label();
             targetNameLabel = new Label();
-            tradePage = new TabPage();
-            tabPage1 = new TabPage();
-            tabControl.SuspendLayout();
-            combatPage.SuspendLayout();
+            simulateButton = new Button();
+            combatPanel.SuspendLayout();
             SuspendLayout();
             // 
             // restartSessionButton
@@ -72,124 +70,121 @@
             restartSessionButton.UseVisualStyleBackColor = false;
             restartSessionButton.Click += restartSessionButton_Click;
             // 
-            // tabControl
+            // combatPanel
             // 
-            tabControl.Controls.Add(combatPage);
-            tabControl.Controls.Add(tradePage);
-            tabControl.Controls.Add(tabPage1);
-            tabControl.Location = new Point(12, 12);
-            tabControl.Name = "tabControl";
-            tabControl.Padding = new Point(1, 1);
-            tabControl.SelectedIndex = 0;
-            tabControl.Size = new Size(1896, 1027);
-            tabControl.TabIndex = 22;
+            combatPanel.Controls.Add(combatStatTag);
+            combatPanel.Controls.Add(combatLabel);
+            combatPanel.Controls.Add(shipTag);
+            combatPanel.Controls.Add(shieldTag);
+            combatPanel.Controls.Add(hullTag);
+            combatPanel.Controls.Add(targetTag);
+            combatPanel.Controls.Add(rankTag);
+            combatPanel.Controls.Add(label2);
+            combatPanel.Controls.Add(label1);
+            combatPanel.Controls.Add(extendBountyTag);
+            combatPanel.Controls.Add(extendedBountyLabel);
+            combatPanel.Controls.Add(localBountyTag);
+            combatPanel.Controls.Add(legalStatusTag);
+            combatPanel.Controls.Add(targetShipLabel);
+            combatPanel.Controls.Add(legalStatusLabel);
+            combatPanel.Controls.Add(targetRankLabel);
+            combatPanel.Controls.Add(targetFactionLabel);
+            combatPanel.Controls.Add(localBounty);
+            combatPanel.Controls.Add(targetHullLabel);
+            combatPanel.Controls.Add(targetPowerLabel);
+            combatPanel.Controls.Add(targetShieldsLabel);
+            combatPanel.Controls.Add(targetNameLabel);
+            combatPanel.Location = new Point(73, 12);
+            combatPanel.Name = "combatPanel";
+            combatPanel.Size = new Size(1835, 1027);
+            combatPanel.TabIndex = 22;
             // 
-            // combatPage
+            // combatStatTag
             // 
-            combatPage.BackColor = Color.DimGray;
-            combatPage.Controls.Add(label8);
-            combatPage.Controls.Add(label7);
-            combatPage.Controls.Add(label6);
-            combatPage.Controls.Add(label5);
-            combatPage.Controls.Add(label4);
-            combatPage.Controls.Add(label3);
-            combatPage.Controls.Add(label2);
-            combatPage.Controls.Add(label1);
-            combatPage.Controls.Add(extendBountyTag);
-            combatPage.Controls.Add(extendedBountyLabel);
-            combatPage.Controls.Add(localBountyTag);
-            combatPage.Controls.Add(legalStatusTag);
-            combatPage.Controls.Add(targetShipLabel);
-            combatPage.Controls.Add(legalStatusLabel);
-            combatPage.Controls.Add(targetRankLabel);
-            combatPage.Controls.Add(targetFactionLabel);
-            combatPage.Controls.Add(localBounty);
-            combatPage.Controls.Add(targetHullLabel);
-            combatPage.Controls.Add(targetPowerLabel);
-            combatPage.Controls.Add(targetShieldsLabel);
-            combatPage.Controls.Add(targetNameLabel);
-            combatPage.Location = new Point(4, 22);
-            combatPage.Name = "combatPage";
-            combatPage.Padding = new Padding(3);
-            combatPage.Size = new Size(1888, 1001);
-            combatPage.TabIndex = 0;
-            combatPage.Text = "Combat";
+            combatStatTag.AutoSize = true;
+            combatStatTag.Font = new Font("Segoe UI", 30F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            combatStatTag.ForeColor = SystemColors.Control;
+            combatStatTag.Location = new Point(970, -3);
+            combatStatTag.Name = "combatStatTag";
+            combatStatTag.Size = new Size(172, 54);
+            combatStatTag.TabIndex = 62;
+            combatStatTag.Text = "Inactive";
             // 
-            // label8
+            // combatLabel
             // 
-            label8.AutoSize = true;
-            label8.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
-            label8.ForeColor = SystemColors.Control;
-            label8.Location = new Point(475, 693);
-            label8.Name = "label8";
-            label8.Size = new Size(19, 19);
-            label8.TabIndex = 41;
-            label8.Text = "A";
+            combatLabel.AutoSize = true;
+            combatLabel.Font = new Font("Segoe UI", 30F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            combatLabel.ForeColor = Color.FromArgb(255, 128, 0);
+            combatLabel.Location = new Point(790, 0);
+            combatLabel.Name = "combatLabel";
+            combatLabel.Size = new Size(205, 54);
+            combatLabel.TabIndex = 61;
+            combatLabel.Text = "Combat : ";
             // 
-            // label7
+            // shipTag
             // 
-            label7.AutoSize = true;
-            label7.Font = new Font("Segoe UI", 30F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            label7.ForeColor = SystemColors.Control;
-            label7.Location = new Point(145, 213);
-            label7.Name = "label7";
-            label7.Size = new Size(101, 54);
-            label7.TabIndex = 40;
-            label7.Text = "N/A";
+            shipTag.AutoSize = true;
+            shipTag.Font = new Font("Segoe UI", 30F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            shipTag.ForeColor = SystemColors.Control;
+            shipTag.Location = new Point(139, 388);
+            shipTag.Name = "shipTag";
+            shipTag.Size = new Size(101, 54);
+            shipTag.TabIndex = 60;
+            shipTag.Text = "N/A";
             // 
-            // label6
+            // shieldTag
             // 
-            label6.AutoSize = true;
-            label6.Font = new Font("Segoe UI", 30F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            label6.ForeColor = SystemColors.Control;
-            label6.Location = new Point(189, 267);
-            label6.Name = "label6";
-            label6.Size = new Size(101, 54);
-            label6.TabIndex = 39;
-            label6.Text = "N/A";
+            shieldTag.AutoSize = true;
+            shieldTag.Font = new Font("Segoe UI", 30F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            shieldTag.ForeColor = SystemColors.Control;
+            shieldTag.Location = new Point(183, 442);
+            shieldTag.Name = "shieldTag";
+            shieldTag.Size = new Size(101, 54);
+            shieldTag.TabIndex = 59;
+            shieldTag.Text = "N/A";
             // 
-            // label5
+            // hullTag
             // 
-            label5.AutoSize = true;
-            label5.Font = new Font("Segoe UI", 30F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            label5.ForeColor = SystemColors.Control;
-            label5.Location = new Point(145, 321);
-            label5.Name = "label5";
-            label5.Size = new Size(101, 54);
-            label5.TabIndex = 38;
-            label5.Text = "N/A";
+            hullTag.AutoSize = true;
+            hullTag.Font = new Font("Segoe UI", 30F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            hullTag.ForeColor = SystemColors.Control;
+            hullTag.Location = new Point(139, 496);
+            hullTag.Name = "hullTag";
+            hullTag.Size = new Size(101, 54);
+            hullTag.TabIndex = 58;
+            hullTag.Text = "N/A";
             // 
-            // label4
+            // targetTag
             // 
-            label4.AutoSize = true;
-            label4.Font = new Font("Segoe UI", 30F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            label4.ForeColor = SystemColors.Control;
-            label4.Location = new Point(189, 3);
-            label4.Name = "label4";
-            label4.Size = new Size(101, 54);
-            label4.TabIndex = 37;
-            label4.Text = "N/A";
+            targetTag.AutoSize = true;
+            targetTag.Font = new Font("Segoe UI", 30F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            targetTag.ForeColor = SystemColors.Control;
+            targetTag.Location = new Point(183, 178);
+            targetTag.Name = "targetTag";
+            targetTag.Size = new Size(101, 54);
+            targetTag.TabIndex = 57;
+            targetTag.Text = "N/A";
             // 
-            // label3
+            // rankTag
             // 
-            label3.AutoSize = true;
-            label3.Font = new Font("Segoe UI", 30F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            label3.ForeColor = SystemColors.Control;
-            label3.Location = new Point(162, 57);
-            label3.Name = "label3";
-            label3.Size = new Size(101, 54);
-            label3.TabIndex = 36;
-            label3.Text = "N/A";
+            rankTag.AutoSize = true;
+            rankTag.Font = new Font("Segoe UI", 30F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            rankTag.ForeColor = SystemColors.Control;
+            rankTag.Location = new Point(156, 232);
+            rankTag.Name = "rankTag";
+            rankTag.Size = new Size(101, 54);
+            rankTag.TabIndex = 56;
+            rankTag.Text = "N/A";
             // 
             // label2
             // 
             label2.AutoSize = true;
             label2.Font = new Font("Segoe UI", 30F, FontStyle.Bold, GraphicsUnit.Point, 0);
             label2.ForeColor = SystemColors.Control;
-            label2.Location = new Point(744, 3);
+            label2.Location = new Point(738, 178);
             label2.Name = "label2";
             label2.Size = new Size(101, 54);
-            label2.TabIndex = 35;
+            label2.TabIndex = 55;
             label2.Text = "N/A";
             // 
             // label1
@@ -197,10 +192,10 @@
             label1.AutoSize = true;
             label1.Font = new Font("Segoe UI", 30F, FontStyle.Bold, GraphicsUnit.Point, 0);
             label1.ForeColor = SystemColors.Control;
-            label1.Location = new Point(762, 57);
+            label1.Location = new Point(756, 232);
             label1.Name = "label1";
             label1.Size = new Size(101, 54);
-            label1.TabIndex = 34;
+            label1.TabIndex = 54;
             label1.Text = "N/A";
             // 
             // extendBountyTag
@@ -208,10 +203,10 @@
             extendBountyTag.AutoSize = true;
             extendBountyTag.Font = new Font("Segoe UI", 30F, FontStyle.Bold, GraphicsUnit.Point, 0);
             extendBountyTag.ForeColor = SystemColors.Control;
-            extendBountyTag.Location = new Point(921, 165);
+            extendBountyTag.Location = new Point(915, 340);
             extendBountyTag.Name = "extendBountyTag";
             extendBountyTag.Size = new Size(101, 54);
-            extendBountyTag.TabIndex = 33;
+            extendBountyTag.TabIndex = 53;
             extendBountyTag.Text = "N/A";
             // 
             // extendedBountyLabel
@@ -219,10 +214,10 @@
             extendedBountyLabel.AutoSize = true;
             extendedBountyLabel.Font = new Font("Segoe UI", 30F, FontStyle.Bold, GraphicsUnit.Point, 0);
             extendedBountyLabel.ForeColor = Color.FromArgb(255, 128, 0);
-            extendedBountyLabel.Location = new Point(564, 165);
+            extendedBountyLabel.Location = new Point(558, 340);
             extendedBountyLabel.Name = "extendedBountyLabel";
             extendedBountyLabel.Size = new Size(351, 54);
-            extendedBountyLabel.TabIndex = 32;
+            extendedBountyLabel.TabIndex = 52;
             extendedBountyLabel.Text = "Galactic Bounty : ";
             // 
             // localBountyTag
@@ -230,10 +225,10 @@
             localBountyTag.AutoSize = true;
             localBountyTag.Font = new Font("Segoe UI", 30F, FontStyle.Bold, GraphicsUnit.Point, 0);
             localBountyTag.ForeColor = SystemColors.Control;
-            localBountyTag.Location = new Point(869, 111);
+            localBountyTag.Location = new Point(863, 286);
             localBountyTag.Name = "localBountyTag";
             localBountyTag.Size = new Size(101, 54);
-            localBountyTag.TabIndex = 31;
+            localBountyTag.TabIndex = 51;
             localBountyTag.Text = "N/A";
             // 
             // legalStatusTag
@@ -241,10 +236,10 @@
             legalStatusTag.AutoSize = true;
             legalStatusTag.Font = new Font("Segoe UI", 30F, FontStyle.Bold, GraphicsUnit.Point, 0);
             legalStatusTag.ForeColor = SystemColors.Control;
-            legalStatusTag.Location = new Point(296, 111);
+            legalStatusTag.Location = new Point(290, 286);
             legalStatusTag.Name = "legalStatusTag";
             legalStatusTag.Size = new Size(101, 54);
-            legalStatusTag.TabIndex = 30;
+            legalStatusTag.TabIndex = 50;
             legalStatusTag.Text = "N/A";
             // 
             // targetShipLabel
@@ -252,10 +247,10 @@
             targetShipLabel.AutoSize = true;
             targetShipLabel.Font = new Font("Segoe UI", 30F, FontStyle.Bold, GraphicsUnit.Point, 0);
             targetShipLabel.ForeColor = Color.FromArgb(255, 128, 0);
-            targetShipLabel.Location = new Point(6, 219);
+            targetShipLabel.Location = new Point(0, 394);
             targetShipLabel.Name = "targetShipLabel";
             targetShipLabel.Size = new Size(138, 54);
-            targetShipLabel.TabIndex = 29;
+            targetShipLabel.TabIndex = 49;
             targetShipLabel.Text = "Ship : ";
             // 
             // legalStatusLabel
@@ -263,10 +258,10 @@
             legalStatusLabel.AutoSize = true;
             legalStatusLabel.Font = new Font("Segoe UI", 30F, FontStyle.Bold, GraphicsUnit.Point, 0);
             legalStatusLabel.ForeColor = Color.FromArgb(255, 128, 0);
-            legalStatusLabel.Location = new Point(6, 111);
+            legalStatusLabel.Location = new Point(0, 286);
             legalStatusLabel.Name = "legalStatusLabel";
             legalStatusLabel.Size = new Size(284, 54);
-            legalStatusLabel.TabIndex = 28;
+            legalStatusLabel.TabIndex = 48;
             legalStatusLabel.Text = "Legal Status : ";
             // 
             // targetRankLabel
@@ -274,10 +269,10 @@
             targetRankLabel.AutoSize = true;
             targetRankLabel.Font = new Font("Segoe UI", 30F, FontStyle.Bold, GraphicsUnit.Point, 0);
             targetRankLabel.ForeColor = Color.FromArgb(255, 128, 0);
-            targetRankLabel.Location = new Point(6, 57);
+            targetRankLabel.Location = new Point(0, 232);
             targetRankLabel.Name = "targetRankLabel";
             targetRankLabel.Size = new Size(150, 54);
-            targetRankLabel.TabIndex = 27;
+            targetRankLabel.TabIndex = 47;
             targetRankLabel.Text = "Rank : ";
             // 
             // targetFactionLabel
@@ -285,10 +280,10 @@
             targetFactionLabel.AutoSize = true;
             targetFactionLabel.Font = new Font("Segoe UI", 30F, FontStyle.Bold, GraphicsUnit.Point, 0);
             targetFactionLabel.ForeColor = Color.FromArgb(255, 128, 0);
-            targetFactionLabel.Location = new Point(564, 57);
+            targetFactionLabel.Location = new Point(558, 232);
             targetFactionLabel.Name = "targetFactionLabel";
             targetFactionLabel.Size = new Size(192, 54);
-            targetFactionLabel.TabIndex = 26;
+            targetFactionLabel.TabIndex = 46;
             targetFactionLabel.Text = "Faction : ";
             // 
             // localBounty
@@ -296,10 +291,10 @@
             localBounty.AutoSize = true;
             localBounty.Font = new Font("Segoe UI", 30F, FontStyle.Bold, GraphicsUnit.Point, 0);
             localBounty.ForeColor = Color.FromArgb(255, 128, 0);
-            localBounty.Location = new Point(564, 111);
+            localBounty.Location = new Point(558, 286);
             localBounty.Name = "localBounty";
             localBounty.Size = new Size(299, 54);
-            localBounty.TabIndex = 25;
+            localBounty.TabIndex = 45;
             localBounty.Text = "Local Bounty : ";
             // 
             // targetHullLabel
@@ -307,10 +302,10 @@
             targetHullLabel.AutoSize = true;
             targetHullLabel.Font = new Font("Segoe UI", 30F, FontStyle.Bold, GraphicsUnit.Point, 0);
             targetHullLabel.ForeColor = Color.FromArgb(255, 128, 0);
-            targetHullLabel.Location = new Point(6, 327);
+            targetHullLabel.Location = new Point(0, 502);
             targetHullLabel.Name = "targetHullLabel";
             targetHullLabel.Size = new Size(133, 54);
-            targetHullLabel.TabIndex = 24;
+            targetHullLabel.TabIndex = 44;
             targetHullLabel.Text = "Hull : ";
             // 
             // targetPowerLabel
@@ -318,10 +313,10 @@
             targetPowerLabel.AutoSize = true;
             targetPowerLabel.Font = new Font("Segoe UI", 30F, FontStyle.Bold, GraphicsUnit.Point, 0);
             targetPowerLabel.ForeColor = Color.FromArgb(255, 128, 0);
-            targetPowerLabel.Location = new Point(564, 3);
+            targetPowerLabel.Location = new Point(558, 178);
             targetPowerLabel.Name = "targetPowerLabel";
             targetPowerLabel.Size = new Size(174, 54);
-            targetPowerLabel.TabIndex = 23;
+            targetPowerLabel.TabIndex = 43;
             targetPowerLabel.Text = "Power : ";
             // 
             // targetShieldsLabel
@@ -329,10 +324,10 @@
             targetShieldsLabel.AutoSize = true;
             targetShieldsLabel.Font = new Font("Segoe UI", 30F, FontStyle.Bold, GraphicsUnit.Point, 0);
             targetShieldsLabel.ForeColor = Color.FromArgb(255, 128, 0);
-            targetShieldsLabel.Location = new Point(6, 273);
+            targetShieldsLabel.Location = new Point(0, 448);
             targetShieldsLabel.Name = "targetShieldsLabel";
             targetShieldsLabel.Size = new Size(189, 54);
-            targetShieldsLabel.TabIndex = 22;
+            targetShieldsLabel.TabIndex = 42;
             targetShieldsLabel.Text = "Shields : ";
             // 
             // targetNameLabel
@@ -340,32 +335,25 @@
             targetNameLabel.AutoSize = true;
             targetNameLabel.Font = new Font("Segoe UI", 30F, FontStyle.Bold, GraphicsUnit.Point, 0);
             targetNameLabel.ForeColor = Color.FromArgb(255, 128, 0);
-            targetNameLabel.Location = new Point(6, 3);
+            targetNameLabel.Location = new Point(0, 178);
             targetNameLabel.Name = "targetNameLabel";
             targetNameLabel.Size = new Size(177, 54);
-            targetNameLabel.TabIndex = 21;
+            targetNameLabel.TabIndex = 41;
             targetNameLabel.Text = "Target : ";
             // 
-            // tradePage
+            // simulateButton
             // 
-            tradePage.BackColor = Color.DimGray;
-            tradePage.BackgroundImageLayout = ImageLayout.None;
-            tradePage.Location = new Point(4, 22);
-            tradePage.Name = "tradePage";
-            tradePage.Padding = new Padding(3);
-            tradePage.Size = new Size(1888, 1001);
-            tradePage.TabIndex = 1;
-            tradePage.Text = "Trade";
-            // 
-            // tabPage1
-            // 
-            tabPage1.Location = new Point(4, 22);
-            tabPage1.Name = "tabPage1";
-            tabPage1.Padding = new Padding(3);
-            tabPage1.Size = new Size(1888, 1001);
-            tabPage1.TabIndex = 2;
-            tabPage1.Text = "tabPage1";
-            tabPage1.UseVisualStyleBackColor = true;
+            simulateButton.BackColor = SystemColors.ActiveCaptionText;
+            simulateButton.FlatStyle = FlatStyle.Popup;
+            simulateButton.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            simulateButton.ForeColor = Color.FromArgb(255, 128, 0);
+            simulateButton.Location = new Point(1674, 1045);
+            simulateButton.Name = "simulateButton";
+            simulateButton.Size = new Size(114, 23);
+            simulateButton.TabIndex = 23;
+            simulateButton.Text = "Simulate Combat";
+            simulateButton.UseVisualStyleBackColor = false;
+            simulateButton.Click += simulateButton_Click;
             // 
             // MainForm
             // 
@@ -373,29 +361,25 @@
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = SystemColors.ControlDarkDark;
             ClientSize = new Size(1920, 1080);
-            Controls.Add(tabControl);
+            Controls.Add(simulateButton);
+            Controls.Add(combatPanel);
             Controls.Add(restartSessionButton);
             FormBorderStyle = FormBorderStyle.None;
             Name = "MainForm";
             Text = "E:D Hud Extension";
-            Shown += MainForm_Shown;
-            tabControl.ResumeLayout(false);
-            combatPage.ResumeLayout(false);
-            combatPage.PerformLayout();
+            combatPanel.ResumeLayout(false);
+            combatPanel.PerformLayout();
             ResumeLayout(false);
         }
 
         #endregion
         private Button restartSessionButton;
-        private TabControl tabControl;
-        private TabPage combatPage;
-        private TabPage tradePage;
-        private Label label8;
-        private Label label7;
-        private Label label6;
-        private Label label5;
-        private Label label4;
-        private Label label3;
+        private Panel combatPanel;
+        private Label shipTag;
+        private Label shieldTag;
+        private Label hullTag;
+        private Label targetTag;
+        private Label rankTag;
         private Label label2;
         private Label label1;
         private Label extendBountyTag;
@@ -411,6 +395,8 @@
         private Label targetPowerLabel;
         private Label targetShieldsLabel;
         private Label targetNameLabel;
-        private TabPage tabPage1;
+        private Label combatStatTag;
+        private Label combatLabel;
+        private Button simulateButton;
     }
 }

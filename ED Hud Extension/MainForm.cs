@@ -1,4 +1,6 @@
 using System.Threading;
+using static Functions;
+using static Globals;
 
 namespace ED_Hud_Extension
 {
@@ -14,14 +16,18 @@ namespace ED_Hud_Extension
 
         }
 
-        private void progressBar1_Click(object sender, EventArgs e)
+        private void simulateButton_Click(object sender, EventArgs e)
         {
 
-        }
+            simulateCombat(true, "potato", "Keelback", 100, 100);
 
-        private void MainForm_Shown(object sender, EventArgs e)
-        {
-            
+            combatStatTag.Text = "Active";
+            combatStatTag.ForeColor = Color.Red;
+
+            targetTag.Text = targetName;
+            shipTag.Text = targetShip;
+            shieldTag.Text = targetShield.ToString();
+            hullTag.Text = targetHull.ToString();
         }
     }
 }

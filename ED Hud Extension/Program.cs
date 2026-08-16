@@ -11,7 +11,7 @@ namespace ED_Hud_Extension
             //To customize application configuration such as set high DPI settings or default font,
             //see https://aka.ms/applicationconfiguration.
             ApplicationConfiguration.Initialize();
-            Application.Run(new InitForm());
+            Application.Run(new MainForm());
 
             //declaring variables to be retrieved from the Journal File
             //display data
@@ -29,9 +29,8 @@ namespace ED_Hud_Extension
             //events what for flagging and such
             bool targetDestroyed = false; //flag for when the player achieves a kill
             bool inCombat = false; //flag for when the player is engaged in combat [under_attack or weapons_fired flags]
-
+            bool isTargeting = false; //flag for checking if the player has targetted anything/one
         }
     }
-
-    
+            
 }
