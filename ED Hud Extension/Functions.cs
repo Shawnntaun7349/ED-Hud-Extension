@@ -1,4 +1,11 @@
-﻿using System;
+﻿using EliteJournalReader;
+using EliteJournalReader.Events;
+using System;
+using System.Linq;
+using System.Text;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+
 
 internal class Functions
 {
@@ -16,7 +23,7 @@ internal class Functions
 		Globals.targetShip = tShip;
 		Globals.targetShield = tShield;
 		Globals.targetHull = tHull;
-	}
-	
+    }
+
 }
 

@@ -30,6 +30,8 @@
         {
             restartSessionButton = new Button();
             combatPanel = new Panel();
+            initPanel = new Panel();
+            journalWarning = new Label();
             combatStatTag = new Label();
             combatLabel = new Label();
             shipTag = new Label();
@@ -53,7 +55,9 @@
             targetShieldsLabel = new Label();
             targetNameLabel = new Label();
             simulateButton = new Button();
+            settingsButton = new Button();
             combatPanel.SuspendLayout();
+            initPanel.SuspendLayout();
             SuspendLayout();
             // 
             // restartSessionButton
@@ -72,6 +76,7 @@
             // 
             // combatPanel
             // 
+            combatPanel.Controls.Add(initPanel);
             combatPanel.Controls.Add(combatStatTag);
             combatPanel.Controls.Add(combatLabel);
             combatPanel.Controls.Add(shipTag);
@@ -98,6 +103,25 @@
             combatPanel.Name = "combatPanel";
             combatPanel.Size = new Size(1835, 1027);
             combatPanel.TabIndex = 22;
+            // 
+            // initPanel
+            // 
+            initPanel.Controls.Add(journalWarning);
+            initPanel.Location = new Point(3, 3);
+            initPanel.Name = "initPanel";
+            initPanel.Size = new Size(1829, 1021);
+            initPanel.TabIndex = 63;
+            // 
+            // journalWarning
+            // 
+            journalWarning.AutoSize = true;
+            journalWarning.Font = new Font("Segoe UI", 30F, FontStyle.Bold);
+            journalWarning.ForeColor = Color.FromArgb(255, 128, 0);
+            journalWarning.Location = new Point(662, 268);
+            journalWarning.Name = "journalWarning";
+            journalWarning.Size = new Size(462, 54);
+            journalWarning.TabIndex = 0;
+            journalWarning.Text = "Waiting for Journal File";
             // 
             // combatStatTag
             // 
@@ -355,20 +379,41 @@
             simulateButton.UseVisualStyleBackColor = false;
             simulateButton.Click += simulateButton_Click;
             // 
+            // settingsButton
+            // 
+            settingsButton.BackColor = SystemColors.ActiveCaptionText;
+            settingsButton.FlatStyle = FlatStyle.Popup;
+            settingsButton.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            settingsButton.ForeColor = Color.FromArgb(255, 128, 0);
+            settingsButton.Location = new Point(1554, 1045);
+            settingsButton.Name = "settingsButton";
+            settingsButton.Size = new Size(114, 23);
+            settingsButton.TabIndex = 24;
+            settingsButton.Text = "Settings";
+            settingsButton.UseVisualStyleBackColor = false;
+            settingsButton.Click += settingsButton_Click;
+            // 
             // MainForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = SystemColors.ControlDarkDark;
             ClientSize = new Size(1920, 1080);
+            Controls.Add(settingsButton);
             Controls.Add(simulateButton);
             Controls.Add(combatPanel);
             Controls.Add(restartSessionButton);
             FormBorderStyle = FormBorderStyle.None;
+            MaximizeBox = false;
+            MinimizeBox = false;
             Name = "MainForm";
+            StartPosition = FormStartPosition.Manual;
             Text = "E:D Hud Extension";
+            Load += MainForm_Load;
             combatPanel.ResumeLayout(false);
             combatPanel.PerformLayout();
+            initPanel.ResumeLayout(false);
+            initPanel.PerformLayout();
             ResumeLayout(false);
         }
 
@@ -398,5 +443,8 @@
         private Label combatStatTag;
         private Label combatLabel;
         private Button simulateButton;
+        private Button settingsButton;
+        private Panel initPanel;
+        private Label journalWarning;
     }
 }

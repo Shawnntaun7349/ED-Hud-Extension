@@ -1,3 +1,5 @@
+using System.Text.Json;
+
 namespace ED_Hud_Extension
 {
     internal static class Program
@@ -30,6 +32,7 @@ namespace ED_Hud_Extension
             bool targetDestroyed = false; //flag for when the player achieves a kill
             bool inCombat = false; //flag for when the player is engaged in combat [under_attack or weapons_fired flags]
             bool isTargeting = false; //flag for checking if the player has targetted anything/one
+
         }
     }
             

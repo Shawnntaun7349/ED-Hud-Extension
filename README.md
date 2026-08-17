@@ -1,0 +1,1 @@
+No money to be made here ya fucken sluts, get outta here.
