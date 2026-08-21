@@ -7,6 +7,8 @@ using System.Text;
 using System.Text.Json;
 using System.Windows.Forms;
 
+using static Globals;
+
 namespace ED_Hud_Extension
 {
     public partial class SettingsForm : Form
@@ -15,31 +17,26 @@ namespace ED_Hud_Extension
         {
             InitializeComponent();
 
-            //default out the values so the user doesn't get an error for only changing one setting
-            List<string> monitorList = GetMonitorList();
-            prefDisplayMenu.DataSource = monitorList;
-            prefDisplayMenu.SelectedIndex = 0;
+            //try to load the user's saved settings
+            
+            prefDisplayMenu.DataSource = GetMonitorList();
+            prefDisplayMenu.SelectedIndex = savedPrefDisplayIndex;
 
             fullscreenMenu.SelectedIndex = 0;
-
-            if (Globals.journalPath is not null) //check for valid journal selection rq
-            {
-                pathTextbox.Text = Globals.journalPath;
-                prefDisplayMenu.SelectedIndex = Globals.savedPrefDisplayIndex;
-            }
+            journalPathTextbox.Text = journalPath;
+            statReadButton.Checked = statusEnabled;
         }
 
         private void browseButton_Click(object sender, EventArgs e) //gimme the god damn journal folder
         {
             using (var folderDialog = new FolderBrowserDialog())
             {
-                folderDialog.Description = "";
-                folderDialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+                folderDialog.InitialDirectory = defaultJournalPath;
                 if (folderDialog.ShowDialog() == DialogResult.OK)
                 {
                     string selectedPath = folderDialog.SelectedPath;
-                    pathTextbox.Text = selectedPath;
-                    Globals.journalPath = selectedPath;
+                    journalPathTextbox.Text = selectedPath;
+                    journalPath = selectedPath;
                 }
             }
         }
@@ -47,40 +44,21 @@ namespace ED_Hud_Extension
         private void applyButton_Click(object sender, EventArgs e) //check for errors, then save the user's settings
         {
             //then verify the journal folder
-            string pathToCheck = Globals.journalPath;
+            string pathToCheck = journalPath;
             if (pathToCheck is null) //make sure the input isn't fucking empty
             {
                 MessageBox.Show("The selection is empty. Please select the journal folder or click close.", "Invalid Selection", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
-            else if (File.Exists(Path.Combine(pathToCheck, "ModulesInfo.json"))) //make sure that the folder is the correct one by checking for guaranteed files like the ModulesInfo file
+            else if (Directory.Exists(pathToCheck)) //make sure that the folder is the correct one by checking for guaranteed files like the ModulesInfo file
             {
-                Directory.CreateDirectory("C:\\EDHE"); //Create the EDHE directory if it doesn't exist
-                string confirmedPath = pathToCheck;
+                chosenDisplay = prefDisplayMenu.SelectedIndex;
+                statusEnabled = statReadButton.Checked;
+                gamePath = gamePathTextbox.Text;
 
-                var path = new Dictionary<string, string>
-                {
-                    { "Path", confirmedPath },
-                    { "Preferred Display", prefDisplayMenu.SelectedIndex.ToString() }
-
-                };
-
-                string json = JsonSerializer.Serialize(path, new JsonSerializerOptions { WriteIndented = true }); //json-ify that shit
-                File.WriteAllText("C:\\EDHE\\settings.json", json); //create settings.json and write the data to it
+                Functions.saveSettings();
                 MessageBox.Show("Settings saved successfully! Application will now restart.", "Selection complete", MessageBoxButtons.OK);
+                
                 Application.Restart();
-
-                //start out by attempting to adjust to the user's selected display
-                MainForm mf = new MainForm();
-                try
-                {
-
-                }
-                catch
-                {
-                    MessageBox.Show("There was an issue with your display settings, please try again.", "Display Error", MessageBoxButtons.OK);
-                    return;
-                }
-                return;
             }
             else
             {
