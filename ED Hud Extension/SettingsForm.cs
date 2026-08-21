@@ -24,10 +24,11 @@ namespace ED_Hud_Extension
 
             fullscreenMenu.SelectedIndex = 0;
             journalPathTextbox.Text = journalPath;
+            gamePathTextbox.Text = gamePath;
             statReadButton.Checked = statusEnabled;
         }
 
-        private void browseButton_Click(object sender, EventArgs e) //gimme the god damn journal folder
+        private void pathBrowseButton_Click(object sender, EventArgs e) //gimme the god damn journal folder
         {
             using (var folderDialog = new FolderBrowserDialog())
             {
@@ -54,6 +55,7 @@ namespace ED_Hud_Extension
                 chosenDisplay = prefDisplayMenu.SelectedIndex;
                 statusEnabled = statReadButton.Checked;
                 gamePath = gamePathTextbox.Text;
+                journalPath = journalPathTextbox.Text;
 
                 Functions.saveSettings();
                 MessageBox.Show("Settings saved successfully! Application will now restart.", "Selection complete", MessageBoxButtons.OK);

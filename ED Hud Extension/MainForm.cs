@@ -16,12 +16,12 @@ namespace ED_Hud_Extension
 {
     public partial class MainForm : Form
     {
-        private static System.Threading.Timer animTimer;//multi-threading timers are a hassle 
         private static System.Threading.Timer localTimer;//multi-threading timers are a hassle 
         private static System.Threading.Timer connectingTimer;
 
         //bits for the connection 'animation'
-        public static string animConnectionText = "establishing uplink connection."; //waitingConnectLabel label
+        private static System.Threading.Timer animTimer;
+        public static string animConnectionText = "establishing uplink connection."; 
         public static string animConnectionTextBase = "establishing uplink connection.";
         public static string animClientText = "awaiting client response.";
         public static string animClientTextBase = "awaiting client response.";
@@ -35,7 +35,7 @@ namespace ED_Hud_Extension
 
         public static bool currentJournal = false; //is the game running? use the most recent journal
         public static bool newJournal = false; //is the game not running? wait for a new journal
-        public static bool clientReady = false;
+        public static bool clientReady = false; //is the game running but we're idling on the main menu? wait for a game mode selection
 
         public bool gameRunning()
         {
@@ -75,10 +75,12 @@ namespace ED_Hud_Extension
                 initiateWatcher();
                 currentJournal = true;
                 if (statusEnabled) { statusLabel.Text = ("mainform loaded, game is running"); }
+                animTimer.Dispose();
             }
             else //otherwise, start the loop & wait for the game to spin up
             {
                 if (statusEnabled) { statusLabel.Text = statBase + "waiting for client"; }
+                initPanel.BringToFront();
             }
         }
         public JournalWatcher watcher = new JournalWatcher(journalPath);
@@ -90,6 +92,8 @@ namespace ED_Hud_Extension
             watcher.StartWatching(); //start the watcher to monitor for events
             watcher.GetEvent<NewJournalFileEvent>().Fired += newJournalMethod;
             watcher.GetEvent<LoadGameEvent>().Fired += loadInitialData;
+            watcher.GetEvent<RefuelAllEvent>().Fired += refuelAllEvent;
+            watcher.GetEvent<RefuelPartialEvent>().Fired += refuelPartialEvent;
             if (statusEnabled) { statusLabel.Invoke(new Action(() => statusLabel.Text = statBase + "initiating journal watcher")); }
         }
 
@@ -103,22 +107,50 @@ namespace ED_Hud_Extension
         {
             if (newJournal)
             {
-                cmdrNameLabel.Invoke(new Action(() => cmdrNameLabel.Text = args.Commander));
-                shipLabel.Invoke(new Action(() => shipLabel.Text = args.Ship));
-                shipNameLabel.Invoke(new Action(() => shipNameLabel.Text = args.ShipName));
+                Invoke(new Action(() => welcomeLabel.Text += "\n" + args.Commander));
+
+                Invoke(new Action(() => curShipTag.Text = args.Ship));
+
+                Invoke(new Action(() => curShipDesTag.Text = args.ShipName));
+
+                Invoke(new Action(() => curShipIDTag.Text = args.ShipIdent));
+
+                currentFuelLevel = args.FuelLevel;
+                maxFuelLevel = args.FuelCapacity;
+                Invoke(new Action(() => curShipFuelTag.Text = (currentFuelLevel + " / " + maxFuelLevel)));
 
                 clientReady = true;
                 if (statusEnabled) { statusLabel.Invoke(new Action(() => statusLabel.Text = statBase + "new journal generated, parsing")); }
             }
             else
             {
-                cmdrNameLabel.Invoke(new Action(() => cmdrNameLabel.Text = args.Commander));
-                shipLabel.Invoke(new Action(() => shipLabel.Text = args.Ship));
-                shipNameLabel.Invoke(new Action(() => shipNameLabel.Text = args.ShipName));
+                Invoke(new Action(() => welcomeLabel.Text += "\n" + args.Commander));
 
-                clientReady = true;
+                Invoke(new Action(() => curShipTag.Text = args.Ship));
+
+                Invoke(new Action(() => curShipDesTag.Text = args.ShipName));
+
+                Invoke(new Action(() => curShipIDTag.Text = args.ShipIdent));
+
+                currentFuelLevel = args.FuelLevel;
+                maxFuelLevel = args.FuelCapacity;
+                Invoke(new Action(() => curShipFuelTag.Text = (args.FuelLevel + " / " + args.FuelCapacity)));
+
+                clientReady = false;
                 if (statusEnabled) { statusLabel.Invoke(new Action(() => statusLabel.Text = statBase + "current journal identified, parsing")); }
             }
+        }
+
+        private void refuelAllEvent(object? sender, RefuelAllEvent.RefuelAllEventArgs args) //journal watcher requires full and partial refueling calls to be seperate, so 
+        {                                                                                   //seperate messages / callouts maybe?
+            currentFuelLevel = maxFuelLevel;
+            Invoke(new Action(() => curShipFuelTag.Text = (currentFuelLevel + " / " + maxFuelLevel)));
+        }
+
+        private void refuelPartialEvent(object? sender, RefuelPartialEvent.RefuelPartialEventArgs args)
+        {
+            currentFuelLevel += args.Amount;
+            Invoke(new Action(() => curShipFuelTag.Text = (currentFuelLevel + " / " + maxFuelLevel)));
         }
 
         private void restartSessionButton_Click(object sender, EventArgs e) //used to manually reset the player's session if it doesn't reset automatically
@@ -132,13 +164,8 @@ namespace ED_Hud_Extension
 
             simulateCombat(true, "potato", "Keelback", 100, 100);
 
-            combatStatTag.Text = "Active";
-            combatStatTag.ForeColor = Color.Red;
-
-            targetTag.Text = targetName;
-            shipTag.Text = targetShip;
-            shieldTag.Text = targetShield.ToString();
-            hullTag.Text = targetHull.ToString();
+            combatTag.ForeColor = Color.Red;
+            combatTag.Text = " Active";
         }
 
         private void settingsButton_Click(object sender, EventArgs e) //opens the settings menu
@@ -166,13 +193,22 @@ namespace ED_Hud_Extension
         //timer methods
         private void localCallbackMethod(object state)
         {
-            locDTTag.Invoke(new Action(() => locDTTag.Text = DateTime.Now.ToString("dddd, MMMM dd, yyyy \nHH:mm")));
-
             //create the two ends of the tag, then insert the modified year
             string starTimeStart = DateTime.UtcNow.ToString("dddd, MMMM dd, ");
             string startTimeEnd = DateTime.UtcNow.ToString("\nHH:mm");
             string fullText = starTimeStart + starYear.ToString() + startTimeEnd;
-            starDTTag.Invoke(new Action(() => starDTTag.Text = fullText));
+
+            string localTime = DateTime.Now.ToString("dddd, MMMM dd, yyyy \nHH:mm");
+
+            //home panel clocks
+            Invoke(new Action(() => starDTTag.Text = fullText));
+            Invoke(new Action(() => locDTTag.Text = localTime));
+
+            //combat panel clocks
+            Invoke(new Action(() => combatLocDTTag.Text = localTime));
+            Invoke(new Action(() => combatStarDTTag.Text = fullText));
+
+            //explore panel clocks
         }
 
         private void starDTTag_TextChanged(object sender, EventArgs e)
@@ -238,7 +274,7 @@ namespace ED_Hud_Extension
                 {
                     Invoke(new Action(() => waitingClientLabel.Visible = true));
                     animTimer.Dispose();
-                    waitingConnectLabel.Invoke(new Action(() => waitingConnectLabel.Text = "establishing uplink connection...      done"));
+                    waitingConnectLabel.Invoke(new Action(() => waitingConnectLabel.Text = "establishing uplink connection...    done"));
                     Invoke(new Action(() => waitingClientLabel.Visible = true));
                     connectingTimer = new System.Threading.Timer(connectingCallBackMethod, "Timer State", 500, 500);
                     animDots = 1;
@@ -251,7 +287,7 @@ namespace ED_Hud_Extension
 
         private void connectingCallBackMethod(object state)
         {
-            if (conDots < 3) //runs if there are less than three dots in the animation string.
+            if (conDots < 3 && !clientReady) //runs if there are less than three dots in the animation string and the client's not ready
             {
                 animClientText += ".";
                 Invoke(new Action(() => waitingClientLabel.Text = animClientText));
@@ -267,7 +303,7 @@ namespace ED_Hud_Extension
             }
             else if (clientReady) //if we've reached 3 dots and the client is ready
             {
-                Invoke(new Action(() => waitingClientLabel.Text = "awaiting client response...             done"));
+                Invoke(new Action(() => waitingClientLabel.Text = "awaiting client response...                 done"));
                 initiateWatcher();
             }
         }
@@ -277,11 +313,27 @@ namespace ED_Hud_Extension
         {
             initPanel.Dispose();
             animTimer.Dispose();
+            homePanel.BringToFront();
         }
 
         private void MainForm_FormClosed(object sender, FormClosedEventArgs e)
         {
 
+        }
+
+        private void homeButton_Click(object sender, EventArgs e)
+        {
+            homePanel.BringToFront();
+        }
+
+        private void combatButton_Click(object sender, EventArgs e)
+        {
+            combatPanel.BringToFront();
+        }
+
+        private void explorationButton_Click(object sender, EventArgs e)
+        {
+            explorePanel.BringToFront();
         }
     }
 }

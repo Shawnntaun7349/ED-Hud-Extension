@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Diagnostics;
 
 public class Globals
 {
+    //target variables
     public static string targetName;
     public static string targetShip;
     public static float targetShield;
@@ -37,4 +39,7 @@ public class Globals
     // --------------------- player variables ---------------------
     //journal data
     public Dictionary<string, string> playerInfo;
+
+    public static double currentFuelLevel;
+    public static double maxFuelLevel;
 }   

@@ -37,7 +37,7 @@
             gamePathTextbox = new TextBox();
             label6 = new Label();
             label1 = new Label();
-            browseButton = new Button();
+            pathBrowseButton = new Button();
             journalPathTextbox = new TextBox();
             pathLabel = new Label();
             dispTab = new TabPage();
@@ -95,7 +95,7 @@
             genTab.Controls.Add(gamePathTextbox);
             genTab.Controls.Add(label6);
             genTab.Controls.Add(label1);
-            genTab.Controls.Add(browseButton);
+            genTab.Controls.Add(pathBrowseButton);
             genTab.Controls.Add(journalPathTextbox);
             genTab.Controls.Add(pathLabel);
             genTab.Location = new Point(4, 24);
@@ -110,13 +110,13 @@
             label7.AutoSize = true;
             label7.Location = new Point(6, 3);
             label7.Name = "label7";
-            label7.Size = new Size(586, 15);
+            label7.Size = new Size(694, 30);
             label7.TabIndex = 20;
-            label7.Text = "The default game path is \"C:\\Program Files (x86)\\Steam\\steamapps\\common\\Elite Dangerous\\EDLaunch.exe\"\r\n";
+            label7.Text = "The default game path is \r\n\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\Elite Dangerous\\Products\\elite-dangerous-odyssey-64\\EliteDangerous64.exe\"";
             // 
             // gameBrowseButton
             // 
-            gameBrowseButton.Location = new Point(555, 21);
+            gameBrowseButton.Location = new Point(555, 35);
             gameBrowseButton.Name = "gameBrowseButton";
             gameBrowseButton.Size = new Size(31, 23);
             gameBrowseButton.TabIndex = 18;
@@ -125,7 +125,7 @@
             // 
             // gamePathTextbox
             // 
-            gamePathTextbox.Location = new Point(93, 21);
+            gamePathTextbox.Location = new Point(93, 36);
             gamePathTextbox.Name = "gamePathTextbox";
             gamePathTextbox.Size = new Size(456, 23);
             gamePathTextbox.TabIndex = 17;
@@ -133,7 +133,7 @@
             // label6
             // 
             label6.AutoSize = true;
-            label6.Location = new Point(36, 25);
+            label6.Location = new Point(36, 39);
             label6.Name = "label6";
             label6.Size = new Size(51, 15);
             label6.TabIndex = 16;
@@ -142,24 +142,24 @@
             // label1
             // 
             label1.AutoSize = true;
-            label1.Location = new Point(6, 62);
+            label1.Location = new Point(6, 77);
             label1.Name = "label1";
             label1.Size = new Size(543, 15);
             label1.TabIndex = 15;
             label1.Text = "The default Journal folder location is \"...\\[user]\\Saved Games\\Frontier Developments\\Elite Dangerous\"";
             // 
-            // browseButton
+            // pathBrowseButton
             // 
-            browseButton.Location = new Point(555, 80);
-            browseButton.Name = "browseButton";
-            browseButton.Size = new Size(31, 23);
-            browseButton.TabIndex = 14;
-            browseButton.Text = "...";
-            browseButton.UseVisualStyleBackColor = true;
+            pathBrowseButton.Location = new Point(555, 95);
+            pathBrowseButton.Name = "pathBrowseButton";
+            pathBrowseButton.Size = new Size(31, 23);
+            pathBrowseButton.TabIndex = 14;
+            pathBrowseButton.Text = "...";
+            pathBrowseButton.UseVisualStyleBackColor = true;
             // 
             // journalPathTextbox
             // 
-            journalPathTextbox.Location = new Point(93, 80);
+            journalPathTextbox.Location = new Point(93, 95);
             journalPathTextbox.Name = "journalPathTextbox";
             journalPathTextbox.Size = new Size(456, 23);
             journalPathTextbox.TabIndex = 13;
@@ -167,7 +167,7 @@
             // pathLabel
             // 
             pathLabel.AutoSize = true;
-            pathLabel.Location = new Point(6, 84);
+            pathLabel.Location = new Point(6, 99);
             pathLabel.Name = "pathLabel";
             pathLabel.Size = new Size(81, 15);
             pathLabel.TabIndex = 12;
@@ -299,7 +299,7 @@
         private TabControl settingsTabControl;
         private TabPage genTab;
         private Label label1;
-        private Button browseButton;
+        private Button pathBrowseButton;
         private TextBox journalPathTextbox;
         private Label pathLabel;
         private TabPage dispTab;
