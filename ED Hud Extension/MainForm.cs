@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Diagnostics.Eventing.Reader;
 using System.Drawing.Text;
 using System.IO;
+using System.Numerics;
 using System.Reflection.Metadata.Ecma335;
 using System.Security.Policy;
 using System.Text.Json;
@@ -36,7 +37,7 @@ namespace ED_Hud_Extension
         public static bool currentJournal = false; //is the game running? use the most recent journal
         public static bool newJournal = false; //is the game not running? wait for a new journal
         public static bool clientReady = false; //is the game running but we're idling on the main menu? wait for a game mode selection
-        public static bool watcherLive = false;
+        public static bool watcherLive = false; //has the watcher already been initialized? [don't do it twice things break]
 
         public bool gameRunning()
         {
@@ -85,63 +86,159 @@ namespace ED_Hud_Extension
                 dividerPanel.Visible = false;
             }
         }
+        
+        // --------------------- methods for handling Journal Reader events ---------------------
         public JournalWatcher watcher = new JournalWatcher(journalPath);
 
-        private void initiateWatcher()
+        private void initiateWatcher() 
         {
             watcherLive = true;
             watcher.Path = journalPath;
+            if (statusEnabled) { Invoke(new Action(() => statusLabel.Text = statBase + "initiating journal watcher")); }
 
             watcher.StartWatching(); //start the watcher to monitor for events
+            // event subscriptions
+            //starting up
             watcher.GetEvent<NewJournalFileEvent>().Fired += newJournalMethod;
             watcher.GetEvent<LoadGameEvent>().Fired += loadInitialData;
+            watcher.GetEvent<RankEvent>().Fired += rankEvent;
+            watcher.GetEvent<ProgressEvent>().Fired += progressEvent;
+            watcher.GetEvent<ReputationEvent>().Fired += repEvent;
+            watcher.GetEvent<LocationEvent>().Fired += locationEvent;
+
+            //shutting down
+            watcher.GetEvent<ShutdownEvent>().Fired += gameShutDown;
+
+            //refueling
             watcher.GetEvent<RefuelAllEvent>().Fired += refuelAllEvent;
             watcher.GetEvent<RefuelPartialEvent>().Fired += refuelPartialEvent;
-            if (statusEnabled) { Invoke(new Action(() => statusLabel.Text = statBase + "initiating journal watcher")); }
         }
 
-        private void newJournalMethod(object? sender, NewJournalFileEvent.NewJournalFileEventArgs args)
+        private void newJournalMethod(object? sender, NewJournalFileEvent.NewJournalFileEventArgs args) //fires on startup
         {
             newJournal = true;
             if (statusEnabled) { Invoke(new Action(() => statusLabel.Text = statBase + "new journal file generated, initiating reader")); }
         }
 
-        private void loadInitialData(object? sender, LoadGameEvent.LoadGameEventArgs args)
+        private void loadInitialData(object? sender, LoadGameEvent.LoadGameEventArgs args) //fires on startup
         {
             if (newJournal)
             {
                 Invoke(new Action(() => welcomeLabel.Text += "\n" + args.Commander));
 
-                Invoke(new Action(() => curShipTag.Text = args.Ship));
-
-                Invoke(new Action(() => curShipDesTag.Text = args.ShipName));
-
-                Invoke(new Action(() => curShipIDTag.Text = args.ShipIdent));
-
-                currentFuelLevel = args.FuelLevel;
-                maxFuelLevel = args.FuelCapacity;
-                Invoke(new Action(() => curShipFuelTag.Text = (currentFuelLevel + " / " + maxFuelLevel)));
-
-                clientReady = true;
                 if (statusEnabled) { Invoke(new Action(() => statusLabel.Text = statBase + "new journal generated, parsing")); }
             }
             else
             {
                 Invoke(new Action(() => welcomeLabel.Text += "\n" + args.Commander));
 
-                Invoke(new Action(() => curShipTag.Text = args.Ship));
-
-                Invoke(new Action(() => curShipDesTag.Text = args.ShipName));
-
-                Invoke(new Action(() => curShipIDTag.Text = args.ShipIdent));
-
-                currentFuelLevel = args.FuelLevel;
-                maxFuelLevel = args.FuelCapacity;
-                Invoke(new Action(() => curShipFuelTag.Text = (args.FuelLevel + " / " + args.FuelCapacity)));
-
-                clientReady = true;
                 if (statusEnabled) { Invoke(new Action(() => statusLabel.Text = statBase + "current journal identified, parsing")); }
             }
+            clientReady = true;
+
+            currentFuelLevel = args.FuelLevel;
+            maxFuelLevel = args.FuelCapacity;
+            pShipType = args.Ship;
+            pShipName = args.ShipName;
+            pShipID = args.ShipIdent;
+
+            gameMode = args.GameMode.ToString();
+
+            pCreditBalance = args.Credits;
+            pLoan = args.Loan;
+
+            string pCreditBalanceFormatted = string.Format("{0:N0}", pCreditBalance);
+            string pLoanBalanceFormatted = string.Format("{0:N0}", pLoan);
+            Invoke(new Action(() => homeCredBalanceTag.Text = pCreditBalanceFormatted));
+            
+            if (pLoan == 0) { Invoke(new Action(() => homeLBTag.Text = "None")); }
+            else { Invoke(new Action(() => homeLBTag.Text = pLoanBalanceFormatted)); }
+
+            Invoke(new Action(() => curShipTag.Text = args.Ship));
+            Invoke(new Action(() => curShipDesTag.Text = args.ShipName));
+            Invoke(new Action(() => curShipIDTag.Text = args.ShipIdent));
+            Invoke(new Action(() => curShipFuelTag.Text = (currentFuelLevel + " / " + maxFuelLevel)));
+
+            Invoke(new Action(() => homeLSTag.Text = "scanning..."));
+            Invoke(new Action(() => homeSysTag.Text = "scanning..."));
+        }
+
+        private void rankEvent(object? sender, RankEvent.RankEventArgs e) //fires on startup
+        {
+            //its an obnoxious amount of 'possible null value' warnings, but we gotta include the .ToString() call in case the rank *isn't* Elite
+            pCombatRank = eliteTier(e.Combat).ToString();
+            pExploreRank = eliteTier(e.Explore).ToString();
+            pTradeRank = eliteTier(e.Trade).ToString();
+            pArenaRank = eliteTier(e.CQC).ToString();
+            pExoBioRank = eliteTier(e.Exobiologist).ToString();
+            pMercRank = eliteTier(e.Soldier).ToString();
+            pFedRank = e.Federation.ToString();
+            pEmpRank = e.Empire.ToString();
+
+            Invoke(new Action(() => homeCRTag.Text = pCombatRank));
+            Invoke(new Action(() => homeMRTag.Text = pMercRank));
+            Invoke(new Action(() => homeARTag.Text = pArenaRank));
+            Invoke(new Action(() => homeEXRTag.Text = pExoBioRank));
+            Invoke(new Action(() => homeERTag.Text = pExploreRank));
+            Invoke(new Action(() => homeTRTag.Text = pTradeRank));
+        }
+
+        private void progressEvent(object? sender, ProgressEvent.ProgressEventArgs e) //fires on startup
+        {
+            pCombatProgress = e.Combat;
+            pExploreProgress = e.Explore;
+            pTradeProgress = e.Trade;
+            pArenaProgress = e.CQC;
+            pExoBioProgress = e.Exobiologist;
+            pMercProgress = e.Soldier;
+            pFedProgress = e.Federation;
+            pEmpProgress = e.Empire;
+        }
+
+        private void repEvent(object? sender, ReputationEvent.ReputationEventArgs e) //fires on startup *after* rank & progress events
+        {
+            pEmpRep = e.Empire;
+            pFedRep = e.Federation;
+            pAllyRep = e.Alliance;
+            pIndieRep = e.Independent;
+
+            pEmpRepType = e.EmpireStatus.ToString();
+            pFedRepType = e.FederationStatus.ToString();
+            pAllyRepType = e.AllianceStatus.ToString();
+            pIndieRepType = e.IndependentStatus.ToString();
+        }
+
+        private void locationEvent(object? sender, LocationEvent.LocationEventArgs e) //fires on startup or at a station post-death
+        {
+            pCurrentSystem = e.StarSystem;
+            starFaction = e.SystemFaction.ToString();
+            pFactionRep = e.SystemFaction.MyReputation.ToString(); //this is a number value, needs converted to keywords for readability
+            pWanted = e.Wanted; 
+            starFactionState = e.SystemFaction.FactionState;
+            systemAllegiance = e.SystemAllegiance.ToString();
+            systemPrimEconomy = e.SystemEconomy;
+            systemSecEconomy = e.SystemSecondEconomy;
+            systemGovernment = e.SystemGovernment;
+            systemSecurity = e.SystemSecurity;
+
+            pDocked = e.Docked;
+            if (pDocked) 
+            { 
+                stationName = e.StationName;
+                stationType = e.StationType;
+                marketID = e.MarketID;
+            }
+
+            if (pWanted) { Invoke(new Action(() => homeLSTag.Text = "Wanted")); Invoke(new Action(() => homeLSTag.ForeColor = Color.DarkRed)); }
+            else { Invoke(new Action(() => homeLSTag.Text = "Clean")); Invoke(new Action(() => homeLSTag.ForeColor = Color.FromArgb(192, 64, 0))); }
+            Invoke(new Action(() => homeSysTag.Text = pCurrentSystem));
+        }
+
+        private void underAttack(object? sender, UnderAttackEvent.UnderAttackEventArgs e) //take a fucken guess what this one's for
+        {
+            attackerTarget = e.Target.ToString();
+            pUnderAttack = true;
+            if (autoPanelSwitch || autoCombatSwitch) { combatPanel.BringToFront(); } 
         }
 
         private void refuelAllEvent(object? sender, RefuelAllEvent.RefuelAllEventArgs args) //journal watcher requires full and partial refueling calls to be seperate, so 
@@ -156,6 +253,21 @@ namespace ED_Hud_Extension
             Invoke(new Action(() => curShipFuelTag.Text = (currentFuelLevel + " / " + maxFuelLevel)));
         }
 
+        private void gameShutDown(object? sender, ShutdownEvent.ShutdownEventArgs e)
+        {
+            if (autoShutDownEnabled)
+            {
+                MessageBox.Show("Elite Dangerous has shut down. EDHE will now shut down.", "Shutting Down", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                Application.Exit();
+            }
+            else
+            {
+                //tell the user the game shut down, end the journal watcher. figure out a way to redetect the game launch later? i dunno
+            }
+        }
+
+        //--------------------- UI Button Methods ---------------------
+
         private void restartSessionButton_Click(object sender, EventArgs e) //used to manually reset the player's session if it doesn't reset automatically
         {
             TestForm tf = new TestForm();
@@ -166,6 +278,8 @@ namespace ED_Hud_Extension
         {
             combatTag.ForeColor = Color.Red;
             combatTag.Text = " Active";
+            pUnderAttack = true;
+            if (autoPanelSwitch || autoCombatSwitch) { combatPanel.BringToFront(); }
         }
 
         private void settingsButton_Click(object sender, EventArgs e) //opens the settings menu
@@ -204,6 +318,8 @@ namespace ED_Hud_Extension
             Invoke(new Action(() => combatStarDTTag.Text = fullText));
 
             //explore panel clocks
+            Invoke(new Action(() => exploreLocDTTag.Text = localTime));
+            Invoke(new Action(() => exploreStarDTTag.Text = fullText));
         }
 
         private void starDTTag_TextChanged(object sender, EventArgs e)
@@ -220,19 +336,19 @@ namespace ED_Hud_Extension
 
             if (steps == 1)
             {
-                initLabel.Invoke(new Action(() => initLabel.Text += "done"));
-                diagLabel.Invoke(new Action(() => diagLabel.Visible = true));
+                Invoke(new Action(() => initDone.Visible = true));
+                Invoke(new Action(() => diagLabel.Visible = true));
                 steps++;
             }
             else if (steps == 2)
             {
-                diagLabel.Invoke(new Action(() => diagLabel.Text += "done"));
+                Invoke(new Action(() => diagDone.Visible = true));
                 enviroLabel.Invoke(new Action(() => enviroLabel.Visible = true));
                 steps++;
             }
             else if (steps == 3)
             {
-                enviroLabel.Invoke(new Action(() => enviroLabel.Text += "done"));
+                Invoke(new Action(() => enviroDone.Visible = true));
                 waitingConnectLabel.Invoke(new Action(() => waitingConnectLabel.Visible = true));
                 steps++;
             }
@@ -254,9 +370,10 @@ namespace ED_Hud_Extension
 
                     if (gameRunning())
                     {
-                        initiateWatcher();
+                        //initiateWatcher();
                         animTimer.Dispose();
-                        waitingConnectLabel.Invoke(new Action(() => waitingConnectLabel.Text = "establishing uplink connection...      done"));
+                        Invoke(new Action(() => waitingConnectLabel.Text = "establishing uplink connection..."));
+                        Invoke(new Action(() => uplinkDone.Visible = true));
                         Invoke(new Action(() => waitingClientLabel.Visible = true));
                         connectingTimer = new System.Threading.Timer(connectingCallBackMethod, "Timer State", 500, 500);
                         animDots = 1;
@@ -268,7 +385,8 @@ namespace ED_Hud_Extension
                 {
                     initiateWatcher();
                     animTimer.Dispose();
-                    waitingConnectLabel.Invoke(new Action(() => waitingConnectLabel.Text = "establishing uplink connection...    done"));
+                    Invoke(new Action(() => waitingConnectLabel.Text = "establishing uplink connection..."));
+                    Invoke(new Action(() => uplinkDone.Visible = true));
                     Invoke(new Action(() => waitingClientLabel.Visible = true));
                     connectingTimer = new System.Threading.Timer(connectingCallBackMethod, "Timer State", 500, 500);
                     animDots = 1;
@@ -301,7 +419,8 @@ namespace ED_Hud_Extension
             }
             else if (clientReady) //if we've reached 3 dots and the client is ready
             {
-                Invoke(new Action(() => waitingClientLabel.Text = "awaiting client response...                 done"));
+                Invoke(new Action(() => waitingClientLabel.Text = "awaiting client response..."));
+                Invoke(new Action(() => clientDone.Visible = true));
                 if (statusEnabled) { Invoke(new Action(() => statusLabel.Text = statBase + "client loaded, waiting for game start")); }
             }
         }

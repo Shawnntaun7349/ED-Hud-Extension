@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Text;
+using System.Diagnostics;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using EliteJournalReader;
@@ -9,6 +10,8 @@ using EliteJournalReader.Events;
 using static Globals;
 using System.Text.Json;
 using ED_Hud_Extension;
+using static ED_Hud_Extension.MainForm;
+
 
 internal class Functions
 {
@@ -57,11 +60,14 @@ internal class Functions
         }
 
         //load the display settings
-        savedPrefDisplayIndex = Int32.Parse(doc.RootElement.GetProperty("Preferred Display").GetString()); //0, 1, 2, etc.
-		statusEnabled = Boolean.Parse(doc.RootElement.GetProperty("Status Readout Enabled").GetString()); // True or False
+        savedPrefDisplayIndex = Int32.Parse(doc.RootElement.GetProperty("Preferred Display").GetString()); 
+		statusEnabled = Boolean.Parse(doc.RootElement.GetProperty("Status Readout Enabled").GetString()); 
+        autoShutDownEnabled = Boolean.Parse(doc.RootElement.GetProperty("Auto Shut Down").GetString());
+        autoPanelSwitch = Boolean.Parse(doc.RootElement.GetProperty("Auto Switch Always").GetString());
+        autoCombatSwitch = Boolean.Parse(doc.RootElement.GetProperty("Auto Switch Combat Only").GetString());
 
-		//make sure the form loads on the correct display
-		Screen displayScreen = Screen.AllScreens[savedPrefDisplayIndex];
+        //make sure the form loads on the correct display
+        Screen displayScreen = Screen.AllScreens[savedPrefDisplayIndex];
 		location = displayScreen.WorkingArea.Location;
 	}
 
@@ -76,7 +82,10 @@ internal class Functions
                     { "Journal Path", journalPath },
                     { "Game Path", gamePath },
                     { "Preferred Display", chosenDisplay.ToString() },
-                    { "Status Readout Enabled", statusEnabled.ToString() }
+                    { "Status Readout Enabled", statusEnabled.ToString() },
+                    { "Auto Shut Down", autoShutDownEnabled.ToString() },
+                    { "Auto Switch Always", autoPanelSwitch.ToString() },
+                    { "Auto Switch Combat Only", autoCombatSwitch.ToString() }
 
                 };
 
@@ -117,7 +126,10 @@ internal class Functions
                     { "Journal Path", defaultJournalPath },
                     { "Game Path", defaultGamePath },
                     { "Preferred Display", "0" },
-					{ "Status Readout Enabled", "true" }
+					{ "Status Readout Enabled", "True" },
+                    { "Auto Shut Down", "True" },
+                    { "Auto Switch Always", "False" },
+                    { "Auto Switch Combat Only", "False" }
 				};
 
         string json = JsonSerializer.Serialize(settings, new JsonSerializerOptions { WriteIndented = true }); //json-ify that shit
@@ -128,11 +140,11 @@ internal class Functions
 	{
 		//a function to retrieve scan data from the player journal and store them for display. setup is mildly redundant at the moment but will make more sense once journal integration is done.
 
-		Globals.inCombat = inCombat;
-		Globals.targetName = tName;
-		Globals.targetShip = tShip;
-		Globals.targetShield = tShield;
-		Globals.targetHull = tHull;
+		//Globals.inCombat = inCombat;
+		//Globals.targetName = tName;
+		//Globals.targetShip = tShip;
+		//Globals.targetShield = tShield;
+		//Globals.targetHull = tHull;
 	}
     public static void RestartApplication() //when a good ol 'Application.Restart();' call shits the bed, you pull out the Environment namespace big guns
     {
@@ -148,4 +160,25 @@ internal class Functions
         //forcefully exit the current instance
         Environment.Exit(0);
     }
+
+    public static object eliteTier(object rank)
+    {
+        //grab the players rank, see if it's above 8. if it is, subtract 8 from that value to determine how many iterations of Elite the player is
+        int total = 0;
+        string tier = "";
+        if ((int)rank > 8)
+        {
+            total = (int)rank - 8;
+        }
+        else { return rank; } //if it doesn't need converted to Elite, just pass the rank right on back to the caller
+
+        if (total == 1) { tier = "Elite I"; }
+        else if (total == 2) { tier = "Elite II"; }
+        else if (total == 3) { tier = "Elite III"; }
+        else if (total == 4) { tier = "Elite IV";  }
+        else if (total == 5) { tier = "Elite V"; }
+
+        return tier;
+    }
+    
 }

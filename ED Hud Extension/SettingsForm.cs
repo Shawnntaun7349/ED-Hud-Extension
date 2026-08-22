@@ -22,10 +22,13 @@ namespace ED_Hud_Extension
             prefDisplayMenu.DataSource = GetMonitorList();
             prefDisplayMenu.SelectedIndex = savedPrefDisplayIndex;
 
-            fullscreenMenu.SelectedIndex = 0;
+            fullscreenMenu.SelectedIndex = selectedIndex;
             journalPathTextbox.Text = journalPath;
             gamePathTextbox.Text = gamePath;
-            statReadButton.Checked = statusEnabled;
+            statReadToggle.Checked = statusEnabled;
+            autoSwitchToggle.Checked = autoPanelSwitch;
+            combatSwitchToggle.Checked = autoCombatSwitch;
+            autoShutdownToggle.Checked = autoShutDownEnabled;
         }
 
         private void pathBrowseButton_Click(object sender, EventArgs e) //gimme the god damn journal folder
@@ -53,9 +56,12 @@ namespace ED_Hud_Extension
             else if (Directory.Exists(pathToCheck)) //make sure that the folder is the correct one by checking for guaranteed files like the ModulesInfo file
             {
                 chosenDisplay = prefDisplayMenu.SelectedIndex;
-                statusEnabled = statReadButton.Checked;
+                statusEnabled = statReadToggle.Checked;
                 gamePath = gamePathTextbox.Text;
                 journalPath = journalPathTextbox.Text;
+                autoPanelSwitch = autoSwitchToggle.Checked;
+                autoCombatSwitch = combatSwitchToggle.Checked;
+                autoShutDownEnabled = autoShutdownToggle.Checked;
 
                 Functions.saveSettings();
                 MessageBox.Show("Settings saved successfully! Application will now restart.", "Selection complete", MessageBoxButtons.OK);
