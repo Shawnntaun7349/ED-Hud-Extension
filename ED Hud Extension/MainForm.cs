@@ -36,6 +36,7 @@ namespace ED_Hud_Extension
         public static bool currentJournal = false; //is the game running? use the most recent journal
         public static bool newJournal = false; //is the game not running? wait for a new journal
         public static bool clientReady = false; //is the game running but we're idling on the main menu? wait for a game mode selection
+        public static bool watcherLive = false;
 
         public bool gameRunning()
         {
@@ -62,31 +63,33 @@ namespace ED_Hud_Extension
             animTimer = new System.Threading.Timer(animCallbackMethod, "Timer State", 500, 1000);
             localTimer = new System.Threading.Timer(localCallbackMethod, "Timer State", 100, 500);
 
-            if (statusEnabled) { statusLabel.Text = ("mainform initialized, timers started, settings loaded\n"); }
+            if (statusEnabled) { statusLabel.Text = statBase + ("mainform initialized, timers started, settings loaded\n"); }
         }
 
         private void MainForm_Load(object sender, EventArgs e)
         {
-            if (statusEnabled) { statusLabel.Text = "initiating service"; }
+            if (statusEnabled) { statusLabel.Text = statBase + "initiating service"; }
             locDTTag.Text = DateTime.Now.ToString("dddd, MMMM dd, yyyy \nHH:mm");
 
             if (gameRunning()) //if the game is already running when EDHE spins up
             {
                 initiateWatcher();
                 currentJournal = true;
-                if (statusEnabled) { statusLabel.Text = ("mainform loaded, game is running"); }
+                if (statusEnabled) { statusLabel.Text = statBase + ("mainform loaded, game is running"); }
                 animTimer.Dispose();
             }
             else //otherwise, start the loop & wait for the game to spin up
             {
                 if (statusEnabled) { statusLabel.Text = statBase + "waiting for client"; }
                 initPanel.BringToFront();
+                dividerPanel.Visible = false;
             }
         }
         public JournalWatcher watcher = new JournalWatcher(journalPath);
 
         private void initiateWatcher()
         {
+            watcherLive = true;
             watcher.Path = journalPath;
 
             watcher.StartWatching(); //start the watcher to monitor for events
@@ -94,13 +97,13 @@ namespace ED_Hud_Extension
             watcher.GetEvent<LoadGameEvent>().Fired += loadInitialData;
             watcher.GetEvent<RefuelAllEvent>().Fired += refuelAllEvent;
             watcher.GetEvent<RefuelPartialEvent>().Fired += refuelPartialEvent;
-            if (statusEnabled) { statusLabel.Invoke(new Action(() => statusLabel.Text = statBase + "initiating journal watcher")); }
+            if (statusEnabled) { Invoke(new Action(() => statusLabel.Text = statBase + "initiating journal watcher")); }
         }
 
         private void newJournalMethod(object? sender, NewJournalFileEvent.NewJournalFileEventArgs args)
         {
             newJournal = true;
-            if (statusEnabled) { statusLabel.Invoke(new Action(() => statusLabel.Text = statBase + "new journal file generated, initiating reader")); }
+            if (statusEnabled) { Invoke(new Action(() => statusLabel.Text = statBase + "new journal file generated, initiating reader")); }
         }
 
         private void loadInitialData(object? sender, LoadGameEvent.LoadGameEventArgs args)
@@ -120,7 +123,7 @@ namespace ED_Hud_Extension
                 Invoke(new Action(() => curShipFuelTag.Text = (currentFuelLevel + " / " + maxFuelLevel)));
 
                 clientReady = true;
-                if (statusEnabled) { statusLabel.Invoke(new Action(() => statusLabel.Text = statBase + "new journal generated, parsing")); }
+                if (statusEnabled) { Invoke(new Action(() => statusLabel.Text = statBase + "new journal generated, parsing")); }
             }
             else
             {
@@ -136,8 +139,8 @@ namespace ED_Hud_Extension
                 maxFuelLevel = args.FuelCapacity;
                 Invoke(new Action(() => curShipFuelTag.Text = (args.FuelLevel + " / " + args.FuelCapacity)));
 
-                clientReady = false;
-                if (statusEnabled) { statusLabel.Invoke(new Action(() => statusLabel.Text = statBase + "current journal identified, parsing")); }
+                clientReady = true;
+                if (statusEnabled) { Invoke(new Action(() => statusLabel.Text = statBase + "current journal identified, parsing")); }
             }
         }
 
@@ -161,9 +164,6 @@ namespace ED_Hud_Extension
 
         private void simulateButton_Click(object sender, EventArgs e)
         {
-
-            simulateCombat(true, "potato", "Keelback", 100, 100);
-
             combatTag.ForeColor = Color.Red;
             combatTag.Text = " Active";
         }
@@ -171,11 +171,6 @@ namespace ED_Hud_Extension
         private void settingsButton_Click(object sender, EventArgs e) //opens the settings menu
         {
             SettingsForm sf = new SettingsForm();
-
-            //sf.FormClosed += (s, args) =>
-            //{
-            //    initPanel.Visible = false;
-            //};
 
             sf.Show();
         }
@@ -250,7 +245,7 @@ namespace ED_Hud_Extension
                     waitingConnectLabel.Invoke(new Action(() => waitingConnectLabel.Text = animConnectionText));
                     animDots++;
                 }
-                else if (!newJournal || !timeToClear)//if that string has all 3 periods, reset it it back to one.
+                else if (!newJournal)//if that string has all 3 periods, reset it it back to one.
                 {
                     animConnectionText = animConnectionTextBase;
                     waitingConnectLabel.Invoke(new Action(() => waitingConnectLabel.Text = animConnectionText));
@@ -259,80 +254,87 @@ namespace ED_Hud_Extension
 
                     if (gameRunning())
                     {
-                        Invoke(new Action(() => waitingClientLabel.Visible = true));
+                        initiateWatcher();
                         animTimer.Dispose();
                         waitingConnectLabel.Invoke(new Action(() => waitingConnectLabel.Text = "establishing uplink connection...      done"));
                         Invoke(new Action(() => waitingClientLabel.Visible = true));
                         connectingTimer = new System.Threading.Timer(connectingCallBackMethod, "Timer State", 500, 500);
                         animDots = 1;
-                        newJournal = true;
 
                         if (statusEnabled) { Invoke(new Action(() => statusLabel.Text = statBase + "moving to trigger client timer")); }
                     }
                 }
                 else if (gameRunning())
                 {
-                    Invoke(new Action(() => waitingClientLabel.Visible = true));
+                    initiateWatcher();
                     animTimer.Dispose();
                     waitingConnectLabel.Invoke(new Action(() => waitingConnectLabel.Text = "establishing uplink connection...    done"));
                     Invoke(new Action(() => waitingClientLabel.Visible = true));
                     connectingTimer = new System.Threading.Timer(connectingCallBackMethod, "Timer State", 500, 500);
                     animDots = 1;
-                    newJournal = true;
 
-                    if (statusEnabled) { Invoke(new Action(() => statusLabel.Text = "client loaded, waiting for game start")); }
+                    if (statusEnabled) { Invoke(new Action(() => statusLabel.Text = statBase + "client loaded, waiting for game start")); }
                 }
             }
         }
 
         private void connectingCallBackMethod(object state)
         {
+            if (!watcherLive)
+            {
+                initiateWatcher();
+            }
+
             if (conDots < 3 && !clientReady) //runs if there are less than three dots in the animation string and the client's not ready
             {
                 animClientText += ".";
                 Invoke(new Action(() => waitingClientLabel.Text = animClientText));
                 conDots++;
-                if (statusEnabled) { Invoke(new Action(() => statusLabel.Text = "client loaded, waiting for game start [anim 1]")); }
+                if (statusEnabled) { Invoke(new Action(() => statusLabel.Text = statBase + "client loaded, waiting for game start [anim 1]")); }
             }
             else if (conDots >= 3 && !clientReady) //if we reach 3 dots and the client's not ready yet
             {
                 animClientText = animClientTextBase;
                 Invoke(new Action(() => waitingClientLabel.Text = animClientTextBase));
                 conDots = 1;
-                if (statusEnabled) { Invoke(new Action(() => statusLabel.Text = "client loaded, waiting for game start [anim 2]")); }
+                if (statusEnabled) { Invoke(new Action(() => statusLabel.Text = statBase + "client loaded, waiting for game start [anim 2]")); }
             }
             else if (clientReady) //if we've reached 3 dots and the client is ready
             {
                 Invoke(new Action(() => waitingClientLabel.Text = "awaiting client response...                 done"));
-                initiateWatcher();
+                if (statusEnabled) { Invoke(new Action(() => statusLabel.Text = statBase + "client loaded, waiting for game start")); }
             }
         }
 
-
-        private void cmdrNameLabel_TextChanged(object sender, EventArgs e)
+        private void clearInitPanel()
         {
             initPanel.Dispose();
             animTimer.Dispose();
             homePanel.BringToFront();
+            dividerPanel.Visible = true;
+            if (statusEnabled) { Invoke(new Action(() => statusLabel.Text = statBase + "session started, parsing journal")); }
         }
 
-        private void MainForm_FormClosed(object sender, FormClosedEventArgs e)
+        private void welcomeLabel_TextChanged(object sender, EventArgs e)
         {
-
+            clearInitPanel();
         }
 
         private void homeButton_Click(object sender, EventArgs e)
         {
+            clearInitPanel();
             homePanel.BringToFront();
         }
 
         private void combatButton_Click(object sender, EventArgs e)
         {
+            clearInitPanel();
             combatPanel.BringToFront();
         }
 
         private void explorationButton_Click(object sender, EventArgs e)
         {
+            clearInitPanel();
             explorePanel.BringToFront();
         }
     }

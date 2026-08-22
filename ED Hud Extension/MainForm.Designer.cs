@@ -550,7 +550,7 @@ namespace ED_Hud_Extension
             initPanel.Controls.Add(enviroLabel);
             initPanel.Location = new Point(110, 0);
             initPanel.Name = "initPanel";
-            initPanel.Size = new Size(1802, 1076);
+            initPanel.Size = new Size(1802, 1042);
             initPanel.TabIndex = 65;
             // 
             // waitingClientLabel
@@ -791,6 +791,7 @@ namespace ED_Hud_Extension
             welcomeLabel.TabIndex = 61;
             welcomeLabel.Text = "Welcome, Commander ";
             welcomeLabel.TextAlign = ContentAlignment.MiddleCenter;
+            welcomeLabel.TextChanged += welcomeLabel_TextChanged;
             // 
             // locDTLabel
             // 
@@ -1148,8 +1149,8 @@ namespace ED_Hud_Extension
             Controls.Add(settingsButton);
             Controls.Add(explorePanel);
             Controls.Add(restartSessionButton);
-            Controls.Add(homeButton);
             Controls.Add(initPanel);
+            Controls.Add(homeButton);
             Controls.Add(explorationButton);
             Controls.Add(combatButton);
             Controls.Add(simulateButton);
@@ -1159,7 +1160,6 @@ namespace ED_Hud_Extension
             Name = "MainForm";
             StartPosition = FormStartPosition.Manual;
             Text = "E:D Hud Extension";
-            FormClosed += MainForm_FormClosed;
             Load += MainForm_Load;
             combatPanel.ResumeLayout(false);
             combatPanel.PerformLayout();

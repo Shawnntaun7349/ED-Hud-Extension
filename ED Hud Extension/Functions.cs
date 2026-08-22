@@ -57,7 +57,7 @@ internal class Functions
         }
 
         //load the display settings
-        savedPrefDisplayIndex = Int32.Parse(doc.RootElement.GetProperty("Preferred Display").GetString()); //1, 2, 3, etc.
+        savedPrefDisplayIndex = Int32.Parse(doc.RootElement.GetProperty("Preferred Display").GetString()); //0, 1, 2, etc.
 		statusEnabled = Boolean.Parse(doc.RootElement.GetProperty("Status Readout Enabled").GetString()); // True or False
 
 		//make sure the form loads on the correct display
