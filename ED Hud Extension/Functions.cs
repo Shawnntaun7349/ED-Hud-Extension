@@ -127,7 +127,7 @@ internal class Functions
                     { "Game Path", defaultGamePath },
                     { "Preferred Display", "0" },
 					{ "Status Readout Enabled", "True" },
-                    { "Auto Shut Down", "True" },
+                    { "Auto Shut Down", "False" },
                     { "Auto Switch Always", "False" },
                     { "Auto Switch Combat Only", "False" }
 				};
@@ -179,6 +179,27 @@ internal class Functions
         else if (total == 5) { tier = "Elite V"; }
 
         return tier;
+    }
+
+    public static void animateLabel(System.Threading.Timer t, Label l, string baseLine, int dots, bool complete)
+    {
+        
+
+        if (dots > 3 && !complete)
+        {
+            l.Invoke(new Action(() => l.Text = baseLine + "."));
+            dots++;
+        }
+        else if (dots == 3 && !complete)
+        {
+            l.Invoke(new Action(() => l.Text = baseLine));
+            dots = 1;
+        }
+        else if (complete)
+        {
+            t.Dispose();
+            dots = 1;
+        }
     }
     
 }

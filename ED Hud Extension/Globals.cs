@@ -4,18 +4,12 @@ using System.Diagnostics;
 
 public class Globals
 {
-    //target variables
-    public static string targetName;
-    public static string targetShip;
-    public static float targetShield;
-    public static float targetHull;
-    public static bool inCombat;
-
     //background variables
     public static bool connected = false; //for online connection
     public static bool waitingForJournal = true; //for local connection
     public static int starYear = DateTime.UtcNow.Year + 1286;
-    public static Point location; // for display methods
+    public static Point location; //for display methods
+    public static DateTime startUpTime; //set at JournalWatcher startup, used to filter all but a few 'old' events in a given journal
 
     // --------------------- settings variables ---------------------
     //files & paths
@@ -75,6 +69,21 @@ public class Globals
     //combat stuff
     public static bool pUnderAttack;
     public static string attackerTarget;
+
+    //target variables
+    public static bool targetLocked;
+    public static bool pTargeting;
+    public static int scanLevel;
+    public static string targetName;
+    public static string targetShip;
+    public static object targetRank;
+    public static double targetShield;
+    public static double targetHull;
+    public static string targetFaction;
+    public static string targetLegal;
+    public static double targetBounty;
+    public static string targetSubSystem;
+    public static double targetSSHealth;
 
     //financial stuff
     public static string gameMode;

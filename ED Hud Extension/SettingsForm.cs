@@ -18,7 +18,6 @@ namespace ED_Hud_Extension
             InitializeComponent();
 
             //try to load the user's saved settings
-            
             prefDisplayMenu.DataSource = GetMonitorList();
             prefDisplayMenu.SelectedIndex = savedPrefDisplayIndex;
 
@@ -96,6 +95,7 @@ namespace ED_Hud_Extension
         private void closeButton_Click(object sender, EventArgs e)
         {
             DialogResult check = MessageBox.Show(
+                this,
                 "Are you sure?",
                 "Confirmation",
                 MessageBoxButtons.YesNo,

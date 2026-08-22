@@ -19,6 +19,7 @@ namespace ED_Hud_Extension
     {
         private static System.Threading.Timer localTimer;//multi-threading timers are a hassle 
         private static System.Threading.Timer connectingTimer;
+        private static System.Threading.Timer scanTimer;
 
         //bits for the connection 'animation'
         private static System.Threading.Timer animTimer;
@@ -76,7 +77,7 @@ namespace ED_Hud_Extension
             {
                 initiateWatcher();
                 currentJournal = true;
-                if (statusEnabled) { statusLabel.Text = statBase + ("mainform loaded, game is running"); }
+                if (statusEnabled) { statusLabel.Text = statBase + "mainform loaded, game is running"; }
                 animTimer.Dispose();
             }
             else //otherwise, start the loop & wait for the game to spin up
@@ -99,6 +100,7 @@ namespace ED_Hud_Extension
             watcher.StartWatching(); //start the watcher to monitor for events
             // event subscriptions
             //starting up
+            startUpTime = DateTime.UtcNow;
             watcher.GetEvent<NewJournalFileEvent>().Fired += newJournalMethod;
             watcher.GetEvent<LoadGameEvent>().Fired += loadInitialData;
             watcher.GetEvent<RankEvent>().Fired += rankEvent;
@@ -107,11 +109,15 @@ namespace ED_Hud_Extension
             watcher.GetEvent<LocationEvent>().Fired += locationEvent;
 
             //shutting down
-            watcher.GetEvent<ShutdownEvent>().Fired += gameShutDown;
+            watcher.GetEvent<ShutdownEvent>().Fired += gameShutDown; //currently causing problems
 
             //refueling
             watcher.GetEvent<RefuelAllEvent>().Fired += refuelAllEvent;
             watcher.GetEvent<RefuelPartialEvent>().Fired += refuelPartialEvent;
+
+            //scanning
+            watcher.GetEvent<ScanEvent>().Fired += scanEvent;
+            watcher.GetEvent<ShipTargetedEvent>().Fired += shipTargetedEvent;
         }
 
         private void newJournalMethod(object? sender, NewJournalFileEvent.NewJournalFileEventArgs args) //fires on startup
@@ -124,13 +130,15 @@ namespace ED_Hud_Extension
         {
             if (newJournal)
             {
-                Invoke(new Action(() => welcomeLabel.Text += "\n" + args.Commander));
+                Invoke(new Action(() => welcomeLabel.Text = ""));
+                Invoke(new Action(() => welcomeLabel.Text += "Welcome, Commander\n" + args.Commander));
 
                 if (statusEnabled) { Invoke(new Action(() => statusLabel.Text = statBase + "new journal generated, parsing")); }
             }
             else
             {
-                Invoke(new Action(() => welcomeLabel.Text += "\n" + args.Commander));
+                Invoke(new Action(() => welcomeLabel.Text = ""));
+                Invoke(new Action(() => welcomeLabel.Text += "Welcome, Commander\n" + args.Commander));
 
                 if (statusEnabled) { Invoke(new Action(() => statusLabel.Text = statBase + "current journal identified, parsing")); }
             }
@@ -241,6 +249,58 @@ namespace ED_Hud_Extension
             if (autoPanelSwitch || autoCombatSwitch) { combatPanel.BringToFront(); } 
         }
 
+        private void scanEvent(object? sender, ScanEvent.ScanEventArgs e) //for when a player scans an astral body
+        {
+            
+        }
+
+        private void shipTargetedEvent(object? sender, ShipTargetedEvent.ShipTargetedEventArgs e) //for when the player scans a ship
+        {
+            if (e.Timestamp > startUpTime) //if this event fired *after* the current journal reader fired up
+            {
+                if (statusEnabled) { Invoke(new Action(() => statusLabel.Text = "scanning taget")); }
+
+                string scanStageBase = "scanning.";
+                Invoke(new Action(() => scanStageTag.Text = scanStageBase));
+                if (statusEnabled) { Invoke(new Action(() => statusLabel.Text = statBase + "scan stage 0")); }
+                scanTimer = new System.Threading.Timer(scanCallbackMethod, "Timer State", 500, 500);
+
+                if (e.TargetLocked) { targetLocked = true; }
+                else { targetLocked = false; }
+
+                scanLevel = e.ScanStage;
+                targetShip = e.Ship;
+
+                if (scanLevel >= 1)
+                {
+                    targetName = e.PilotName;
+                    targetRank = eliteTier(e.PilotRank).ToString();
+                    if (statusEnabled) { Invoke(new Action(() => statusLabel.Text = statBase + "scan stage 1")); }
+                }
+                if (scanLevel >= 2)
+                {
+                    targetShield = e.ShieldHealth;
+                    targetHull = e.HullHealth;
+                    if (statusEnabled) { Invoke(new Action(() => statusLabel.Text = statBase + "scan stage 2")); }
+                }
+                if (scanLevel >= 3)
+                {
+                    targetFaction = e.Faction;
+                    targetLegal = e.LegalStatus;
+                    targetBounty = e.Bounty;
+                    targetSubSystem = e.SubSystem;
+                    targetSSHealth = e.SubSystemHealth;
+                    Invoke(new Action(() => scanStageTag.Text = "Target Locked"));
+                    if (statusEnabled) { Invoke(new Action(() => statusLabel.Text = statBase + "scan stage 3")); }
+                }
+            }
+            else
+            {
+                Invoke(new Action(() => scanStageTag.Text = "no target"));
+            }
+
+        }
+
         private void refuelAllEvent(object? sender, RefuelAllEvent.RefuelAllEventArgs args) //journal watcher requires full and partial refueling calls to be seperate, so 
         {                                                                                   //seperate messages / callouts maybe?
             currentFuelLevel = maxFuelLevel;
@@ -255,9 +315,9 @@ namespace ED_Hud_Extension
 
         private void gameShutDown(object? sender, ShutdownEvent.ShutdownEventArgs e)
         {
-            if (autoShutDownEnabled)
+            if (autoShutDownEnabled && e.Timestamp > startUpTime) //currently triggering if EDHE is started while the game is loading??? to be looked into later
             {
-                MessageBox.Show("Elite Dangerous has shut down. EDHE will now shut down.", "Shutting Down", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                Invoke(new Action(() => MessageBox.Show(this, "Elite Dangerous has shut down. EDHE will now shut down.", "Shutting Down", MessageBoxButtons.OK, MessageBoxIcon.Warning)));
                 Application.Exit();
             }
             else
@@ -286,7 +346,7 @@ namespace ED_Hud_Extension
         {
             SettingsForm sf = new SettingsForm();
 
-            sf.Show();
+            sf.Show(this);
         }
 
         private void exitButton_Click(object sender, EventArgs e)
@@ -425,8 +485,34 @@ namespace ED_Hud_Extension
             }
         }
 
+        private void scanCallbackMethod(object sender)
+        {
+            if (!targetLocked)
+            {
+                Invoke(new Action(() => scanStageTag.Text = "no target"));
+                Invoke(new Action(() => statusLabel.Text = statBase + "no target to scan"));
+                scanTimer.Dispose();
+            }
+            else
+            {
+                if (animDots < 3)
+                {
+                    //animateLabel(animTimer, scanStageTag, "scanning.", 1, true);
+                    //Invoke(new Action(() => scanStageTag.Text = "target locked"));
+                    Invoke(new Action(() => scanStageTag.Text += "."));
+                    animDots++;
+                }
+                else if (animDots >= 3)
+                {
+                    Invoke(new Action(() => scanStageTag.Text = "scanning."));
+                    animDots = 1;
+                }
+            }
+        }
+
         private void clearInitPanel()
         {
+            animDots = 1;
             initPanel.Dispose();
             animTimer.Dispose();
             homePanel.BringToFront();
