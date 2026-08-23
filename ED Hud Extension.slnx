@@ -2,5 +2,7 @@
   <Folder Name="/Solution Items/">
     <File Path="Functions.cs" />
   </Folder>
-  <Project Path="ED Hud Extension/ED Hud Extension.csproj" />
+  <Project Path="ED Hud Extension/ED Hud Extension.csproj">
+    <BuildType Project="Release" />
+  </Project>
 </Solution>

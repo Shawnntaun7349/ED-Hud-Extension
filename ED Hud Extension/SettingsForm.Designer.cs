@@ -31,16 +31,6 @@
             closeButton = new Button();
             applyButton = new Button();
             settingsTabControl = new TabControl();
-            dispTab = new TabPage();
-            combatSwitchToggle = new CheckBox();
-            autoSwitchToggle = new CheckBox();
-            label4 = new Label();
-            label3 = new Label();
-            statReadToggle = new CheckBox();
-            fullscreenMenu = new ComboBox();
-            label2 = new Label();
-            prefDisplayMenu = new ComboBox();
-            prefDisplayLabel = new Label();
             genTab = new TabPage();
             label7 = new Label();
             gameBrowseButton = new Button();
@@ -50,12 +40,25 @@
             pathBrowseButton = new Button();
             journalPathTextbox = new TextBox();
             pathLabel = new Label();
-            soundTab = new TabPage();
-            helpTab = new TabPage();
+            dispTab = new TabPage();
             autoShutdownToggle = new CheckBox();
+            combatSwitchToggle = new CheckBox();
+            autoSwitchToggle = new CheckBox();
+            label4 = new Label();
+            label3 = new Label();
+            statReadToggle = new CheckBox();
+            prefDisplayMenu = new ComboBox();
+            prefDisplayLabel = new Label();
+            soundTab = new TabPage();
+            inaraTab = new TabPage();
+            edsmTab = new TabPage();
+            spanshTab = new TabPage();
+            edmcTab = new TabPage();
+            helpTab = new TabPage();
+            restartButton = new Button();
             settingsTabControl.SuspendLayout();
-            dispTab.SuspendLayout();
             genTab.SuspendLayout();
+            dispTab.SuspendLayout();
             SuspendLayout();
             // 
             // closeButton
@@ -80,120 +83,19 @@
             // 
             // settingsTabControl
             // 
-            settingsTabControl.Controls.Add(dispTab);
             settingsTabControl.Controls.Add(genTab);
+            settingsTabControl.Controls.Add(dispTab);
             settingsTabControl.Controls.Add(soundTab);
+            settingsTabControl.Controls.Add(inaraTab);
+            settingsTabControl.Controls.Add(edsmTab);
+            settingsTabControl.Controls.Add(spanshTab);
+            settingsTabControl.Controls.Add(edmcTab);
             settingsTabControl.Controls.Add(helpTab);
             settingsTabControl.Location = new Point(12, 12);
             settingsTabControl.Name = "settingsTabControl";
             settingsTabControl.SelectedIndex = 0;
             settingsTabControl.Size = new Size(776, 397);
             settingsTabControl.TabIndex = 2;
-            // 
-            // dispTab
-            // 
-            dispTab.BackColor = SystemColors.Control;
-            dispTab.Controls.Add(autoShutdownToggle);
-            dispTab.Controls.Add(combatSwitchToggle);
-            dispTab.Controls.Add(autoSwitchToggle);
-            dispTab.Controls.Add(label4);
-            dispTab.Controls.Add(label3);
-            dispTab.Controls.Add(statReadToggle);
-            dispTab.Controls.Add(fullscreenMenu);
-            dispTab.Controls.Add(label2);
-            dispTab.Controls.Add(prefDisplayMenu);
-            dispTab.Controls.Add(prefDisplayLabel);
-            dispTab.Location = new Point(4, 24);
-            dispTab.Name = "dispTab";
-            dispTab.Padding = new Padding(3);
-            dispTab.Size = new Size(768, 369);
-            dispTab.TabIndex = 1;
-            dispTab.Text = "Display";
-            // 
-            // combatSwitchToggle
-            // 
-            combatSwitchToggle.AutoSize = true;
-            combatSwitchToggle.Location = new Point(3, 171);
-            combatSwitchToggle.Name = "combatSwitchToggle";
-            combatSwitchToggle.Size = new Size(239, 19);
-            combatSwitchToggle.TabIndex = 28;
-            combatSwitchToggle.Text = "Switch Panels Automatically for Combat";
-            combatSwitchToggle.UseVisualStyleBackColor = true;
-            // 
-            // autoSwitchToggle
-            // 
-            autoSwitchToggle.AutoSize = true;
-            autoSwitchToggle.Location = new Point(3, 146);
-            autoSwitchToggle.Name = "autoSwitchToggle";
-            autoSwitchToggle.Size = new Size(175, 19);
-            autoSwitchToggle.TabIndex = 27;
-            autoSwitchToggle.Text = "Switch Panels Automatically";
-            autoSwitchToggle.UseVisualStyleBackColor = true;
-            // 
-            // label4
-            // 
-            label4.AutoSize = true;
-            label4.Font = new Font("Segoe UI", 12F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            label4.Location = new Point(7, 3);
-            label4.Name = "label4";
-            label4.Size = new Size(133, 21);
-            label4.TabIndex = 26;
-            label4.Text = "Display Settings";
-            // 
-            // label3
-            // 
-            label3.AutoSize = true;
-            label3.Font = new Font("Segoe UI", 12F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            label3.Location = new Point(7, 98);
-            label3.Name = "label3";
-            label3.Size = new Size(101, 21);
-            label3.TabIndex = 25;
-            label3.Text = "UI Elements";
-            // 
-            // statReadToggle
-            // 
-            statReadToggle.AutoSize = true;
-            statReadToggle.Location = new Point(3, 121);
-            statReadToggle.Name = "statReadToggle";
-            statReadToggle.Size = new Size(105, 19);
-            statReadToggle.TabIndex = 24;
-            statReadToggle.Text = "Status Readout";
-            statReadToggle.UseVisualStyleBackColor = true;
-            // 
-            // fullscreenMenu
-            // 
-            fullscreenMenu.FormattingEnabled = true;
-            fullscreenMenu.Items.AddRange(new object[] { "Fullscreen", "Borderless Windowed" });
-            fullscreenMenu.Location = new Point(114, 55);
-            fullscreenMenu.Name = "fullscreenMenu";
-            fullscreenMenu.Size = new Size(161, 23);
-            fullscreenMenu.TabIndex = 23;
-            // 
-            // label2
-            // 
-            label2.AutoSize = true;
-            label2.Location = new Point(48, 58);
-            label2.Name = "label2";
-            label2.Size = new Size(60, 15);
-            label2.TabIndex = 22;
-            label2.Text = "Fullscreen";
-            // 
-            // prefDisplayMenu
-            // 
-            prefDisplayMenu.FormattingEnabled = true;
-            prefDisplayMenu.Location = new Point(114, 31);
-            prefDisplayMenu.Name = "prefDisplayMenu";
-            prefDisplayMenu.Size = new Size(456, 23);
-            prefDisplayMenu.TabIndex = 21;
-            // 
-            // prefDisplayLabel
-            // 
-            prefDisplayLabel.AutoSize = true;
-            prefDisplayLabel.Location = new Point(12, 34);
-            prefDisplayLabel.Name = "prefDisplayLabel";
-            prefDisplayLabel.Size = new Size(96, 15);
-            prefDisplayLabel.TabIndex = 20;
-            prefDisplayLabel.Text = "Preferred Display";
             // 
             // genTab
             // 
@@ -281,39 +183,172 @@
             pathLabel.TabIndex = 12;
             pathLabel.Text = "Journal Folder";
             // 
-            // soundTab
+            // dispTab
             // 
-            soundTab.Location = new Point(4, 24);
-            soundTab.Name = "soundTab";
-            soundTab.Size = new Size(768, 369);
-            soundTab.TabIndex = 2;
-            soundTab.Text = "Sound";
-            soundTab.UseVisualStyleBackColor = true;
-            // 
-            // helpTab
-            // 
-            helpTab.Location = new Point(4, 24);
-            helpTab.Name = "helpTab";
-            helpTab.Size = new Size(768, 369);
-            helpTab.TabIndex = 3;
-            helpTab.Text = "Help";
-            helpTab.UseVisualStyleBackColor = true;
+            dispTab.BackColor = SystemColors.Control;
+            dispTab.Controls.Add(autoShutdownToggle);
+            dispTab.Controls.Add(combatSwitchToggle);
+            dispTab.Controls.Add(autoSwitchToggle);
+            dispTab.Controls.Add(label4);
+            dispTab.Controls.Add(label3);
+            dispTab.Controls.Add(statReadToggle);
+            dispTab.Controls.Add(prefDisplayMenu);
+            dispTab.Controls.Add(prefDisplayLabel);
+            dispTab.Location = new Point(4, 24);
+            dispTab.Name = "dispTab";
+            dispTab.Padding = new Padding(3);
+            dispTab.Size = new Size(768, 369);
+            dispTab.TabIndex = 1;
+            dispTab.Text = "Display";
             // 
             // autoShutdownToggle
             // 
             autoShutdownToggle.AutoSize = true;
-            autoShutdownToggle.Location = new Point(3, 196);
+            autoShutdownToggle.Location = new Point(3, 235);
             autoShutdownToggle.Name = "autoShutdownToggle";
             autoShutdownToggle.Size = new Size(240, 19);
             autoShutdownToggle.TabIndex = 29;
             autoShutdownToggle.Text = "Close Application when Elite shuts down";
             autoShutdownToggle.UseVisualStyleBackColor = true;
             // 
+            // combatSwitchToggle
+            // 
+            combatSwitchToggle.AutoSize = true;
+            combatSwitchToggle.Location = new Point(3, 210);
+            combatSwitchToggle.Name = "combatSwitchToggle";
+            combatSwitchToggle.Size = new Size(239, 19);
+            combatSwitchToggle.TabIndex = 28;
+            combatSwitchToggle.Text = "Switch Panels Automatically for Combat";
+            combatSwitchToggle.UseVisualStyleBackColor = true;
+            // 
+            // autoSwitchToggle
+            // 
+            autoSwitchToggle.AutoSize = true;
+            autoSwitchToggle.Location = new Point(3, 185);
+            autoSwitchToggle.Name = "autoSwitchToggle";
+            autoSwitchToggle.Size = new Size(175, 19);
+            autoSwitchToggle.TabIndex = 27;
+            autoSwitchToggle.Text = "Switch Panels Automatically";
+            autoSwitchToggle.UseVisualStyleBackColor = true;
+            // 
+            // label4
+            // 
+            label4.AutoSize = true;
+            label4.Font = new Font("Segoe UI", 12F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            label4.Location = new Point(7, 3);
+            label4.Name = "label4";
+            label4.Size = new Size(133, 21);
+            label4.TabIndex = 26;
+            label4.Text = "Display Settings";
+            // 
+            // label3
+            // 
+            label3.AutoSize = true;
+            label3.Font = new Font("Segoe UI", 12F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            label3.Location = new Point(7, 137);
+            label3.Name = "label3";
+            label3.Size = new Size(101, 21);
+            label3.TabIndex = 25;
+            label3.Text = "UI Elements";
+            // 
+            // statReadToggle
+            // 
+            statReadToggle.AutoSize = true;
+            statReadToggle.Location = new Point(3, 160);
+            statReadToggle.Name = "statReadToggle";
+            statReadToggle.Size = new Size(105, 19);
+            statReadToggle.TabIndex = 24;
+            statReadToggle.Text = "Status Readout";
+            statReadToggle.UseVisualStyleBackColor = true;
+            // 
+            // prefDisplayMenu
+            // 
+            prefDisplayMenu.FormattingEnabled = true;
+            prefDisplayMenu.Location = new Point(114, 31);
+            prefDisplayMenu.Name = "prefDisplayMenu";
+            prefDisplayMenu.Size = new Size(456, 23);
+            prefDisplayMenu.TabIndex = 21;
+            // 
+            // prefDisplayLabel
+            // 
+            prefDisplayLabel.AutoSize = true;
+            prefDisplayLabel.Location = new Point(15, 34);
+            prefDisplayLabel.Name = "prefDisplayLabel";
+            prefDisplayLabel.Size = new Size(96, 15);
+            prefDisplayLabel.TabIndex = 20;
+            prefDisplayLabel.Text = "Preferred Display";
+            // 
+            // soundTab
+            // 
+            soundTab.BackColor = SystemColors.Control;
+            soundTab.Location = new Point(4, 24);
+            soundTab.Name = "soundTab";
+            soundTab.Size = new Size(768, 369);
+            soundTab.TabIndex = 2;
+            soundTab.Text = "Sound";
+            // 
+            // inaraTab
+            // 
+            inaraTab.BackColor = SystemColors.Control;
+            inaraTab.Location = new Point(4, 24);
+            inaraTab.Name = "inaraTab";
+            inaraTab.Padding = new Padding(3);
+            inaraTab.Size = new Size(768, 369);
+            inaraTab.TabIndex = 4;
+            inaraTab.Text = "Inara";
+            // 
+            // edsmTab
+            // 
+            edsmTab.BackColor = SystemColors.Control;
+            edsmTab.Location = new Point(4, 24);
+            edsmTab.Name = "edsmTab";
+            edsmTab.Size = new Size(768, 369);
+            edsmTab.TabIndex = 5;
+            edsmTab.Text = "EDSM";
+            // 
+            // spanshTab
+            // 
+            spanshTab.BackColor = SystemColors.Control;
+            spanshTab.Location = new Point(4, 24);
+            spanshTab.Name = "spanshTab";
+            spanshTab.Size = new Size(768, 369);
+            spanshTab.TabIndex = 6;
+            spanshTab.Text = "Spansh";
+            // 
+            // edmcTab
+            // 
+            edmcTab.BackColor = SystemColors.Control;
+            edmcTab.Location = new Point(4, 24);
+            edmcTab.Name = "edmcTab";
+            edmcTab.Size = new Size(768, 369);
+            edmcTab.TabIndex = 7;
+            edmcTab.Text = "EDMC";
+            // 
+            // helpTab
+            // 
+            helpTab.BackColor = SystemColors.Control;
+            helpTab.Location = new Point(4, 24);
+            helpTab.Name = "helpTab";
+            helpTab.Size = new Size(768, 369);
+            helpTab.TabIndex = 3;
+            helpTab.Text = "Help";
+            // 
+            // restartButton
+            // 
+            restartButton.Location = new Point(93, 415);
+            restartButton.Name = "restartButton";
+            restartButton.Size = new Size(75, 23);
+            restartButton.TabIndex = 3;
+            restartButton.Text = "Restart";
+            restartButton.UseVisualStyleBackColor = true;
+            restartButton.Click += restartButton_Click;
+            // 
             // SettingsForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(800, 450);
+            Controls.Add(restartButton);
             Controls.Add(settingsTabControl);
             Controls.Add(applyButton);
             Controls.Add(closeButton);
@@ -321,10 +356,10 @@
             StartPosition = FormStartPosition.CenterParent;
             Text = "Settings";
             settingsTabControl.ResumeLayout(false);
-            dispTab.ResumeLayout(false);
-            dispTab.PerformLayout();
             genTab.ResumeLayout(false);
             genTab.PerformLayout();
+            dispTab.ResumeLayout(false);
+            dispTab.PerformLayout();
             ResumeLayout(false);
         }
 
@@ -339,8 +374,6 @@
         private TextBox journalPathTextbox;
         private Label pathLabel;
         private TabPage dispTab;
-        private ComboBox fullscreenMenu;
-        private Label label2;
         private ComboBox prefDisplayMenu;
         private Label prefDisplayLabel;
         private TabPage soundTab;
@@ -355,5 +388,10 @@
         private CheckBox combatSwitchToggle;
         private CheckBox autoSwitchToggle;
         private CheckBox autoShutdownToggle;
+        private TabPage inaraTab;
+        private TabPage edsmTab;
+        private TabPage spanshTab;
+        private TabPage edmcTab;
+        private Button restartButton;
     }
 }

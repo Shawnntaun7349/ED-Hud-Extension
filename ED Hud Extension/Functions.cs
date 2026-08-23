@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using EliteJournalReader;
 using EliteJournalReader.Events;
+using System.Text.RegularExpressions;
 
 using static Globals;
 using System.Text.Json;
@@ -17,7 +18,7 @@ internal class Functions
 {
     public Functions()
 	{
-		//i dunno why but it gets real mad if i put anything here so fuck it
+        //i dunno why but it gets real mad if i put anything here so fuck it
 	}
 
 	public static void loadSettings()
@@ -59,9 +60,9 @@ internal class Functions
             MessageBox.Show("No exe detected, please select the 'EliteDangerous64.exe' location in the settings menu.", "Game not found", MessageBoxButtons.OK, MessageBoxIcon.Warning);
         }
 
-        //load the display settings
-        savedPrefDisplayIndex = Int32.Parse(doc.RootElement.GetProperty("Preferred Display").GetString()); 
-		statusEnabled = Boolean.Parse(doc.RootElement.GetProperty("Status Readout Enabled").GetString()); 
+        //load the user's settings
+        savedPrefDisplayIndex = Int32.Parse(doc.RootElement.GetProperty("Preferred Display").GetString());
+        statusEnabled = Boolean.Parse(doc.RootElement.GetProperty("Status Readout Enabled").GetString()); 
         autoShutDownEnabled = Boolean.Parse(doc.RootElement.GetProperty("Auto Shut Down").GetString());
         autoPanelSwitch = Boolean.Parse(doc.RootElement.GetProperty("Auto Switch Always").GetString());
         autoCombatSwitch = Boolean.Parse(doc.RootElement.GetProperty("Auto Switch Combat Only").GetString());
@@ -77,10 +78,10 @@ internal class Functions
         {
             Directory.CreateDirectory("C:\\EDHE"); //create the EDHE directory if it doesn't exist
 
-            var path = new Dictionary<string, string>
+            var path = new Dictionary<object, object>
                 {
-                    { "Journal Path", journalPath },
-                    { "Game Path", gamePath },
+                    { "Journal Path", journalPath.ToString() },
+                    { "Game Path", gamePath.ToString() },
                     { "Preferred Display", chosenDisplay.ToString() },
                     { "Status Readout Enabled", statusEnabled.ToString() },
                     { "Auto Shut Down", autoShutDownEnabled.ToString() },
@@ -119,14 +120,13 @@ internal class Functions
         }
 
         //finally, create a settings file to save settings to
-
-        Directory.CreateDirectory("C:\\EDHE"); //Create the EDHE directory if it doesn't exist...somehow...
-        var settings = new Dictionary<string, string>
+        Directory.CreateDirectory("C:\\EDHE"); 
+        var settings = new Dictionary<object, object>
                 {
                     { "Journal Path", defaultJournalPath },
                     { "Game Path", defaultGamePath },
                     { "Preferred Display", "0" },
-					{ "Status Readout Enabled", "True" },
+                    { "Status Readout Enabled", "True" },
                     { "Auto Shut Down", "False" },
                     { "Auto Switch Always", "False" },
                     { "Auto Switch Combat Only", "False" }
@@ -136,15 +136,9 @@ internal class Functions
         File.WriteAllText("C:\\EDHE\\settings.json", json); //create settings.json and write the data to it
     }
 
-	public static void simulateCombat(bool inCombat, string tName, string tShip, float tShield, float tHull) //to be removed at some point, this is just for debugging
+	public static void simulateCombat() //to be removed at some point, this is just for debugging
 	{
-		//a function to retrieve scan data from the player journal and store them for display. setup is mildly redundant at the moment but will make more sense once journal integration is done.
-
-		//Globals.inCombat = inCombat;
-		//Globals.targetName = tName;
-		//Globals.targetShip = tShip;
-		//Globals.targetShield = tShield;
-		//Globals.targetHull = tHull;
+		
 	}
     public static void RestartApplication() //when a good ol 'Application.Restart();' call shits the bed, you pull out the Environment namespace big guns
     {
@@ -181,25 +175,10 @@ internal class Functions
         return tier;
     }
 
-    public static void animateLabel(System.Threading.Timer t, Label l, string baseLine, int dots, bool complete)
+    public static string correctedRank(string enumRank)
     {
-        
+        if (string.IsNullOrEmpty(enumRank)) return enumRank;
 
-        if (dots > 3 && !complete)
-        {
-            l.Invoke(new Action(() => l.Text = baseLine + "."));
-            dots++;
-        }
-        else if (dots == 3 && !complete)
-        {
-            l.Invoke(new Action(() => l.Text = baseLine));
-            dots = 1;
-        }
-        else if (complete)
-        {
-            t.Dispose();
-            dots = 1;
-        }
+        return Regex.Replace(enumRank, @"([a-z])([A-Z])|([A-Z]+)([A-Z][a-z])", "$1$4 $2$3");
     }
-    
 }

@@ -20,14 +20,14 @@ namespace ED_Hud_Extension
             //try to load the user's saved settings
             prefDisplayMenu.DataSource = GetMonitorList();
             prefDisplayMenu.SelectedIndex = savedPrefDisplayIndex;
-
-            fullscreenMenu.SelectedIndex = selectedIndex;
             journalPathTextbox.Text = journalPath;
             gamePathTextbox.Text = gamePath;
             statReadToggle.Checked = statusEnabled;
             autoSwitchToggle.Checked = autoPanelSwitch;
             combatSwitchToggle.Checked = autoCombatSwitch;
             autoShutdownToggle.Checked = autoShutDownEnabled;
+
+
         }
 
         private void pathBrowseButton_Click(object sender, EventArgs e) //gimme the god damn journal folder
@@ -64,12 +64,11 @@ namespace ED_Hud_Extension
 
                 Functions.saveSettings();
                 MessageBox.Show("Settings saved successfully! Application will now restart.", "Selection complete", MessageBoxButtons.OK);
-                
-                Application.Restart();
+                Functions.RestartApplication();
             }
             else
             {
-               MessageBox.Show("The provided directory appears to be incorrect. Please verify the directory, or launch the game to generate journal files.", "Could not locate journal files", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("The provided directory appears to be incorrect. Please verify the directory, or launch the game to generate journal files.", "Could not locate journal files", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
         }
 
@@ -104,6 +103,12 @@ namespace ED_Hud_Extension
             {
                 Close();
             }
+        }
+
+        private void restartButton_Click(object sender, EventArgs e)
+        {
+            DialogResult restart = MessageBox.Show("Are you sure you want to restart?", "Restart EDHE", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+            if (restart == DialogResult.Yes) { Functions.RestartApplication(); }
         }
     }
 }

@@ -10,6 +10,7 @@ public class Globals
     public static int starYear = DateTime.UtcNow.Year + 1286;
     public static Point location; //for display methods
     public static DateTime startUpTime; //set at JournalWatcher startup, used to filter all but a few 'old' events in a given journal
+    public static string gameMode;
 
     // --------------------- settings variables ---------------------
     //files & paths
@@ -74,19 +75,24 @@ public class Globals
     public static bool targetLocked;
     public static bool pTargeting;
     public static int scanLevel;
+    public static bool scanDone;
     public static string targetName;
     public static string targetShip;
     public static object targetRank;
     public static double targetShield;
     public static double targetHull;
     public static string targetFaction;
+    public static string targetPower;
     public static string targetLegal;
     public static double targetBounty;
+    public static double targetExtendedBounty;
     public static string targetSubSystem;
     public static double targetSSHealth;
+    public static bool hasLocalBounty;
+    public static bool hasExtendedBounty;
+    public static bool hasBothBounty;
 
     //financial stuff
-    public static string gameMode;
     public static long pCreditBalance;
     public static long pLoan;
 

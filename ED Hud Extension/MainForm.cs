@@ -1,5 +1,6 @@
 using EliteJournalReader;
 using EliteJournalReader.Events;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Diagnostics.Eventing.Reader;
 using System.Drawing.Text;
@@ -23,15 +24,15 @@ namespace ED_Hud_Extension
 
         //bits for the connection 'animation'
         private static System.Threading.Timer animTimer;
-        public static string animConnectionText = "establishing uplink connection."; 
+        public static string animConnectionText = "establishing uplink connection.";
         public static string animConnectionTextBase = "establishing uplink connection.";
         public static string animClientText = "awaiting client response.";
         public static string animClientTextBase = "awaiting client response.";
         public static int animDots = 1;
         public static int conDots = 1;
-        public static int animCycles = 0;
         public static int steps = 1;
         public static bool timeToClear = false;
+        public static bool scanReset;
 
         public static string statBase = "Status : ";
 
@@ -56,16 +57,22 @@ namespace ED_Hud_Extension
         {
             InitializeComponent();
 
+            DoubleBuffered = true;
+
             loadSettings();
 
             if (statusEnabled) { statusLabel.Visible = true; }
 
             StartPosition = FormStartPosition.Manual;
             Location = location; //this is thisForm.Location property being set to the Globals.location value
-            animTimer = new System.Threading.Timer(animCallbackMethod, "Timer State", 500, 1000);
             localTimer = new System.Threading.Timer(localCallbackMethod, "Timer State", 100, 500);
+            animTimer = new System.Threading.Timer(animCallbackMethod, "Timer State", 500, 1000);
+            scanTimer = new System.Threading.Timer(scanCallbackMethod, "Timer State", Timeout.Infinite, Timeout.Infinite);
 
             if (statusEnabled) { statusLabel.Text = statBase + ("mainform initialized, timers started, settings loaded\n"); }
+
+            initPanel.BringToFront();
+            dividerPanel.Visible = false;
         }
 
         private void MainForm_Load(object sender, EventArgs e)
@@ -79,6 +86,7 @@ namespace ED_Hud_Extension
                 currentJournal = true;
                 if (statusEnabled) { statusLabel.Text = statBase + "mainform loaded, game is running"; }
                 animTimer.Dispose();
+                dividerPanel.Visible = true;
             }
             else //otherwise, start the loop & wait for the game to spin up
             {
@@ -87,11 +95,11 @@ namespace ED_Hud_Extension
                 dividerPanel.Visible = false;
             }
         }
-        
+
         // --------------------- methods for handling Journal Reader events ---------------------
         public JournalWatcher watcher = new JournalWatcher(journalPath);
 
-        private void initiateWatcher() 
+        private void initiateWatcher()
         {
             watcherLive = true;
             watcher.Path = journalPath;
@@ -128,20 +136,14 @@ namespace ED_Hud_Extension
 
         private void loadInitialData(object? sender, LoadGameEvent.LoadGameEventArgs args) //fires on startup
         {
-            if (newJournal)
-            {
-                Invoke(new Action(() => welcomeLabel.Text = ""));
-                Invoke(new Action(() => welcomeLabel.Text += "Welcome, Commander\n" + args.Commander));
+            if (newJournal) { if (statusEnabled) { Invoke(new Action(() => statusLabel.Text = statBase + "new journal generated, parsing")); } }
+            else { if (statusEnabled) { Invoke(new Action(() => statusLabel.Text = statBase + "current journal identified, parsing")); } }
 
-                if (statusEnabled) { Invoke(new Action(() => statusLabel.Text = statBase + "new journal generated, parsing")); }
-            }
-            else
-            {
-                Invoke(new Action(() => welcomeLabel.Text = ""));
-                Invoke(new Action(() => welcomeLabel.Text += "Welcome, Commander\n" + args.Commander));
+            Invoke(new Action(() => linkLabel.Text = "uplink integrity: high"));
+            Invoke(new Action(() => linkLabel.ForeColor = Color.FromArgb(192, 64, 0)));
 
-                if (statusEnabled) { Invoke(new Action(() => statusLabel.Text = statBase + "current journal identified, parsing")); }
-            }
+            Invoke(new Action(() => welcomeLabel.Text = ""));
+            Invoke(new Action(() => welcomeLabel.Text += "Welcome, Commander\n" + args.Commander));
             clientReady = true;
 
             currentFuelLevel = args.FuelLevel;
@@ -158,7 +160,7 @@ namespace ED_Hud_Extension
             string pCreditBalanceFormatted = string.Format("{0:N0}", pCreditBalance);
             string pLoanBalanceFormatted = string.Format("{0:N0}", pLoan);
             Invoke(new Action(() => homeCredBalanceTag.Text = pCreditBalanceFormatted));
-            
+
             if (pLoan == 0) { Invoke(new Action(() => homeLBTag.Text = "None")); }
             else { Invoke(new Action(() => homeLBTag.Text = pLoanBalanceFormatted)); }
 
@@ -221,7 +223,7 @@ namespace ED_Hud_Extension
             pCurrentSystem = e.StarSystem;
             starFaction = e.SystemFaction.ToString();
             pFactionRep = e.SystemFaction.MyReputation.ToString(); //this is a number value, needs converted to keywords for readability
-            pWanted = e.Wanted; 
+            pWanted = e.Wanted;
             starFactionState = e.SystemFaction.FactionState;
             systemAllegiance = e.SystemAllegiance.ToString();
             systemPrimEconomy = e.SystemEconomy;
@@ -230,8 +232,8 @@ namespace ED_Hud_Extension
             systemSecurity = e.SystemSecurity;
 
             pDocked = e.Docked;
-            if (pDocked) 
-            { 
+            if (pDocked)
+            {
                 stationName = e.StationName;
                 stationType = e.StationType;
                 marketID = e.MarketID;
@@ -246,58 +248,152 @@ namespace ED_Hud_Extension
         {
             attackerTarget = e.Target.ToString();
             pUnderAttack = true;
-            if (autoPanelSwitch || autoCombatSwitch) { combatPanel.BringToFront(); } 
+            if (autoPanelSwitch || autoCombatSwitch) { combatPanel.BringToFront(); }
         }
 
         private void scanEvent(object? sender, ScanEvent.ScanEventArgs e) //for when a player scans an astral body
         {
-            
+
         }
 
         private void shipTargetedEvent(object? sender, ShipTargetedEvent.ShipTargetedEventArgs e) //for when the player scans a ship
         {
             if (e.Timestamp > startUpTime) //if this event fired *after* the current journal reader fired up
             {
-                if (statusEnabled) { Invoke(new Action(() => statusLabel.Text = "scanning taget")); }
+                if (statusEnabled) { Invoke(new Action(() => statusLabel.Text = "scanning target")); }
 
-                string scanStageBase = "scanning.";
-                Invoke(new Action(() => scanStageTag.Text = scanStageBase));
-                if (statusEnabled) { Invoke(new Action(() => statusLabel.Text = statBase + "scan stage 0")); }
-                scanTimer = new System.Threading.Timer(scanCallbackMethod, "Timer State", 500, 500);
+                if (!scanDone)
+                {
+                    string scanStageBase = "scanning.";
+                    Invoke(new Action(() => scanStageTag.Text = scanStageBase));
+                    if (statusEnabled) { Invoke(new Action(() => statusLabel.Text = statBase + "scan stage 0")); }
+                    scanTimer = new System.Threading.Timer(scanCallbackMethod, "Timer State", 0, 500);
+                }
 
-                if (e.TargetLocked) { targetLocked = true; }
-                else { targetLocked = false; }
+                if (e.TargetLocked)
+                {
+                    targetLocked = true; Invoke(new Action(() => targetDataLabel.Text = "Target Data [Current]"));
+
+                    //clear out the old data
+                    foreach (Label lbl in combatPanel.Controls.OfType<Label>().Where(lbl => lbl.Tag != null && lbl.Tag.ToString() == "combatTag"))
+                    {
+                        Invoke(new Action(() => lbl.Text = "[awaiting scan]"));
+                    }
+                }
+                else
+                {
+                    targetLocked = false;
+                    Invoke(new Action(() => targetDataLabel.Text = "Target Data [Previous]"));
+                    Invoke(new Action(() => scanStageTag.Text = "no target"));
+                }
 
                 scanLevel = e.ScanStage;
-                targetShip = e.Ship;
+                targetShip = e.Ship_Localised;
+                Invoke(new Action(() => targetShipTag.Text = targetShip));
 
                 if (scanLevel >= 1)
                 {
-                    targetName = e.PilotName;
-                    targetRank = eliteTier(e.PilotRank).ToString();
+                    pTargeting = true;
+                    targetName = e.PilotName_Localised;
+                    targetRank = e.PilotRank.ToString(); //don't convert the target's rank to Elite tiers, the player doesn't get to know that detail
+
+                    Invoke(new Action(() => targetTag.Text = targetName));
+                    Invoke(new Action(() => targetRankTag.Text = correctedRank((targetRank.ToString()))));
+
                     if (statusEnabled) { Invoke(new Action(() => statusLabel.Text = statBase + "scan stage 1")); }
                 }
                 if (scanLevel >= 2)
                 {
                     targetShield = e.ShieldHealth;
                     targetHull = e.HullHealth;
+
+                    Invoke(new Action(() => targetShieldTag.Text = targetShield.ToString() + "%"));
+                    Invoke(new Action(() => targetHullTag.Text = targetHull.ToString() + "%"));
+
                     if (statusEnabled) { Invoke(new Action(() => statusLabel.Text = statBase + "scan stage 2")); }
                 }
                 if (scanLevel >= 3)
                 {
+                    scanDone = true;
+                    scanTimer.Change(0, Timeout.Infinite);
                     targetFaction = e.Faction;
+                    targetPower = e.Power;
+
                     targetLegal = e.LegalStatus;
                     targetBounty = e.Bounty;
-                    targetSubSystem = e.SubSystem;
+                    int totalBounty = 0;
+
+                    if (e.LegalStatus == "Clean") //if they appear clean locally
+                    {
+                        Invoke(new Action(() => targetLegalStatusTag.Text = "Clean"));
+                        Invoke(new Action(() => targetBountyTag.Text = "None"));
+                        Invoke(new Action(() => targetLegalStatusTag.ForeColor = Color.White));
+                        totalBounty = 0;
+                    }
+                    if (e.LegalStatus == "Hunter") //if a KWS comes back with this status, they're wanted outside of this system but clean locally
+                    {
+                        Invoke(new Action(() => targetLegalStatusTag.Text = "Warranted"));
+                        Invoke(new Action(() => targetLegalStatusTag.ForeColor = Color.DarkRed));
+                        totalBounty += (int)e.Bounty;
+                        Invoke(new Action(() => targetBountyTag.Text = totalBounty.ToString()));
+                    }
+                    if (e.LegalStatus == "Wanted") //if they're wanted here
+                    {
+                        Invoke(new Action(() => targetLegalStatusTag.ForeColor = Color.DarkRed));
+                        if (totalBounty + (int)e.Bounty > totalBounty) //and they're wanted elsewhere
+                        {
+                            totalBounty += (int)e.Bounty;
+                            Invoke(new Action(() => targetLegalStatusTag.Text = "Wanted && Warranted")); //fucken get em
+                            Invoke(new Action(() => targetBountyTag.Text = totalBounty.ToString()));
+                        }
+                        else //but they're not wanted elsewhere
+                        {
+                            Invoke(new Action(() => targetLegalStatusTag.Text = "Wanted")); //still smoke em, but with less enthusiasm
+                            Invoke(new Action(() => targetBountyTag.Text = totalBounty.ToString()));
+                        }
+                    }
+
+                    targetSubSystem = e.SubSystem_Localised;
                     targetSSHealth = e.SubSystemHealth;
+
                     Invoke(new Action(() => scanStageTag.Text = "Target Locked"));
+
+                    if (e.Power is not null && e.Faction == "0")
+                    {
+                        targetFaction = targetPower;
+                    }
+
+                    if (e.Power is null)
+                    {
+                        targetPower = "None";
+                    }
+
+                    Invoke(new Action(() => targetPowerTag.Text = targetPower));
+                    Invoke(new Action(() => targetFactionTag.Text = targetFaction));
+
+                    Invoke(new Action(() => targetBountyTag.Text = string.Format("{0:N0}", e.Bounty)));
+
+                    if (e.SubSystem != null)
+                    {
+                        Invoke(new Action(() => targetSSTag.Text = targetSubSystem));
+                        Invoke(new Action(() => targetSSHTag.Text = e.SubSystemHealth.ToString() + "%"));
+                    }
+
                     if (statusEnabled) { Invoke(new Action(() => statusLabel.Text = statBase + "scan stage 3")); }
                 }
+                if (!targetLocked && pTargeting) //if the player *was* targetting someone but they lost lock
+                {
+                    scanTimer.Change(0, 5000); //start a 5 second timer and tell the callback method
+                    scanReset = true;
+                }
+
             }
-            else
-            {
-                Invoke(new Action(() => scanStageTag.Text = "no target"));
-            }
+            else { /*ignore the event as it occured before edhe started*/ }
+
+        }
+
+        private void recoveryTimerCallback(object sender)
+        {
 
         }
 
@@ -315,14 +411,16 @@ namespace ED_Hud_Extension
 
         private void gameShutDown(object? sender, ShutdownEvent.ShutdownEventArgs e)
         {
-            if (autoShutDownEnabled && e.Timestamp > startUpTime) //currently triggering if EDHE is started while the game is loading??? to be looked into later
+            if (autoShutDownEnabled && e.Timestamp > startUpTime)
             {
                 Invoke(new Action(() => MessageBox.Show(this, "Elite Dangerous has shut down. EDHE will now shut down.", "Shutting Down", MessageBoxButtons.OK, MessageBoxIcon.Warning)));
                 Application.Exit();
             }
-            else
+            else if (e.Timestamp > startUpTime)
             {
-                //tell the user the game shut down, end the journal watcher. figure out a way to redetect the game launch later? i dunno
+                Invoke(new Action(() => MessageBox.Show(this, "Elite Dangerous has shut down. EDHE will remain operational but will need restarted in the case of a new session.", "Uplink Lost", MessageBoxButtons.OK, MessageBoxIcon.Warning)));
+                Invoke(new Action(() => linkLabel.Text = " uplink integrity lost"));
+                Invoke(new Action(() => linkLabel.ForeColor = Color.DarkRed));
             }
         }
 
@@ -330,16 +428,17 @@ namespace ED_Hud_Extension
 
         private void restartSessionButton_Click(object sender, EventArgs e) //used to manually reset the player's session if it doesn't reset automatically
         {
-            TestForm tf = new TestForm();
-            tf.Show();
+            Invoke(new Action(() => MessageBox.Show(this, "Elite Dangerous has shut down. EDHE will remain operational but will need restarted in the case of a new session.", "Uplink Lost", MessageBoxButtons.OK, MessageBoxIcon.Warning)));
+            Invoke(new Action(() => linkLabel.Text = " uplink integrity lost"));
+            Invoke(new Action(() => linkLabel.ForeColor = Color.DarkRed));
         }
 
         private void simulateButton_Click(object sender, EventArgs e)
         {
-            combatTag.ForeColor = Color.Red;
-            combatTag.Text = " Active";
-            pUnderAttack = true;
-            if (autoPanelSwitch || autoCombatSwitch) { combatPanel.BringToFront(); }
+            //combatTag.ForeColor = Color.Red;
+            //combatTag.Text = " Active";
+            //pUnderAttack = true;
+            //if (autoPanelSwitch || autoCombatSwitch) { combatPanel.BringToFront(); }
         }
 
         private void settingsButton_Click(object sender, EventArgs e) //opens the settings menu
@@ -372,14 +471,6 @@ namespace ED_Hud_Extension
             //home panel clocks
             Invoke(new Action(() => starDTTag.Text = fullText));
             Invoke(new Action(() => locDTTag.Text = localTime));
-
-            //combat panel clocks
-            Invoke(new Action(() => combatLocDTTag.Text = localTime));
-            Invoke(new Action(() => combatStarDTTag.Text = fullText));
-
-            //explore panel clocks
-            Invoke(new Action(() => exploreLocDTTag.Text = localTime));
-            Invoke(new Action(() => exploreStarDTTag.Text = fullText));
         }
 
         private void starDTTag_TextChanged(object sender, EventArgs e)
@@ -426,7 +517,6 @@ namespace ED_Hud_Extension
                     animConnectionText = animConnectionTextBase;
                     waitingConnectLabel.Invoke(new Action(() => waitingConnectLabel.Text = animConnectionText));
                     animDots = 1;
-                    animCycles++;
 
                     if (gameRunning())
                     {
@@ -487,22 +577,29 @@ namespace ED_Hud_Extension
 
         private void scanCallbackMethod(object sender)
         {
-            if (!targetLocked)
+            if (scanDone) { return; } //if the scan is done fuck off
+
+            if (!targetLocked && !scanReset) //if the user lost the target but we havent started the 'lost target' scanner
+            {
+                scanTimer.Change(0, 5000);
+                scanReset = true;
+            }
+            else if (!targetLocked & scanReset) //if the timer has elapsed & we still dont have a target
             {
                 Invoke(new Action(() => scanStageTag.Text = "no target"));
                 Invoke(new Action(() => statusLabel.Text = statBase + "no target to scan"));
-                scanTimer.Dispose();
+                scanTimer.Change(Timeout.Infinite, Timeout.Infinite);
             }
             else
             {
-                if (animDots < 3)
+                if (animDots < 3 && !scanDone)
                 {
                     //animateLabel(animTimer, scanStageTag, "scanning.", 1, true);
                     //Invoke(new Action(() => scanStageTag.Text = "target locked"));
                     Invoke(new Action(() => scanStageTag.Text += "."));
                     animDots++;
                 }
-                else if (animDots >= 3)
+                else if (animDots >= 3 && !scanDone)
                 {
                     Invoke(new Action(() => scanStageTag.Text = "scanning."));
                     animDots = 1;
@@ -516,31 +613,35 @@ namespace ED_Hud_Extension
             initPanel.Dispose();
             animTimer.Dispose();
             homePanel.BringToFront();
+            dividerPanel.BringToFront();
             dividerPanel.Visible = true;
             if (statusEnabled) { Invoke(new Action(() => statusLabel.Text = statBase + "session started, parsing journal")); }
-        }
-
-        private void welcomeLabel_TextChanged(object sender, EventArgs e)
-        {
-            clearInitPanel();
         }
 
         private void homeButton_Click(object sender, EventArgs e)
         {
             clearInitPanel();
             homePanel.BringToFront();
+            dividerPanel.BringToFront();
         }
 
         private void combatButton_Click(object sender, EventArgs e)
         {
             clearInitPanel();
             combatPanel.BringToFront();
+            dividerPanel.BringToFront();
         }
 
         private void explorationButton_Click(object sender, EventArgs e)
         {
             clearInitPanel();
             explorePanel.BringToFront();
+            dividerPanel.BringToFront();
+        }
+
+        private void welcomeLabel_TextChanged(object sender, EventArgs e)
+        {
+            clearInitPanel();
         }
     }
 }
