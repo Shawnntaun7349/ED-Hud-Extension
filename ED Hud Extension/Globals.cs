@@ -1,8 +1,4 @@
-﻿using EliteJournalReader.Events;
-using System;
-using System.Diagnostics;
-
-public class Globals
+﻿public class Globals
 {
     //background variables
     public static bool connected = false; //for online connection
@@ -35,8 +31,65 @@ public class Globals
     //user settings - audio
     public static bool mindYourOwnDamnBusiness;
 
+    public static bool statusReaderLive;
+
+    //journal files, status files, etc.
+    public class StatusTags
+    {
+        //Flag 1
+        public static bool Docked;
+        public static bool Landed;
+        public static bool GearDown;
+        public static bool ShieldsUp;
+        public static bool Supercruise;
+        public static bool FAOff;
+        public static bool HardpointsDeployed;
+        public static bool InWing;
+        public static bool LightsOn;
+        public static bool CargoScoopDeployed;
+        public static bool SilentRunning;
+        public static bool ScoopingFuel;
+        public static bool SrvHandBrake;
+        public static bool SrvTurretView;
+        public static bool SrvTurretRetracted; //comes active when the srv gets close enough to the player's ship to retract the turret entirely
+        public static bool SrvDriveAssist;
+        public static bool FsdMassLocked;
+        public static bool FsdCharging;
+        public static bool FsdCooldown;
+        public static bool LowFuel; //<25%
+        public static bool OverHeating; //>100%
+        public static bool HasLatLong;
+        public static bool IsInDanger;
+        public static bool InMainShip;
+        public static bool InFighter;
+        public static bool InSrv;
+        public static bool HudInAnalysisMode;
+        public static bool NightVision;
+        public static bool AltitudeFromAverageRadius;
+        public static bool FsdJump;
+        public static bool SrvHighBeam;
+
+        //Flag 2
+        public static bool OnFoot;
+        public static bool InTaxi;
+        public static bool InMulticrew;
+        public static bool OnFootInStation;
+        public static bool OnFootOnPlanet;
+        public static bool AimDownSight;
+        public static bool LowOxygen;
+        public static bool LowHealth;
+        public static bool Hot;
+        public static bool Cold;
+        public static bool VeryHot;
+        public static bool VeryCold;
+        public static bool GlideMode;
+        public static bool OnFootInHangar;
+        public static bool OnFootSocialSpace;
+        public static bool OnFootExterior;
+        public static bool BreathableAtmosphere;
+    }
+
     // --------------------- player variables ---------------------
-    //journal data
     //player stuff
     public static string pCombatRank;
     public static string pMercRank;
@@ -97,11 +150,21 @@ public class Globals
     public static long pLoan;
 
     //ship stuff
+    //from journal
     public static string pShipType;
     public static string pShipName;
     public static string pShipID;
-    public static double currentFuelLevel;
+    public static double currentFuelLevel; //from the journal files
     public static double maxFuelLevel;
+
+    //from status file
+    public static int systemPips;
+    public static int enginePips;
+    public static int weaponPips;
+    public static int fireGroup;
+    public static int guiFocus;
+    public static double fuelMain;
+    public static double fuelRes;
 
     //location stuff
     public static string pCurrentSystem;

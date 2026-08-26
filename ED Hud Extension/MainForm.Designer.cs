@@ -29,7 +29,7 @@ namespace ED_Hud_Extension
         ///  Required method for Designer support - do not modify
         ///  the contents of this method with the code editor.
         /// </summary>
-        private void InitializeComponent()
+        public void InitializeComponent()
         {
             restartSessionButton = new Button();
             combatPanel = new Panel();
@@ -112,14 +112,20 @@ namespace ED_Hud_Extension
             welcomeLabel = new Label();
             locDTLabel = new Label();
             explorePanel = new Panel();
-            label6 = new Label();
-            label7 = new Label();
-            label4 = new Label();
-            label5 = new Label();
-            starTag = new Label();
-            label3 = new Label();
+            expNextSystemTag = new Label();
+            expNextSystemLabel = new Label();
+            expDestinationTag = new Label();
+            expDestinationLabel = new Label();
+            bodiesLabel = new Label();
+            starsLabel = new Label();
+            detailViewPanel = new Panel();
+            label9 = new Label();
             bodiesDivPanel = new Panel();
-            label1 = new Label();
+            label10 = new Label();
+            bodyListPanel = new Panel();
+            bodyList = new ListView();
+            label11 = new Label();
+            label12 = new Label();
             fsdTag = new Label();
             fsdLabel = new Label();
             expCurrentSystemTag = new Label();
@@ -134,6 +140,7 @@ namespace ED_Hud_Extension
             initPanel.SuspendLayout();
             homePanel.SuspendLayout();
             explorePanel.SuspendLayout();
+            bodyListPanel.SuspendLayout();
             statusPanel.SuspendLayout();
             SuspendLayout();
             // 
@@ -1052,7 +1059,6 @@ namespace ED_Hud_Extension
             starDTTag.Text = "Tuesday, August 18th 3312\r\n2:45\r\n";
             starDTTag.TextAlign = ContentAlignment.MiddleRight;
             starDTTag.Visible = false;
-            starDTTag.TextChanged += starDTTag_TextChanged;
             // 
             // waitingSTTag
             // 
@@ -1116,14 +1122,19 @@ namespace ED_Hud_Extension
             // 
             // explorePanel
             // 
-            explorePanel.Controls.Add(label6);
-            explorePanel.Controls.Add(label7);
-            explorePanel.Controls.Add(label4);
-            explorePanel.Controls.Add(label5);
-            explorePanel.Controls.Add(starTag);
-            explorePanel.Controls.Add(label3);
+            explorePanel.Controls.Add(expNextSystemTag);
+            explorePanel.Controls.Add(expNextSystemLabel);
+            explorePanel.Controls.Add(expDestinationTag);
+            explorePanel.Controls.Add(expDestinationLabel);
+            explorePanel.Controls.Add(bodiesLabel);
+            explorePanel.Controls.Add(starsLabel);
+            explorePanel.Controls.Add(detailViewPanel);
+            explorePanel.Controls.Add(label9);
             explorePanel.Controls.Add(bodiesDivPanel);
-            explorePanel.Controls.Add(label1);
+            explorePanel.Controls.Add(label10);
+            explorePanel.Controls.Add(bodyListPanel);
+            explorePanel.Controls.Add(label11);
+            explorePanel.Controls.Add(label12);
             explorePanel.Controls.Add(fsdTag);
             explorePanel.Controls.Add(fsdLabel);
             explorePanel.Controls.Add(expCurrentSystemTag);
@@ -1133,90 +1144,150 @@ namespace ED_Hud_Extension
             explorePanel.Size = new Size(1802, 894);
             explorePanel.TabIndex = 63;
             // 
-            // label6
+            // expNextSystemTag
             // 
-            label6.AutoSize = true;
-            label6.Font = new Font("Oxanium", 21.75F);
-            label6.ForeColor = SystemColors.Control;
-            label6.Location = new Point(196, 222);
-            label6.Name = "label6";
-            label6.Size = new Size(91, 36);
-            label6.TabIndex = 88;
-            label6.Text = "ready";
+            expNextSystemTag.AutoSize = true;
+            expNextSystemTag.Font = new Font("Oxanium", 21.75F);
+            expNextSystemTag.ForeColor = SystemColors.Control;
+            expNextSystemTag.Location = new Point(812, 67);
+            expNextSystemTag.Name = "expNextSystemTag";
+            expNextSystemTag.Size = new Size(91, 36);
+            expNextSystemTag.TabIndex = 94;
+            expNextSystemTag.Text = "ready";
             // 
-            // label7
+            // expNextSystemLabel
             // 
-            label7.AutoSize = true;
-            label7.Font = new Font("Oxanium", 21.75F);
-            label7.ForeColor = Color.FromArgb(192, 64, 0);
-            label7.Location = new Point(0, 222);
-            label7.Name = "label7";
-            label7.Size = new Size(172, 36);
-            label7.TabIndex = 87;
-            label7.Text = "fsd status : ";
+            expNextSystemLabel.AutoSize = true;
+            expNextSystemLabel.Font = new Font("Oxanium", 21.75F);
+            expNextSystemLabel.ForeColor = Color.FromArgb(192, 64, 0);
+            expNextSystemLabel.Location = new Point(750, 31);
+            expNextSystemLabel.Name = "expNextSystemLabel";
+            expNextSystemLabel.Size = new Size(203, 36);
+            expNextSystemLabel.TabIndex = 93;
+            expNextSystemLabel.Text = "next system : ";
             // 
-            // label4
+            // expDestinationTag
             // 
-            label4.AutoSize = true;
-            label4.Font = new Font("Oxanium", 21.75F);
-            label4.ForeColor = SystemColors.Control;
-            label4.Location = new Point(196, 186);
-            label4.Name = "label4";
-            label4.Size = new Size(91, 36);
-            label4.TabIndex = 86;
-            label4.Text = "ready";
+            expDestinationTag.AutoSize = true;
+            expDestinationTag.Font = new Font("Oxanium", 30F, FontStyle.Bold);
+            expDestinationTag.ForeColor = SystemColors.Control;
+            expDestinationTag.Location = new Point(0, 50);
+            expDestinationTag.Name = "expDestinationTag";
+            expDestinationTag.Size = new Size(312, 50);
+            expDestinationTag.TabIndex = 92;
+            expDestinationTag.Text = "[awaiting scan]";
             // 
-            // label5
+            // expDestinationLabel
             // 
-            label5.AutoSize = true;
-            label5.Font = new Font("Oxanium", 21.75F);
-            label5.ForeColor = Color.FromArgb(192, 64, 0);
-            label5.Location = new Point(0, 186);
-            label5.Name = "label5";
-            label5.Size = new Size(172, 36);
-            label5.TabIndex = 85;
-            label5.Text = "fsd status : ";
+            expDestinationLabel.AutoSize = true;
+            expDestinationLabel.Font = new Font("Oxanium", 30F, FontStyle.Bold);
+            expDestinationLabel.ForeColor = Color.FromArgb(192, 64, 0);
+            expDestinationLabel.Location = new Point(0, 0);
+            expDestinationLabel.Name = "expDestinationLabel";
+            expDestinationLabel.Size = new Size(426, 50);
+            expDestinationLabel.TabIndex = 91;
+            expDestinationLabel.Text = "Destination System : ";
             // 
-            // starTag
+            // bodiesLabel
             // 
-            starTag.AutoSize = true;
-            starTag.Font = new Font("Oxanium", 21.75F);
-            starTag.ForeColor = SystemColors.Control;
-            starTag.Location = new Point(196, 150);
-            starTag.Name = "starTag";
-            starTag.Size = new Size(91, 36);
-            starTag.TabIndex = 84;
-            starTag.Text = "ready";
+            bodiesLabel.AutoSize = true;
+            bodiesLabel.Font = new Font("Oxanium", 21.75F);
+            bodiesLabel.ForeColor = Color.FromArgb(192, 64, 0);
+            bodiesLabel.Location = new Point(0, 257);
+            bodiesLabel.Name = "bodiesLabel";
+            bodiesLabel.Size = new Size(129, 36);
+            bodiesLabel.TabIndex = 85;
+            bodiesLabel.Text = "Bodies : ";
             // 
-            // label3
+            // starsLabel
             // 
-            label3.AutoSize = true;
-            label3.Font = new Font("Oxanium", 21.75F);
-            label3.ForeColor = Color.FromArgb(192, 64, 0);
-            label3.Location = new Point(0, 150);
-            label3.Name = "label3";
-            label3.Size = new Size(127, 36);
-            label3.TabIndex = 83;
-            label3.Text = "Star[s] : ";
+            starsLabel.AutoSize = true;
+            starsLabel.Font = new Font("Oxanium", 21.75F);
+            starsLabel.ForeColor = Color.FromArgb(192, 64, 0);
+            starsLabel.Location = new Point(0, 221);
+            starsLabel.Name = "starsLabel";
+            starsLabel.Size = new Size(127, 36);
+            starsLabel.TabIndex = 83;
+            starsLabel.Text = "Star[s] : ";
+            // 
+            // detailViewPanel
+            // 
+            detailViewPanel.BackColor = Color.FromArgb(64, 64, 64);
+            detailViewPanel.ForeColor = SystemColors.Desktop;
+            detailViewPanel.Location = new Point(1150, 148);
+            detailViewPanel.Name = "detailViewPanel";
+            detailViewPanel.Size = new Size(652, 735);
+            detailViewPanel.TabIndex = 90;
+            // 
+            // label9
+            // 
+            label9.AutoSize = true;
+            label9.Font = new Font("Oxanium", 21.75F);
+            label9.ForeColor = SystemColors.Control;
+            label9.Location = new Point(196, 293);
+            label9.Name = "label9";
+            label9.Size = new Size(91, 36);
+            label9.TabIndex = 88;
+            label9.Text = "ready";
             // 
             // bodiesDivPanel
             // 
             bodiesDivPanel.BackColor = Color.FromArgb(192, 64, 0);
-            bodiesDivPanel.Location = new Point(0, 145);
+            bodiesDivPanel.Location = new Point(0, 216);
             bodiesDivPanel.Name = "bodiesDivPanel";
             bodiesDivPanel.Size = new Size(652, 2);
             bodiesDivPanel.TabIndex = 82;
             // 
-            // label1
+            // label10
             // 
-            label1.AutoSize = true;
-            label1.Font = new Font("Oxanium", 30F, FontStyle.Bold);
-            label1.ForeColor = Color.FromArgb(192, 64, 0);
-            label1.Location = new Point(0, 99);
-            label1.Name = "label1";
-            label1.Size = new Size(181, 50);
-            label1.TabIndex = 81;
-            label1.Text = "Bodies : ";
+            label10.AutoSize = true;
+            label10.Font = new Font("Oxanium", 21.75F);
+            label10.ForeColor = SystemColors.Control;
+            label10.Location = new Point(196, 221);
+            label10.Name = "label10";
+            label10.Size = new Size(91, 36);
+            label10.TabIndex = 84;
+            label10.Text = "ready";
+            // 
+            // bodyListPanel
+            // 
+            bodyListPanel.BackColor = Color.FromArgb(64, 64, 64);
+            bodyListPanel.Controls.Add(bodyList);
+            bodyListPanel.ForeColor = SystemColors.Desktop;
+            bodyListPanel.Location = new Point(2, 472);
+            bodyListPanel.Name = "bodyListPanel";
+            bodyListPanel.Size = new Size(652, 411);
+            bodyListPanel.TabIndex = 89;
+            // 
+            // bodyList
+            // 
+            bodyList.Location = new Point(95, 45);
+            bodyList.Name = "bodyList";
+            bodyList.Size = new Size(431, 324);
+            bodyList.TabIndex = 0;
+            bodyList.UseCompatibleStateImageBehavior = false;
+            // 
+            // label11
+            // 
+            label11.AutoSize = true;
+            label11.Font = new Font("Oxanium", 21.75F);
+            label11.ForeColor = Color.FromArgb(192, 64, 0);
+            label11.Location = new Point(0, 293);
+            label11.Name = "label11";
+            label11.Size = new Size(172, 36);
+            label11.TabIndex = 87;
+            label11.Text = "fsd status : ";
+            // 
+            // label12
+            // 
+            label12.AutoSize = true;
+            label12.Font = new Font("Oxanium", 21.75F);
+            label12.ForeColor = SystemColors.Control;
+            label12.Location = new Point(196, 257);
+            label12.Name = "label12";
+            label12.Size = new Size(91, 36);
+            label12.TabIndex = 86;
+            label12.Text = "ready";
             // 
             // fsdTag
             // 
@@ -1245,7 +1316,7 @@ namespace ED_Hud_Extension
             expCurrentSystemTag.AutoSize = true;
             expCurrentSystemTag.Font = new Font("Oxanium", 30F, FontStyle.Bold);
             expCurrentSystemTag.ForeColor = SystemColors.Control;
-            expCurrentSystemTag.Location = new Point(356, 49);
+            expCurrentSystemTag.Location = new Point(0, 158);
             expCurrentSystemTag.Name = "expCurrentSystemTag";
             expCurrentSystemTag.Size = new Size(312, 50);
             expCurrentSystemTag.TabIndex = 53;
@@ -1256,7 +1327,7 @@ namespace ED_Hud_Extension
             expCurrentSystemLabel.AutoSize = true;
             expCurrentSystemLabel.Font = new Font("Oxanium", 30F, FontStyle.Bold);
             expCurrentSystemLabel.ForeColor = Color.FromArgb(192, 64, 0);
-            expCurrentSystemLabel.Location = new Point(0, 49);
+            expCurrentSystemLabel.Location = new Point(0, 108);
             expCurrentSystemLabel.Name = "expCurrentSystemLabel";
             expCurrentSystemLabel.Size = new Size(350, 50);
             expCurrentSystemLabel.TabIndex = 52;
@@ -1305,7 +1376,7 @@ namespace ED_Hud_Extension
             verLabel.Name = "verLabel";
             verLabel.Size = new Size(77, 15);
             verLabel.TabIndex = 1;
-            verLabel.Text = "version 0.1.7";
+            verLabel.Text = "version 0.1.8";
             verLabel.TextAlign = ContentAlignment.MiddleRight;
             // 
             // statusLabel
@@ -1370,111 +1441,118 @@ namespace ED_Hud_Extension
             homePanel.PerformLayout();
             explorePanel.ResumeLayout(false);
             explorePanel.PerformLayout();
+            bodyListPanel.ResumeLayout(false);
             statusPanel.ResumeLayout(false);
             statusPanel.PerformLayout();
             ResumeLayout(false);
         }
 
         #endregion
-        private Button restartSessionButton;
-        private Panel combatPanel;
-        private Label targetShipTag;
-        private Label targetShieldTag;
-        private Label targetHullTag;
-        private Label targetTag;
-        private Label targetRankTag;
-        private Label targetPowerTag;
-        private Label targetFactionTag;
-        private Label targetBountyTag;
-        private Label targetLegalStatusTag;
-        private Label targetShipLabel;
-        private Label targetLegalStatusLabel;
-        private Label targetRankLabel;
-        private Label targetFactionLabel;
-        private Label targetLocalBounty;
-        private Label targetHullLabel;
-        private Label targetPowerLabel;
-        private Label targetShieldsLabel;
-        private Label targetNameLabel;
-        private Button simulateButton;
-        private Button settingsButton;
-        private Button combatButton;
-        private Button explorationButton;
-        private Button homeButton;
-        private Panel initPanel;
-        private Panel homePanel;
-        private Label welcomeLabel;
-        private Label locDTLabel;
-        private Panel explorePanel;
-        private Label expCurrentSystemTag;
-        private Label expCurrentSystemLabel;
-        private Label waitingSTTag;
-        private Label starDTLabel;
-        private Label locDTTag;
+        public Button restartSessionButton;
+        public Panel combatPanel;
+        public Label targetShipTag;
+        public Label targetShieldTag;
+        public Label targetHullTag;
+        public Label targetTag;
+        public Label targetRankTag;
+        public Label targetPowerTag;
+        public Label targetFactionTag;
+        public Label targetBountyTag;
+        public Label targetLegalStatusTag;
+        public Label targetShipLabel;
+        public Label targetLegalStatusLabel;
+        public Label targetRankLabel;
+        public Label targetFactionLabel;
+        public Label targetLocalBounty;
+        public Label targetHullLabel;
+        public Label targetPowerLabel;
+        public Label targetShieldsLabel;
+        public Label targetNameLabel;
+        public Button simulateButton;
+        public Button settingsButton;
+        public Button combatButton;
+        public Button explorationButton;
+        public Button homeButton;
+        public Panel initPanel;
+        public Panel homePanel;
+        public Label welcomeLabel;
+        public Label locDTLabel;
+        public Panel explorePanel;
+        public Label expCurrentSystemTag;
+        public Label expCurrentSystemLabel;
+        public Label waitingSTTag;
+        public Label starDTLabel;
+        public Label locDTTag;
         public Label waitingConnectLabel;
-        private Panel dividerPanel;
-        private Button exitButton;
-        private Label starDTTag;
-        private EliteJournalReader.JournalWatcher journalWatcher;
-        private Label shipNameLabel;
-        private Label shipLabel;
+        public Panel dividerPanel;
+        public Button exitButton;
+        public Label starDTTag;
+        public EliteJournalReader.JournalWatcher journalWatcher;
+        public Label shipNameLabel;
+        public Label shipLabel;
         public Label initLabel;
         public Label diagLabel;
         public Label enviroLabel;
-        private Label linkLabel;
-        private Panel statusPanel;
-        private Label statusLabel;
+        public Label linkLabel;
+        public Panel statusPanel;
+        public Label statusLabel;
         public Label waitingClientLabel;
-        private Label shipFuelLabel;
-        private Label shipIDLabel;
-        private Label curShipFuelTag;
-        private Label curShipIDTag;
-        private Label curShipDesTag;
-        private Label curShipTag;
-        private Label verLabel;
-        private Label homeLSTag;
-        private Label homeLSLabel;
-        private Label homeLBTag;
-        private Label homeSysTag;
-        private Label homeCRLabel;
-        private Label homeCRTag;
-        private Label creditBalanceLabel;
-        private Label homeSysLabel;
-        private Label homeCredBalanceTag;
-        private Label homeTRTag;
-        private Label homeLBLabel;
+        public Label shipFuelLabel;
+        public Label shipIDLabel;
+        public Label curShipFuelTag;
+        public Label curShipIDTag;
+        public Label curShipDesTag;
+        public Label curShipTag;
+        public Label verLabel;
+        public Label homeLSTag;
+        public Label homeLSLabel;
+        public Label homeLBTag;
+        public Label homeSysTag;
+        public Label homeCRLabel;
+        public Label homeCRTag;
+        public Label creditBalanceLabel;
+        public Label homeSysLabel;
+        public Label homeCredBalanceTag;
+        public Label homeTRTag;
+        public Label homeLBLabel;
         public Label clientDone;
         public Label enviroDone;
         public Label uplinkDone;
         public Label diagDone;
         public Label initDone;
-        private Label homeTRLabel;
-        private Label homeARLabel;
-        private Label homeARTag;
-        private Label homeMRLabel;
-        private Label homeMRTag;
-        private Label homeEXRLabel;
-        private Label homeEXRTag;
-        private Label homeERLabel;
-        private Label homeERTag;
-        private Label scanStageLabel;
-        private Label scanStageTag;
-        private Panel combatPanelDivider;
-        private Label targetDataLabel;
-        private Label targetSSHTag;
-        private Label targetSSHealthLabel;
-        private Label targetSSTag;
-        private Label targetSubSystemLabel;
-        private Button stationButton;
-        private Label fsdTag;
-        private Label fsdLabel;
-        private Panel bodiesDivPanel;
-        private Label label1;
-        private Label label6;
-        private Label label7;
-        private Label label4;
-        private Label label5;
-        private Label starTag;
-        private Label label3;
+        public Label homeTRLabel;
+        public Label homeARLabel;
+        public Label homeARTag;
+        public Label homeMRLabel;
+        public Label homeMRTag;
+        public Label homeEXRLabel;
+        public Label homeEXRTag;
+        public Label homeERLabel;
+        public Label homeERTag;
+        public Label scanStageLabel;
+        public Label scanStageTag;
+        public Panel combatPanelDivider;
+        public Label targetDataLabel;
+        public Label targetSSHTag;
+        public Label targetSSHealthLabel;
+        public Label targetSSTag;
+        public Label targetSubSystemLabel;
+        public Button stationButton;
+        public Label fsdTag;
+        public Label fsdLabel;
+        public Panel bodiesDivPanel;
+        public Panel bodyListPanel;
+        public Panel detailViewPanel;
+        public Label bodiesLabel;
+        public Label starsLabel;
+        public Label label9;
+        public Label label10;
+        public Label label11;
+        public Label label12;
+        public ListView bodyList;
+        public Label expDestinationTag;
+        public Label expDestinationLabel;
+        public Label expNextSystemTag;
+        public Label expNextSystemLabel;
     }
 }

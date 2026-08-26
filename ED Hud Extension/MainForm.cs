@@ -1,26 +1,26 @@
 using EliteJournalReader;
 using EliteJournalReader.Events;
-using System.ComponentModel;
+using Newtonsoft.Json.Linq;
 using System.Diagnostics;
-using System.Diagnostics.Eventing.Reader;
-using System.Drawing.Text;
-using System.IO;
-using System.Numerics;
-using System.Reflection.Metadata.Ecma335;
-using System.Security.Policy;
+using System.Linq;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Net.Http.Json;
+using System.Security.Cryptography.X509Certificates;
 using System.Text.Json;
-using System.Threading;
-using System.Windows.Forms.Design;
 using static Functions;
 using static Globals;
+using static StatusReader;
 
 namespace ED_Hud_Extension
 {
     public partial class MainForm : Form
     {
+        //timers for timing things 
         private static System.Threading.Timer localTimer;//multi-threading timers are a hassle 
         private static System.Threading.Timer connectingTimer;
         private static System.Threading.Timer scanTimer;
+        private static System.Threading.Timer fsdTimer;
 
         //bits for the connection 'animation'
         private static System.Threading.Timer animTimer;
@@ -32,7 +32,10 @@ namespace ED_Hud_Extension
         public static int conDots = 1;
         public static int steps = 1;
         public static bool timeToClear = false;
+
+        //bits for notifications / status updates
         public static bool scanReset;
+        public static int fsdCooldown;
 
         public static string statBase = "Status : ";
 
@@ -40,10 +43,23 @@ namespace ED_Hud_Extension
         public static bool newJournal = false; //is the game not running? wait for a new journal
         public static bool clientReady = false; //is the game running but we're idling on the main menu? wait for a game mode selection
         public static bool watcherLive = false; //has the watcher already been initialized? [don't do it twice things break]
+        public static ShipFlag _flag = new ShipFlag();
 
         public bool gameRunning()
         {
             if (Process.GetProcessesByName("EliteDangerous64").Length > 0)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }            
+        }
+
+        public bool inMainMenu(ShipFlag _flag)
+        {
+            if (_flag.HasFlag(ShipFlag.None))
             {
                 return true;
             }
@@ -78,9 +94,17 @@ namespace ED_Hud_Extension
         private void MainForm_Load(object sender, EventArgs e)
         {
             if (statusEnabled) { statusLabel.Text = statBase + "initiating service"; }
-            locDTTag.Text = DateTime.Now.ToString("dddd, MMMM dd, yyyy \nHH:mm");
+            loopTimer = new System.Threading.Timer(readTimerCallback, "Timer State", 50, 50); //start the loop for the status reader
 
-            if (gameRunning()) //if the game is already running when EDHE spins up
+            //create the two ends of the tag, then insert the modified year
+            string starTimeStart = DateTime.UtcNow.ToString("dddd, MMMM dd, ");
+            string startTimeEnd = DateTime.UtcNow.ToString("\nHH:mm");
+            string fullText = starTimeStart + starYear.ToString() + startTimeEnd;
+
+            locDTTag.Text = DateTime.Now.ToString("dddd, MMMM dd, yyyy \nHH:mm");
+            starDTTag.Text = fullText;
+
+            if (gameRunning() && (!inMainMenu(_flag))) //if the game is already running when EDHE spins up, also if we're not in the main menu (status Flag1 reads 0 until player loads into game proper) 
             {
                 initiateWatcher();
                 currentJournal = true;
@@ -98,6 +122,9 @@ namespace ED_Hud_Extension
 
         // --------------------- methods for handling Journal Reader events ---------------------
         public JournalWatcher watcher = new JournalWatcher(journalPath);
+        public static System.Threading.Timer loopTimer;
+        public static ShipFlag sf = new ShipFlag();
+        public static OnFootFlag ff = new OnFootFlag();
 
         private void initiateWatcher()
         {
@@ -106,6 +133,7 @@ namespace ED_Hud_Extension
             if (statusEnabled) { Invoke(new Action(() => statusLabel.Text = statBase + "initiating journal watcher")); }
 
             watcher.StartWatching(); //start the watcher to monitor for events
+
             // event subscriptions
             //starting up
             startUpTime = DateTime.UtcNow;
@@ -117,7 +145,10 @@ namespace ED_Hud_Extension
             watcher.GetEvent<LocationEvent>().Fired += locationEvent;
 
             //shutting down
-            watcher.GetEvent<ShutdownEvent>().Fired += gameShutDown; //currently causing problems
+            watcher.GetEvent<ShutdownEvent>().Fired += gameShutDown;
+
+            //status event[s]
+            //statusWatcher.StatusUpdated += statusUpdated;
 
             //refueling
             watcher.GetEvent<RefuelAllEvent>().Fired += refuelAllEvent;
@@ -126,8 +157,18 @@ namespace ED_Hud_Extension
             //scanning
             watcher.GetEvent<ScanEvent>().Fired += scanEvent;
             watcher.GetEvent<ShipTargetedEvent>().Fired += shipTargetedEvent;
+
+            //fsd events
+            watcher.GetEvent<FSDTargetEvent>().Fired += fsdTarget;
+            watcher.GetEvent<FSDJumpEvent>().Fired += fsdJump;
+            watcher.GetEvent<StartJumpEvent>().Fired += fsdStartJump;
+
+            //nav events
+            watcher.GetEvent<NavRouteClearEvent>().Fired += navCleared;
+                        
         }
 
+        //journal events
         private void newJournalMethod(object? sender, NewJournalFileEvent.NewJournalFileEventArgs args) //fires on startup
         {
             newJournal = true;
@@ -262,6 +303,8 @@ namespace ED_Hud_Extension
             {
                 if (statusEnabled) { Invoke(new Action(() => statusLabel.Text = "scanning target")); }
 
+                scanLevel = e.ScanStage;
+
                 if (!scanDone)
                 {
                     string scanStageBase = "scanning.";
@@ -279,6 +322,9 @@ namespace ED_Hud_Extension
                     {
                         Invoke(new Action(() => lbl.Text = "[awaiting scan]"));
                     }
+
+                    targetShip = e.Ship_Localised;
+                    Invoke(new Action(() => targetShipTag.Text = targetShip.ToString()));
                 }
                 else
                 {
@@ -286,10 +332,6 @@ namespace ED_Hud_Extension
                     Invoke(new Action(() => targetDataLabel.Text = "Target Data [Previous]"));
                     Invoke(new Action(() => scanStageTag.Text = "no target"));
                 }
-
-                scanLevel = e.ScanStage;
-                targetShip = e.Ship_Localised;
-                Invoke(new Action(() => targetShipTag.Text = targetShip));
 
                 if (scanLevel >= 1)
                 {
@@ -353,9 +395,6 @@ namespace ED_Hud_Extension
                         }
                     }
 
-                    targetSubSystem = e.SubSystem_Localised;
-                    targetSSHealth = e.SubSystemHealth;
-
                     Invoke(new Action(() => scanStageTag.Text = "Target Locked"));
 
                     if (e.Power is not null && e.Faction == "0")
@@ -373,6 +412,9 @@ namespace ED_Hud_Extension
 
                     Invoke(new Action(() => targetBountyTag.Text = string.Format("{0:N0}", e.Bounty)));
 
+                    targetSubSystem = e.SubSystem_Localisd; //fuck me sideways i misspelled that shit
+                    targetSSHealth = e.SubSystemHealth;
+
                     if (e.SubSystem != null)
                     {
                         Invoke(new Action(() => targetSSTag.Text = targetSubSystem));
@@ -389,11 +431,45 @@ namespace ED_Hud_Extension
 
             }
             else { /*ignore the event as it occured before edhe started*/ }
-
         }
 
-        private void recoveryTimerCallback(object sender)
+        private void fsdTarget(object? sender, FSDTargetEvent.FSDTargetEventArgs e) 
         {
+            if (e.Timestamp > startUpTime)
+            {
+                Invoke(new Action(() => expNextSystemTag.Text = e.Name.ToString()));
+            }
+            else { /*ignore the event as it occured before edhe started*/ }
+        }
+
+        private void fsdStartJump(object? sender, StartJumpEvent.StartJumpEventArgs e)
+        {
+            if (e.Timestamp > startUpTime)
+            {
+                Invoke(new Action(() => fsdTag.Text = "energizing"));
+            }
+            else { /*ignore the event as it occured before edhe started*/ }
+        }
+
+        private void fsdJump(object? sender, FSDJumpEvent.FSDJumpEventArgs e)
+        {
+            if (e.Timestamp > startUpTime)
+            {
+                Invoke(new Action(() => fsdTag.Text = "cooling..."));
+                fsdCooldown = 0;
+                fsdTimer = new System.Threading.Timer(fsdCooldownCallbackMethod, "Timer State", 0, 1000);
+            }
+            else { /*ignore the event as it occured before edhe started*/ }
+        }
+
+        private void navCleared(object? sender, NavRouteClearEvent.NavRouteClearEventArgs e)
+        {
+            while (fsdCooldown != 0)
+            {
+                //wait for cooldown to complete
+            }
+
+            Invoke(new Action(() => fsdTag.Text = "ready"));
 
         }
 
@@ -424,7 +500,7 @@ namespace ED_Hud_Extension
             }
         }
 
-        //--------------------- UI Button Methods ---------------------
+        //--------------------- sidebar ui methods ---------------------
 
         private void restartSessionButton_Click(object sender, EventArgs e) //used to manually reset the player's session if it doesn't reset automatically
         {
@@ -435,10 +511,7 @@ namespace ED_Hud_Extension
 
         private void simulateButton_Click(object sender, EventArgs e)
         {
-            //combatTag.ForeColor = Color.Red;
-            //combatTag.Text = " Active";
-            //pUnderAttack = true;
-            //if (autoPanelSwitch || autoCombatSwitch) { combatPanel.BringToFront(); }
+            simulateSystem();
         }
 
         private void settingsButton_Click(object sender, EventArgs e) //opens the settings menu
@@ -457,7 +530,7 @@ namespace ED_Hud_Extension
             }
         }
 
-        // --------------------- methods for Home panel ui ---------------------
+        // --------------------- Home panel methods ---------------------
         //timer methods
         private void localCallbackMethod(object state)
         {
@@ -473,11 +546,22 @@ namespace ED_Hud_Extension
             Invoke(new Action(() => locDTTag.Text = localTime));
         }
 
-        private void starDTTag_TextChanged(object sender, EventArgs e)
+        public static void readTimerCallback(object? sender)
         {
-            starDTTag.Visible = true;
-            waitingSTTag.Visible = false;
-            starDTTag.TextChanged -= starDTTag_TextChanged; //unsubscribe so that this method doesn't fire ad-nauseum for no reason
+            readStatus(journalPath, sf, ff);
+        }
+
+        private void fsdCooldownCallbackMethod(object state)
+        {
+            if (fsdCooldown < 10)
+            {
+                fsdCooldown++;
+            }
+            else
+            {
+                Invoke(new Action(() => fsdTag.Text = "ready"));
+                fsdTimer.Dispose();
+            }
         }
 
         //'animation' methods
@@ -520,7 +604,7 @@ namespace ED_Hud_Extension
 
                     if (gameRunning())
                     {
-                        //initiateWatcher();
+                        initiateWatcher();
                         animTimer.Dispose();
                         Invoke(new Action(() => waitingConnectLabel.Text = "establishing uplink connection..."));
                         Invoke(new Action(() => uplinkDone.Visible = true));
@@ -540,6 +624,8 @@ namespace ED_Hud_Extension
                     Invoke(new Action(() => waitingClientLabel.Visible = true));
                     connectingTimer = new System.Threading.Timer(connectingCallBackMethod, "Timer State", 500, 500);
                     animDots = 1;
+
+                    
 
                     if (statusEnabled) { Invoke(new Action(() => statusLabel.Text = statBase + "client loaded, waiting for game start")); }
                 }
@@ -567,7 +653,7 @@ namespace ED_Hud_Extension
                 conDots = 1;
                 if (statusEnabled) { Invoke(new Action(() => statusLabel.Text = statBase + "client loaded, waiting for game start [anim 2]")); }
             }
-            else if (clientReady) //if we've reached 3 dots and the client is ready
+            else if (clientReady && (!inMainMenu(_flag))) //if we've reached 3 dots and the client is ready
             {
                 Invoke(new Action(() => waitingClientLabel.Text = "awaiting client response..."));
                 Invoke(new Action(() => clientDone.Visible = true));
@@ -607,6 +693,11 @@ namespace ED_Hud_Extension
             }
         }
 
+        private void recoveryTimerCallback(object sender)
+        {
+
+        }
+
         private void clearInitPanel()
         {
             animDots = 1;
@@ -643,6 +734,52 @@ namespace ED_Hud_Extension
         {
             clearInitPanel();
         }
+
+        private void simulateSystem()
+        {
+            var file = "C:\\EDHE\\sol.json";
+            var path = "C:\\EDHE\\nameslist.txt";
+
+            using JsonDocument doc = JsonDocument.Parse(file);
+
+            JObject obj = JObject.Parse(file);
+            var names = obj.SelectTokens("$.data[*].name").Select(t => t.ToString().ToList());
+
+            foreach (var name in names)
+            {
+                File.WriteAllText(path, name.ToString());
+            }
+            
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+        /* the following method is the basis for the method that will be employed when the player arrives at a new system for exploration. 
+           it is currently awaiting the proper implementation of the exploration panel as a whole, but it was a horrible nightmare to get it
+           to work for some reason so it's just going to live here until it's ready to be updated and employed
+
+        //public static async Task saveFileJson(string url, string filePath)
+        //{
+        //    using (HttpClient client = new HttpClient())
+        //    {
+        //        string jsonContent = await client.GetStringAsync(url);
+
+        //        File.WriteAllText(filePath, jsonContent);
+        //    }
+        //}
+         
+         */
+
     }
 }
 

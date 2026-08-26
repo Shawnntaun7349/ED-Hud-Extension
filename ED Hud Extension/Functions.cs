@@ -1,17 +1,8 @@
-﻿using System;
-using System.Linq;
-using System.Text;
-using System.Diagnostics;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using EliteJournalReader;
-using EliteJournalReader.Events;
-using System.Text.RegularExpressions;
+﻿using System.Text.RegularExpressions;
+
+using System.Text.Json;
 
 using static Globals;
-using System.Text.Json;
-using ED_Hud_Extension;
-using static ED_Hud_Extension.MainForm;
 
 
 internal class Functions
@@ -180,5 +171,19 @@ internal class Functions
         if (string.IsNullOrEmpty(enumRank)) return enumRank;
 
         return Regex.Replace(enumRank, @"([a-z])([A-Z])|([A-Z]+)([A-Z][a-z])", "$1$4 $2$3");
+    }
+
+
+    public static List<int> GetActiveBits(int mask)
+    {
+        var activeBits = new List<int>();
+        for (int i = 0; i < 32; i++)
+        {
+            if ((mask & (1 << i)) != 0)
+            {
+                activeBits.Add(i);
+            }
+        }
+        return activeBits;
     }
 }
