@@ -9,7 +9,7 @@ Current Version : 0.1.8
 --- Planned Features ---
 Expansion on Combat Panel to show more player data, such as Power Distributor levels, current shield status, etc.
 Expansion on Exploration Panel to give the player a list of bodies in the current system, with an option to select a particular body &
-see a more detailed breakdown of that body. [Body Type, notable Signals, est. scan value, etc.] - to include integration w/ EDSM [] via EDDN [https://github.com/EDCD/EDDN].
+see a more detailed breakdown of that body. [Body Type, notable Signals, est. scan value, etc.] - to include integration w/ EDSM via EDDN.
 Implementation of Stationing Panel to display data on the current Station/Settlement, Market data, Mission data, etc.
 Implementation of Mining Panel to display a list of Hotspots, notable stations for selling various Materials, etc.
 [Tentatively] A Color changing mechanism of some kind to allow the user to customize the appearance of their UI [in EDHE, not in-game. EDHM-UI exists and is fantastic.] [https://bluemystical.github.io/edhm-api/]
@@ -56,7 +56,7 @@ Initial setup, Initial Commit, etc.
 The majority of this project, unless otherwise noted, was written by Shawnntaun. [GitHub.com/Shawnntaun7349]
 Shout-out to my brother for letting me pick his brain & offering sage wisdom (such as: "oh gross, C#")
 
-EliteJournalReader library - Written by Marits Elbers & Barry Wimlett. [GitHub.com/MagicMau/EliteJournalReader]
+EliteJournalReader library - Written by Marits Elbers & Barry Wimlett, used under the MIT License. [GitHub.com/MagicMau/EliteJournalReader]
 
 The primary Font, Oxanium - created by Severin Meyer, used under the SIL Open Font License. [See (...licenses/Oxanium (Font)) for documentation] [sev.dev/fonts/oxanium/]
 
