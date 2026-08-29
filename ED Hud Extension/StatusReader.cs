@@ -121,6 +121,14 @@ public class StatusReader
                 string sFile = File.ReadAllText(path);
                 using JsonDocument doc = JsonDocument.Parse(sFile);
 
+                string timeStamp = doc.RootElement.GetProperty("timestamp").ToString();
+                DateTime statusTS = DateTime.Parse(timeStamp);
+
+                if (statusTS < DateTime.Now)
+                {
+                    return; //go away, this is an old status file n we're not loaded in yet
+                }
+
                 Root root = JsonSerializer.Deserialize<Root>(doc);
                 Fuel fuel = JsonSerializer.Deserialize<Fuel>(doc);
                 Destination destination = JsonSerializer.Deserialize<Destination>(doc);
@@ -189,19 +197,6 @@ public class StatusReader
         else
         {
             return; //if it's already live, fuck off so we dont have 17 readers running at the same time
-        }
-        //fetch the status file, read it & parse the data
-    }
-
-    public static void stopStatusReader()
-    {
-        if (statusReaderLive)
-        {
-
-        }
-        else
-        {
-            return; //do nothing, since there's no reader to stop
         }
     }
 }

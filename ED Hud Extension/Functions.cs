@@ -3,6 +3,8 @@
 using System.Text.Json;
 
 using static Globals;
+using static ED_Hud_Extension.MainForm;
+using ED_Hud_Extension;
 
 
 internal class Functions
@@ -10,9 +12,9 @@ internal class Functions
     public Functions()
 	{
         //i dunno why but it gets real mad if i put anything here so fuck it
-	}
+    }
 
-	public static void loadSettings()
+    public static void loadSettings()
     {
         //check for the settings file, generate a new settings file w/ default values if it can't be located
         if (!File.Exists(settingsPath)){ generateSettings(); }

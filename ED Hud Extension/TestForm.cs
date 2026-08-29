@@ -71,5 +71,15 @@ namespace ED_Hud_Extension
 
             Invalidate();
         }
+
+        private void planetOne_MouseEnter(object sender, EventArgs e)
+        {
+            planetOne.ForeColor = Color.DarkRed;
+        }
+
+        private void planetTwo_MouseEnter(object sender, EventArgs e)
+        {
+            planetTwo.ForeColor = Color.DarkRed;
+        }
     }
 }

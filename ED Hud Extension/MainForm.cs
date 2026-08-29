@@ -1,13 +1,9 @@
 using EliteJournalReader;
 using EliteJournalReader.Events;
-using Newtonsoft.Json.Linq;
 using System.Diagnostics;
-using System.Linq;
-using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Net.Http.Json;
-using System.Security.Cryptography.X509Certificates;
+using System.Runtime.CompilerServices;
 using System.Text.Json;
+using static ED_Hud_Extension.SystemData;
 using static Functions;
 using static Globals;
 using static StatusReader;
@@ -44,6 +40,9 @@ namespace ED_Hud_Extension
         public static bool clientReady = false; //is the game running but we're idling on the main menu? wait for a game mode selection
         public static bool watcherLive = false; //has the watcher already been initialized? [don't do it twice things break]
         public static ShipFlag _flag = new ShipFlag();
+        public static StatusReader statReader = new StatusReader();
+        public SystemData systemData = new SystemData();
+
 
         public bool gameRunning()
         {
@@ -54,7 +53,7 @@ namespace ED_Hud_Extension
             else
             {
                 return false;
-            }            
+            }
         }
 
         public bool inMainMenu(ShipFlag _flag)
@@ -81,7 +80,6 @@ namespace ED_Hud_Extension
 
             StartPosition = FormStartPosition.Manual;
             Location = location; //this is thisForm.Location property being set to the Globals.location value
-            localTimer = new System.Threading.Timer(localCallbackMethod, "Timer State", 100, 500);
             animTimer = new System.Threading.Timer(animCallbackMethod, "Timer State", 500, 1000);
             scanTimer = new System.Threading.Timer(scanCallbackMethod, "Timer State", Timeout.Infinite, Timeout.Infinite);
 
@@ -89,27 +87,31 @@ namespace ED_Hud_Extension
 
             initPanel.BringToFront();
             dividerPanel.Visible = false;
+
+            oxaniumFont.AddFontFile("C:\\EDHE\\res\\Oxanium\\Oxanium-Bold.ttf");
+
         }
 
         private void MainForm_Load(object sender, EventArgs e)
         {
+            mainFormLoaded = true;
             if (statusEnabled) { statusLabel.Text = statBase + "initiating service"; }
             loopTimer = new System.Threading.Timer(readTimerCallback, "Timer State", 50, 50); //start the loop for the status reader
+            localTimer = new System.Threading.Timer(localCallbackMethod, "Timer State", 100, 250);
 
-            //create the two ends of the tag, then insert the modified year
-            string starTimeStart = DateTime.UtcNow.ToString("dddd, MMMM dd, ");
-            string startTimeEnd = DateTime.UtcNow.ToString("\nHH:mm");
-            string fullText = starTimeStart + starYear.ToString() + startTimeEnd;
-
+            DateTimeOffset yOffset = DateTimeOffset.UtcNow.AddYears(1286);
+            string starTime = DateTime.UtcNow.ToString("HH:mm");
+            string starDate = yOffset.ToString();
             locDTTag.Text = DateTime.Now.ToString("dddd, MMMM dd, yyyy \nHH:mm");
-            starDTTag.Text = fullText;
+            starDateTag.Text = starDate;
+            starTimeTag.Text = starTime;
 
             if (gameRunning() && (!inMainMenu(_flag))) //if the game is already running when EDHE spins up, also if we're not in the main menu (status Flag1 reads 0 until player loads into game proper) 
             {
                 initiateWatcher();
                 currentJournal = true;
                 if (statusEnabled) { statusLabel.Text = statBase + "mainform loaded, game is running"; }
-                animTimer.Dispose();
+                //animTimer.Dispose();
                 dividerPanel.Visible = true;
             }
             else //otherwise, start the loop & wait for the game to spin up
@@ -147,9 +149,6 @@ namespace ED_Hud_Extension
             //shutting down
             watcher.GetEvent<ShutdownEvent>().Fired += gameShutDown;
 
-            //status event[s]
-            //statusWatcher.StatusUpdated += statusUpdated;
-
             //refueling
             watcher.GetEvent<RefuelAllEvent>().Fired += refuelAllEvent;
             watcher.GetEvent<RefuelPartialEvent>().Fired += refuelPartialEvent;
@@ -165,7 +164,6 @@ namespace ED_Hud_Extension
 
             //nav events
             watcher.GetEvent<NavRouteClearEvent>().Fired += navCleared;
-                        
         }
 
         //journal events
@@ -267,10 +265,10 @@ namespace ED_Hud_Extension
             pWanted = e.Wanted;
             starFactionState = e.SystemFaction.FactionState;
             systemAllegiance = e.SystemAllegiance.ToString();
-            systemPrimEconomy = e.SystemEconomy;
-            systemSecEconomy = e.SystemSecondEconomy;
-            systemGovernment = e.SystemGovernment;
-            systemSecurity = e.SystemSecurity;
+            systemPrimEconomy = e.SystemEconomy_Localised;
+            systemSecEconomy = e.SystemSecondEconomy_Localised;
+            systemGovernment = e.SystemGovernment_Localised;
+            systemSecurity = e.SystemSecurity_Localised;
 
             pDocked = e.Docked;
             if (pDocked)
@@ -283,6 +281,12 @@ namespace ED_Hud_Extension
             if (pWanted) { Invoke(new Action(() => homeLSTag.Text = "Wanted")); Invoke(new Action(() => homeLSTag.ForeColor = Color.DarkRed)); }
             else { Invoke(new Action(() => homeLSTag.Text = "Clean")); Invoke(new Action(() => homeLSTag.ForeColor = Color.FromArgb(192, 64, 0))); }
             Invoke(new Action(() => homeSysTag.Text = pCurrentSystem));
+
+            Invoke(new Action(() => combatSysAllegianceTag.Text = systemAllegiance));
+            Invoke(new Action(() => combatSysGovTag.Text = systemGovernment));
+            Invoke(new Action(() => combatSysSecTag.Text = systemSecurity));
+
+            Invoke(new Action(() => updateLocationData(e.StarSystem)));
         }
 
         private void underAttack(object? sender, UnderAttackEvent.UnderAttackEventArgs e) //take a fucken guess what this one's for
@@ -304,13 +308,14 @@ namespace ED_Hud_Extension
                 if (statusEnabled) { Invoke(new Action(() => statusLabel.Text = "scanning target")); }
 
                 scanLevel = e.ScanStage;
+                //scanTimer = new System.Threading.Timer(scanCallbackMethod, "Timer State", 0, 500);
 
                 if (!scanDone)
                 {
                     string scanStageBase = "scanning.";
                     Invoke(new Action(() => scanStageTag.Text = scanStageBase));
+                    scanLevel = e.ScanStage;
                     if (statusEnabled) { Invoke(new Action(() => statusLabel.Text = statBase + "scan stage 0")); }
-                    scanTimer = new System.Threading.Timer(scanCallbackMethod, "Timer State", 0, 500);
                 }
 
                 if (e.TargetLocked)
@@ -325,9 +330,11 @@ namespace ED_Hud_Extension
 
                     targetShip = e.Ship_Localised;
                     Invoke(new Action(() => targetShipTag.Text = targetShip.ToString()));
+                    scanLevel = e.ScanStage;
                 }
                 else
                 {
+                    scanLevel = e.ScanStage;
                     targetLocked = false;
                     Invoke(new Action(() => targetDataLabel.Text = "Target Data [Previous]"));
                     Invoke(new Action(() => scanStageTag.Text = "no target"));
@@ -335,6 +342,7 @@ namespace ED_Hud_Extension
 
                 if (scanLevel >= 1)
                 {
+                    scanLevel = e.ScanStage;
                     pTargeting = true;
                     targetName = e.PilotName_Localised;
                     targetRank = e.PilotRank.ToString(); //don't convert the target's rank to Elite tiers, the player doesn't get to know that detail
@@ -346,6 +354,7 @@ namespace ED_Hud_Extension
                 }
                 if (scanLevel >= 2)
                 {
+                    scanLevel = e.ScanStage;
                     targetShield = e.ShieldHealth;
                     targetHull = e.HullHealth;
 
@@ -356,6 +365,7 @@ namespace ED_Hud_Extension
                 }
                 if (scanLevel >= 3)
                 {
+                    scanLevel = e.ScanStage;
                     scanDone = true;
                     scanTimer.Change(0, Timeout.Infinite);
                     targetFaction = e.Faction;
@@ -394,6 +404,12 @@ namespace ED_Hud_Extension
                             Invoke(new Action(() => targetBountyTag.Text = totalBounty.ToString()));
                         }
                     }
+                    if (e.LegalStatus == "Lawless") //if laws don't apply here
+                    {
+                        Invoke(new Action(() => targetLegalStatusTag.ForeColor = Color.DarkRed));
+                        Invoke(new Action(() => targetLegalStatusTag.Text = "Lawless")); //might not have a bounty, but you *can* shoot them if you want
+                        Invoke(new Action(() => targetBountyTag.Text = totalBounty.ToString()));
+                    }
 
                     Invoke(new Action(() => scanStageTag.Text = "Target Locked"));
 
@@ -412,7 +428,7 @@ namespace ED_Hud_Extension
 
                     Invoke(new Action(() => targetBountyTag.Text = string.Format("{0:N0}", e.Bounty)));
 
-                    targetSubSystem = e.SubSystem_Localisd; //fuck me sideways i misspelled that shit
+                    targetSubSystem = e.SubSystem_Localised; //fuck me sideways i misspelled that shit
                     targetSSHealth = e.SubSystemHealth;
 
                     if (e.SubSystem != null)
@@ -423,17 +439,12 @@ namespace ED_Hud_Extension
 
                     if (statusEnabled) { Invoke(new Action(() => statusLabel.Text = statBase + "scan stage 3")); }
                 }
-                if (!targetLocked && pTargeting) //if the player *was* targetting someone but they lost lock
-                {
-                    scanTimer.Change(0, 5000); //start a 5 second timer and tell the callback method
-                    scanReset = true;
-                }
 
             }
             else { /*ignore the event as it occured before edhe started*/ }
         }
 
-        private void fsdTarget(object? sender, FSDTargetEvent.FSDTargetEventArgs e) 
+        private void fsdTarget(object? sender, FSDTargetEvent.FSDTargetEventArgs e)
         {
             if (e.Timestamp > startUpTime)
             {
@@ -458,6 +469,8 @@ namespace ED_Hud_Extension
                 Invoke(new Action(() => fsdTag.Text = "cooling..."));
                 fsdCooldown = 0;
                 fsdTimer = new System.Threading.Timer(fsdCooldownCallbackMethod, "Timer State", 0, 1000);
+                pCurrentSystem = e.StarSystem;
+                Invoke(new Action(() => updateLocationData(e.StarSystem)));
             }
             else { /*ignore the event as it occured before edhe started*/ }
         }
@@ -497,7 +510,17 @@ namespace ED_Hud_Extension
                 Invoke(new Action(() => MessageBox.Show(this, "Elite Dangerous has shut down. EDHE will remain operational but will need restarted in the case of a new session.", "Uplink Lost", MessageBoxButtons.OK, MessageBoxIcon.Warning)));
                 Invoke(new Action(() => linkLabel.Text = " uplink integrity lost"));
                 Invoke(new Action(() => linkLabel.ForeColor = Color.DarkRed));
+                shutdownTime = DateTime.Now;
             }
+        }
+
+        private void updateLocationData(string system)
+        {            
+            Invoke(new Action(() => expCurrentSystemTag.Text = system));
+            fetchStarData("https://www.edsm.net/api-system-v1/bodies?systemName=" + system); //get the system data
+
+            clearBodyList();
+            systemData.loadSystemData(bodyListPanel, system);
         }
 
         //--------------------- sidebar ui methods ---------------------
@@ -511,7 +534,7 @@ namespace ED_Hud_Extension
 
         private void simulateButton_Click(object sender, EventArgs e)
         {
-            simulateSystem();
+            updateLocationData(pCurrentSystem);
         }
 
         private void settingsButton_Click(object sender, EventArgs e) //opens the settings menu
@@ -534,16 +557,12 @@ namespace ED_Hud_Extension
         //timer methods
         private void localCallbackMethod(object state)
         {
-            //create the two ends of the tag, then insert the modified year
-            string starTimeStart = DateTime.UtcNow.ToString("dddd, MMMM dd, ");
-            string startTimeEnd = DateTime.UtcNow.ToString("\nHH:mm");
-            string fullText = starTimeStart + starYear.ToString() + startTimeEnd;
-
-            string localTime = DateTime.Now.ToString("dddd, MMMM dd, yyyy \nHH:mm");
-
-            //home panel clocks
-            Invoke(new Action(() => starDTTag.Text = fullText));
-            Invoke(new Action(() => locDTTag.Text = localTime));
+            DateTimeOffset yOffset = DateTimeOffset.UtcNow.AddYears(1286);
+            string starTime = DateTime.UtcNow.ToString("HH:mm");
+            string starDate = yOffset.ToString();
+            Invoke(new Action(() => locDTTag.Text = DateTime.Now.ToString("dddd, MMMM dd, yyyy \nHH:mm")));
+            Invoke(new Action(() => starDateTag.Text = starDate));
+            Invoke(new Action(() => starTimeTag.Text = starTime));
         }
 
         public static void readTimerCallback(object? sender)
@@ -569,40 +588,55 @@ namespace ED_Hud_Extension
         {
             if (statusEnabled) { Invoke(new Action(() => statusLabel.Text = statBase + "service loaded, running anim loop while waiting for game to load")); }
 
-            if (steps == 1)
+            if (mainFormLoaded)
             {
-                Invoke(new Action(() => initDone.Visible = true));
-                Invoke(new Action(() => diagLabel.Visible = true));
-                steps++;
-            }
-            else if (steps == 2)
-            {
-                Invoke(new Action(() => diagDone.Visible = true));
-                enviroLabel.Invoke(new Action(() => enviroLabel.Visible = true));
-                steps++;
-            }
-            else if (steps == 3)
-            {
-                Invoke(new Action(() => enviroDone.Visible = true));
-                waitingConnectLabel.Invoke(new Action(() => waitingConnectLabel.Visible = true));
-                steps++;
-            }
-            else if (!timeToClear) // ... animation loop ///run while waiting for the journalwatcher to identify the proper journal to read
-            {
-                animTimer.Change(500, 500);
-                if (animDots < 3) //if that string has less than 3 periods
+                if (steps == 1)
                 {
-                    animConnectionText = animConnectionText + ".";
-                    waitingConnectLabel.Invoke(new Action(() => waitingConnectLabel.Text = animConnectionText));
-                    animDots++;
+                    Invoke(new Action(() => initDone.Visible = true));
+                    Invoke(new Action(() => diagLabel.Visible = true));
+                    steps++;
                 }
-                else if (!newJournal)//if that string has all 3 periods, reset it it back to one.
+                else if (steps == 2)
                 {
-                    animConnectionText = animConnectionTextBase;
-                    waitingConnectLabel.Invoke(new Action(() => waitingConnectLabel.Text = animConnectionText));
-                    animDots = 1;
+                    Invoke(new Action(() => diagDone.Visible = true));
+                    enviroLabel.Invoke(new Action(() => enviroLabel.Visible = true));
+                    steps++;
+                }
+                else if (steps == 3)
+                {
+                    Invoke(new Action(() => enviroDone.Visible = true));
+                    waitingConnectLabel.Invoke(new Action(() => waitingConnectLabel.Visible = true));
+                    steps++;
+                }
+                else if (!timeToClear) // ... animation loop ///run while waiting for the journalwatcher to identify the proper journal to read
+                {
+                    animTimer.Change(500, 500);
+                    if (animDots < 3) //if that string has less than 3 periods
+                    {
+                        animConnectionText = animConnectionText + ".";
+                        waitingConnectLabel.Invoke(new Action(() => waitingConnectLabel.Text = animConnectionText));
+                        animDots++;
+                    }
+                    else if (!newJournal)//if that string has all 3 periods, reset it it back to one.
+                    {
+                        animConnectionText = animConnectionTextBase;
+                        waitingConnectLabel.Invoke(new Action(() => waitingConnectLabel.Text = animConnectionText));
+                        animDots = 1;
 
-                    if (gameRunning())
+                        if (gameRunning())
+                        {
+                            initiateWatcher();
+                            animTimer.Dispose();
+                            Invoke(new Action(() => waitingConnectLabel.Text = "establishing uplink connection..."));
+                            Invoke(new Action(() => uplinkDone.Visible = true));
+                            Invoke(new Action(() => waitingClientLabel.Visible = true));
+                            connectingTimer = new System.Threading.Timer(connectingCallBackMethod, "Timer State", 500, 500);
+                            animDots = 1;
+
+                            if (statusEnabled) { Invoke(new Action(() => statusLabel.Text = statBase + "moving to trigger client timer")); }
+                        }
+                    }
+                    else if (gameRunning())
                     {
                         initiateWatcher();
                         animTimer.Dispose();
@@ -612,52 +646,45 @@ namespace ED_Hud_Extension
                         connectingTimer = new System.Threading.Timer(connectingCallBackMethod, "Timer State", 500, 500);
                         animDots = 1;
 
-                        if (statusEnabled) { Invoke(new Action(() => statusLabel.Text = statBase + "moving to trigger client timer")); }
+
+
+                        if (statusEnabled) { Invoke(new Action(() => statusLabel.Text = statBase + "client loaded, waiting for game start")); }
                     }
-                }
-                else if (gameRunning())
-                {
-                    initiateWatcher();
-                    animTimer.Dispose();
-                    Invoke(new Action(() => waitingConnectLabel.Text = "establishing uplink connection..."));
-                    Invoke(new Action(() => uplinkDone.Visible = true));
-                    Invoke(new Action(() => waitingClientLabel.Visible = true));
-                    connectingTimer = new System.Threading.Timer(connectingCallBackMethod, "Timer State", 500, 500);
-                    animDots = 1;
-
-                    
-
-                    if (statusEnabled) { Invoke(new Action(() => statusLabel.Text = statBase + "client loaded, waiting for game start")); }
                 }
             }
         }
 
+
+
         private void connectingCallBackMethod(object state)
         {
-            if (!watcherLive)
+            if (!mainFormLoaded)
             {
-                initiateWatcher();
-            }
+                if (!watcherLive)
+                {
+                    initiateWatcher();
+                }
 
-            if (conDots < 3 && !clientReady) //runs if there are less than three dots in the animation string and the client's not ready
-            {
-                animClientText += ".";
-                Invoke(new Action(() => waitingClientLabel.Text = animClientText));
-                conDots++;
-                if (statusEnabled) { Invoke(new Action(() => statusLabel.Text = statBase + "client loaded, waiting for game start [anim 1]")); }
-            }
-            else if (conDots >= 3 && !clientReady) //if we reach 3 dots and the client's not ready yet
-            {
-                animClientText = animClientTextBase;
-                Invoke(new Action(() => waitingClientLabel.Text = animClientTextBase));
-                conDots = 1;
-                if (statusEnabled) { Invoke(new Action(() => statusLabel.Text = statBase + "client loaded, waiting for game start [anim 2]")); }
-            }
-            else if (clientReady && (!inMainMenu(_flag))) //if we've reached 3 dots and the client is ready
-            {
-                Invoke(new Action(() => waitingClientLabel.Text = "awaiting client response..."));
-                Invoke(new Action(() => clientDone.Visible = true));
-                if (statusEnabled) { Invoke(new Action(() => statusLabel.Text = statBase + "client loaded, waiting for game start")); }
+                if (conDots < 3 && !clientReady) //runs if there are less than three dots in the animation string and the client's not ready
+                {
+                    animClientText += ".";
+                    Invoke(new Action(() => waitingClientLabel.Text = animClientText));
+                    conDots++;
+                    if (statusEnabled) { Invoke(new Action(() => statusLabel.Text = statBase + "client loaded, waiting for game start [anim 1]")); }
+                }
+                else if (conDots >= 3 && !clientReady) //if we reach 3 dots and the client's not ready yet
+                {
+                    animClientText = animClientTextBase;
+                    Invoke(new Action(() => waitingClientLabel.Text = animClientTextBase));
+                    conDots = 1;
+                    if (statusEnabled) { Invoke(new Action(() => statusLabel.Text = statBase + "client loaded, waiting for game start [anim 2]")); }
+                }
+                else if (clientReady && (!inMainMenu(_flag))) //if we've reached 3 dots and the client is ready
+                {
+                    Invoke(new Action(() => waitingClientLabel.Text = "awaiting client response..."));
+                    Invoke(new Action(() => clientDone.Visible = true));
+                    if (statusEnabled) { Invoke(new Action(() => statusLabel.Text = statBase + "client loaded, waiting for game start")); }
+                }
             }
         }
 
@@ -665,11 +692,11 @@ namespace ED_Hud_Extension
         {
             if (scanDone) { return; } //if the scan is done fuck off
 
-            if (!targetLocked && !scanReset) //if the user lost the target but we havent started the 'lost target' scanner
-            {
-                scanTimer.Change(0, 5000);
-                scanReset = true;
-            }
+            //if (!targetLocked && !scanReset) //if the user lost the target but we havent started the 'lost target' scanner
+            //{
+            //    scanTimer.Change(0, 5000);
+            //    scanReset = true;
+            //}
             else if (!targetLocked & scanReset) //if the timer has elapsed & we still dont have a target
             {
                 Invoke(new Action(() => scanStageTag.Text = "no target"));
@@ -693,16 +720,11 @@ namespace ED_Hud_Extension
             }
         }
 
-        private void recoveryTimerCallback(object sender)
-        {
-
-        }
-
         private void clearInitPanel()
         {
             animDots = 1;
             initPanel.Dispose();
-            animTimer.Dispose();
+            //animTimer.Dispose();
             homePanel.BringToFront();
             dividerPanel.BringToFront();
             dividerPanel.Visible = true;
@@ -728,6 +750,7 @@ namespace ED_Hud_Extension
             clearInitPanel();
             explorePanel.BringToFront();
             dividerPanel.BringToFront();
+            Debug.WriteLine("explore button clicked");
         }
 
         private void welcomeLabel_TextChanged(object sender, EventArgs e)
@@ -735,51 +758,82 @@ namespace ED_Hud_Extension
             clearInitPanel();
         }
 
-        private void simulateSystem()
+        public void loadDetails(string bodyName, Bodies bodyList)
         {
-            var file = "C:\\EDHE\\sol.json";
-            var path = "C:\\EDHE\\nameslist.txt";
-
-            using JsonDocument doc = JsonDocument.Parse(file);
-
-            JObject obj = JObject.Parse(file);
-            var names = obj.SelectTokens("$.data[*].name").Select(t => t.ToString().ToList());
-
-            foreach (var name in names)
+            foreach (var body in system.bodies)
             {
-                File.WriteAllText(path, name.ToString());
+                if (body.name == bodyName)
+                {
+                    if (body.type == "Planet")
+                    {
+                        planetDetailView.BringToFront();
+                        bodyNameTag.Text = body.name;
+                        bodyTypeTag.Text = body.subType;
+                        bodyDiscoveryTag.Text = body.discoveryInfo.First<Discovery>().ToString();
+                        if (body.isLandable == true) { bodyLandableTag.Text = "Yes"; } else { bodyLandableTag.Text = "No"; }
+                        bodyGravityTag.Text = body.gravity.ToString() + " G";
+                        bodyMassTag.Text = body.earthMasses.ToString();
+                        bodyRadiusTag.Text = body.radius.ToString();
+                        bodyTempTag.Text = body.surfaceTemperature.ToString() + " K";
+                        if (body.surfacePressure != null) { bodyPressureTag.Text = body.surfacePressure.ToString(); } else { bodyPressureTag.Text = "None"; }
+                        bodyVolcanismTag.Text = body.volcanismType;
+                        bodyAtmosphereTag.Text = body.atmosphereType;
+
+                        bodyOrbitalTag.Text = body.orbitalPeriod.ToString() + " Days";
+                        bodyRotationalTag.Text = body.rotationalPeriod.ToString() + " Days";
+                    }
+                    else if (body.type == "Star")
+                    {
+                        starDetailView.BringToFront();
+                        starNameTag.Text = body.name;
+                        starClassTag.Text = body.subType;
+                        starAgeTag.Text = body.age.ToString();
+                        if (body.isScoopable == true) { starScoopableTag.Text = "Yes"; } else { starScoopableTag.Text = "No"; }
+                        starSpectralClassTag.Text = body.spectralClass;
+                        starLuminosityTag.Text = body.luminosity;
+                        starAbsoluteMagnitutdeTag.Text = body.absoluteMagnitude.ToString();
+                        starSolarMassTag.Text = body.solarMasses.ToString();
+                        starSolarRadiusTag.Text = body.solarRadius.ToString();
+                        starTempTag.Text = body.surfaceTemperature.ToString() + " K"; ;
+                        if (body.orbitalPeriod != null) { starOrbitalTag.Text = body.orbitalPeriod.ToString(); } else { starOrbitalTag.Text = "n/a"; }
+                        starRotationalTag.Text = body.rotationalPeriod.ToString() + " Days";
+                    }
+                }
             }
-            
         }
-
-
-
-
-
-
-
-
-
-
-
-
-
         /* the following method is the basis for the method that will be employed when the player arrives at a new system for exploration. 
            it is currently awaiting the proper implementation of the exploration panel as a whole, but it was a horrible nightmare to get it
            to work for some reason so it's just going to live here until it's ready to be updated and employed
+        */
+        public static async Task fetchStarData(string url, CancellationToken ct = default) //thank you EDSM
+        {
+            using var request = new HttpRequestMessage(HttpMethod.Get, url);
+            request.Headers.ConnectionClose = true;
+            using var response = await _client.SendAsync(request, ct).ConfigureAwait(false);
+            response.EnsureSuccessStatusCode();
 
-        //public static async Task saveFileJson(string url, string filePath)
-        //{
-        //    using (HttpClient client = new HttpClient())
-        //    {
-        //        string jsonContent = await client.GetStringAsync(url);
+            string json = await response.Content.ReadAsStringAsync(ct).ConfigureAwait(false);
+            await File.WriteAllTextAsync("C:\\EDHE\\res\\systemdata.json", json, ct).ConfigureAwait(false);
 
-        //        File.WriteAllText(filePath, jsonContent);
-        //    }
-        //}
-         
-         */
+        }
 
+        private static readonly HttpClient _client = new HttpClient(new SocketsHttpHandler
+        {
+            PooledConnectionLifetime = TimeSpan.FromMinutes(2),
+            PooledConnectionIdleTimeout = TimeSpan.FromSeconds(30),
+        })
+        {
+            Timeout = TimeSpan.FromSeconds(30)
+        };
+
+        public void clearBodyList()
+        {
+            Invoke(new Action(() => bodyListPanel.Controls.Clear()));
+            foreach (Label lbl in bodyListPanel.Controls)
+            {
+                lbl.Dispose();
+            }
+        }
     }
 }
 

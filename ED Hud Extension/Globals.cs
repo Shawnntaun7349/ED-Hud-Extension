@@ -1,11 +1,18 @@
-﻿public class Globals
+﻿using System.Drawing.Text;
+
+public class Globals
 {
+    //font bullshit
+    public static PrivateFontCollection oxaniumFont = new PrivateFontCollection();
+
     //background variables
+    public static bool mainFormLoaded = false;
     public static bool connected = false; //for online connection
     public static bool waitingForJournal = true; //for local connection
     public static int starYear = DateTime.UtcNow.Year + 1286;
     public static Point location; //for display methods
     public static DateTime startUpTime; //set at JournalWatcher startup, used to filter all but a few 'old' events in a given journal
+    public static DateTime shutdownTime;
     public static string gameMode;
 
     // --------------------- settings variables ---------------------
