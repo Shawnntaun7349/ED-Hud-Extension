@@ -4,7 +4,7 @@ A second-monitor program for Frontier Development's Elite: Dangerous.
 
 Developed by Sean Roe 
 
-Current Version : 0.1.9
+Current Version : 0.1.9a
 
 --- Planned Features ---
 Expansion on Combat Panel to show more player data, such as Power Distributor levels, current shield status, etc.
@@ -17,6 +17,9 @@ Implementation of Mining Panel to display a list of Hotspots, notable stations f
 *Exploration Panel planned feature is currently in development & undergoing early deployment.
 
 --- Update Notes ---
+Version 0.1.9a
+Updates to the Exploration Panel & underlying SystemData class, corrections to the Http GET request - to - JSON File Deserialization pipeline to correct for lists being generated on empty / out-of-date files. Continued integration of body data to display more details of both bodies and stars. Some minor memory streamlining.
+
 Version 0.1.9
 Significant updates to Exploration Panel, centered around the introduction of the two primary subpanels; the BodyList panel & DetailView panels. Initial implementation of an automatic data retrieval from EDSM upon loading Elite or entering a new System to dynamically generate a list of Bodies, allowing the user to select one body from the list to view much more information on that body. Began working on ironing out various issues resulting from the nightmare that is .NET.
 
