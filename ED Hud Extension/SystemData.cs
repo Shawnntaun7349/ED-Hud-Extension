@@ -7,9 +7,9 @@ namespace ED_Hud_Extension
 {
     public class SystemData //a class for handling planet & system data pulled from EDSM (thank you EDSM)
     {
-        public static Label currentItem;
-        public static int currentX;
-        public static int currentY;
+        public static Label currentItem; //currently selected bodyList item
+        public static int currentX; //current x coordinate for appending list items
+        public static int currentY; //curent y coordinate for appending list items
 
         //a whole dickload of class objects for parsing the system data dump from EDSM
         
@@ -65,14 +65,14 @@ namespace ED_Hud_Extension
 
         public class Discovery
         {
-            public string cmdrName { get;set; }
-            public string dod {  get;set; }
+            public string? cmdrName { get;set; }
+            public string? dod {  get;set; }
         }
 
         public class Parent
         {
             public List<object>? parentList { get;set; }
-            public Dictionary<string, int> parentInfo {  get;set; }
+            public Dictionary<string, int>? parentInfo {  get;set; }
         }
 
         /* Font = Oxanium, Style = Bold, Size = 22.75pt, Initial Location = (0,0), Y offset per item = 36, X offset for subitems is 10, 
@@ -83,6 +83,9 @@ namespace ED_Hud_Extension
         public static System.Threading.Timer waitTimer;
         public static Bodies bodies;
         public static SolarSystem system;
+        public static Belt belts;
+        public static Parent parents;
+        public static Discovery discovery;
 
         public void loadSystemData(Panel panel, string targetSystem)
         {
@@ -98,27 +101,35 @@ namespace ED_Hud_Extension
 
             currentY = 0;
 
-            waitTimer = new System.Threading.Timer(timerCallBack, "Timer State", 10, 50);
-
             string jsonText = File.ReadAllText("C:\\EDHE\\res\\systemdata.json");
             var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
             system = JsonSerializer.Deserialize<SolarSystem>(jsonText, options);
             bodies = JsonSerializer.Deserialize<Bodies>(jsonText, options);
-            Belt belts = JsonSerializer.Deserialize<Belt>(jsonText, options);
-            Parent parents = JsonSerializer.Deserialize<Parent>(jsonText, options);
+            belts = JsonSerializer.Deserialize<Belt>(jsonText, options);
+            parents = JsonSerializer.Deserialize<Parent>(jsonText, options);
+            discovery = JsonSerializer.Deserialize<Discovery>(jsonText, options);
 
             int starCount = 0;
 
-            foreach (var body in system.bodies)
+            if (system.bodies is null)
             {
-                if (body.type == "Star") { starCount++; }
-                generateBodyList(panel, $"{body.name}", system);
-            }
-            var form = ((Control)panel).FindForm();
-            form.BeginInvoke(new Action(() => ((MainForm)form).bodyCountTag.Text = system.bodyCount.ToString()));
-            form.BeginInvoke(new Action(() => ((MainForm)form).starCountTag.Text = starCount.ToString()));
 
-            panel.ResumeLayout();
+            }
+            else
+            {
+                foreach (var body in system.bodies)
+                {
+                    if (body.type == "Star") { starCount++; }
+                    generateBodyList(panel, $"{body.name}", system);
+                }
+                var form = ((Control)panel).FindForm();
+                form.BeginInvoke(new Action(() => ((MainForm)form).bodyCountTag.Text = system.bodyCount.ToString()));
+                form.BeginInvoke(new Action(() => ((MainForm)form).starCountTag.Text = starCount.ToString()));
+
+                panel.ResumeLayout(true);
+                panel.Refresh();
+            }
+
         }
         
         public void generateBodyList(Panel targetPanel, string labelText, SolarSystem system)
@@ -195,16 +206,6 @@ namespace ED_Hud_Extension
             var form = ((Control)sender).FindForm();
             form.BeginInvoke(new Action(() => ((MainForm)form).detailHiderPanel.Visible = false));
             form.BeginInvoke(new Action(() => ((MainForm)form).loadDetails(lbl.Text, bodies))); //good lord have I learned to hate C# because of this line
-        }
-
-        private void timerCallBack(object state)
-        {
-            int i = 0;
-            while (i > 5)
-            {
-                i++;
-            }
-            waitTimer.Dispose();
         }
 
     }

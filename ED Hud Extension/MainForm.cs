@@ -1,5 +1,6 @@
 using EliteJournalReader;
 using EliteJournalReader.Events;
+using System.Collections;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
@@ -144,7 +145,7 @@ namespace ED_Hud_Extension
             watcher.GetEvent<RankEvent>().Fired += rankEvent;
             watcher.GetEvent<ProgressEvent>().Fired += progressEvent;
             watcher.GetEvent<ReputationEvent>().Fired += repEvent;
-            watcher.GetEvent<LocationEvent>().Fired += locationEvent;
+            watcher.GetEvent<LocationEvent>().Fired += locationEvent; 
 
             //shutting down
             watcher.GetEvent<ShutdownEvent>().Fired += gameShutDown;
@@ -184,7 +185,6 @@ namespace ED_Hud_Extension
             Invoke(new Action(() => welcomeLabel.Text = ""));
             Invoke(new Action(() => welcomeLabel.Text += "Welcome, Commander\n" + args.Commander));
             clientReady = true;
-
             currentFuelLevel = args.FuelLevel;
             maxFuelLevel = args.FuelCapacity;
             pShipType = args.Ship;
@@ -286,7 +286,14 @@ namespace ED_Hud_Extension
             Invoke(new Action(() => combatSysGovTag.Text = systemGovernment));
             Invoke(new Action(() => combatSysSecTag.Text = systemSecurity));
 
-            Invoke(new Action(() => updateLocationData(e.StarSystem)));
+            if (this.InvokeRequired)
+            {
+                BeginInvoke(new Action(() => updateLocationData(pCurrentSystem)));
+            }
+            else
+            {
+                updateLocationData(pCurrentSystem);
+            }
         }
 
         private void underAttack(object? sender, UnderAttackEvent.UnderAttackEventArgs e) //take a fucken guess what this one's for
@@ -448,31 +455,28 @@ namespace ED_Hud_Extension
         {
             if (e.Timestamp > startUpTime)
             {
-                Invoke(new Action(() => expNextSystemTag.Text = e.Name.ToString()));
             }
             else { /*ignore the event as it occured before edhe started*/ }
+            Invoke(new Action(() => expNextSystemTag.Text = e.Name.ToString()));
         }
 
         private void fsdStartJump(object? sender, StartJumpEvent.StartJumpEventArgs e)
         {
             if (e.Timestamp > startUpTime)
             {
-                Invoke(new Action(() => fsdTag.Text = "energizing"));
             }
             else { /*ignore the event as it occured before edhe started*/ }
+            Invoke(new Action(() => fsdTag.Text = "energizing"));
         }
 
         private void fsdJump(object? sender, FSDJumpEvent.FSDJumpEventArgs e)
         {
-            if (e.Timestamp > startUpTime)
-            {
-                Invoke(new Action(() => fsdTag.Text = "cooling..."));
-                fsdCooldown = 0;
-                fsdTimer = new System.Threading.Timer(fsdCooldownCallbackMethod, "Timer State", 0, 1000);
-                pCurrentSystem = e.StarSystem;
-                Invoke(new Action(() => updateLocationData(e.StarSystem)));
-            }
-            else { /*ignore the event as it occured before edhe started*/ }
+            pCurrentSystem = e.StarSystem.ToString();
+            Invoke(new Action(() => expCurrentSystemTag.Text = pCurrentSystem));
+            Invoke(new Action(() => expNextSystemTag.Text = pCurrentSystem));
+
+            Invoke(new Action(() => clearBodyList()));
+            Invoke(new Action(() => updateLocationData(pCurrentSystem)));
         }
 
         private void navCleared(object? sender, NavRouteClearEvent.NavRouteClearEventArgs e)
@@ -514,13 +518,47 @@ namespace ED_Hud_Extension
             }
         }
 
-        private void updateLocationData(string system)
-        {            
-            Invoke(new Action(() => expCurrentSystemTag.Text = system));
-            fetchStarData("https://www.edsm.net/api-system-v1/bodies?systemName=" + system); //get the system data
+        private async void updateLocationData(string system)
+        {
+            if (this.InvokeRequired)
+            {
+                this.Invoke(new Action(() => updateLocationData(system)));
+                return;
+            }
 
-            clearBodyList();
-            systemData.loadSystemData(bodyListPanel, system);
+            Invoke(new Action(() => detailHiderPanel.BringToFront()));
+            detailHiderPanel.BringToFront();
+            expCurrentSystemTag.Text = system;
+            await fetchStarData("https://www.edsm.net/api-system-v1/bodies?systemName=" + system); //get the system data
+
+            try
+            {
+                if (this.InvokeRequired)
+                {
+                    BeginInvoke(new Action(() => clearBodyList()));
+                    BeginInvoke(new Action(() => systemData.loadSystemData(bodyListPanel, system)));
+                }
+                else
+                {
+                    clearBodyList();
+                    systemData.loadSystemData(bodyListPanel, system);
+                }
+                Invoke(new Action(() => statusLabel.Text = statBase + "fetching location data"));
+            }
+            catch (IOException)
+            {
+                System.Windows.Forms.Timer waitRetryTimer = new System.Windows.Forms.Timer();
+                waitRetryTimer.Interval = 50;
+                waitRetryTimer.Tick += (s, args) =>
+                {
+                    waitRetryTimer.Stop();
+                    updateLocationData(system);
+                };
+                waitRetryTimer.Start();
+
+                Invoke(new Action(() => statusLabel.Text = statBase + "IOLock, waiting to retry"));
+            }
+
         }
 
         //--------------------- sidebar ui methods ---------------------
@@ -532,9 +570,11 @@ namespace ED_Hud_Extension
             Invoke(new Action(() => linkLabel.ForeColor = Color.DarkRed));
         }
 
-        private void simulateButton_Click(object sender, EventArgs e)
+        private async void simulateButton_Click(object sender, EventArgs e)
         {
+            clearBodyList();
             updateLocationData(pCurrentSystem);
+            //expCurrentSystemTag.TextChanged -= simulateButton_Click;
         }
 
         private void settingsButton_Click(object sender, EventArgs e) //opens the settings menu
@@ -750,7 +790,6 @@ namespace ED_Hud_Extension
             clearInitPanel();
             explorePanel.BringToFront();
             dividerPanel.BringToFront();
-            Debug.WriteLine("explore button clicked");
         }
 
         private void welcomeLabel_TextChanged(object sender, EventArgs e)
@@ -760,43 +799,48 @@ namespace ED_Hud_Extension
 
         public void loadDetails(string bodyName, Bodies bodyList)
         {
-            foreach (var body in system.bodies)
+            if (system.bodies is not null)
             {
-                if (body.name == bodyName)
+                foreach (var body in system.bodies)
                 {
-                    if (body.type == "Planet")
+                    if (body.name == bodyName)
                     {
-                        planetDetailView.BringToFront();
-                        bodyNameTag.Text = body.name;
-                        bodyTypeTag.Text = body.subType;
-                        bodyDiscoveryTag.Text = body.discoveryInfo.First<Discovery>().ToString();
-                        if (body.isLandable == true) { bodyLandableTag.Text = "Yes"; } else { bodyLandableTag.Text = "No"; }
-                        bodyGravityTag.Text = body.gravity.ToString() + " G";
-                        bodyMassTag.Text = body.earthMasses.ToString();
-                        bodyRadiusTag.Text = body.radius.ToString();
-                        bodyTempTag.Text = body.surfaceTemperature.ToString() + " K";
-                        if (body.surfacePressure != null) { bodyPressureTag.Text = body.surfacePressure.ToString(); } else { bodyPressureTag.Text = "None"; }
-                        bodyVolcanismTag.Text = body.volcanismType;
-                        bodyAtmosphereTag.Text = body.atmosphereType;
+                        if (body.type == "Planet")
+                        {
+                            planetDetailView.BringToFront();
+                            bodyNameTag.Text = body.name;
+                            bodyTypeTag.Text = body.subType;
+                            //bodyDiscoveryTag.Text = body.discoveryInfo.First<Discovery>().ToString();
+                            if (body.isLandable == true) { bodyLandableTag.Text = "Yes"; } else { bodyLandableTag.Text = "No"; }
+                            bodyGravityTag.Text = body.gravity.ToString() + " G";
+                            bodyMassTag.Text = body.earthMasses.ToString();
+                            bodyRadiusTag.Text = body.radius.ToString();
+                            bodyTempTag.Text = body.surfaceTemperature.ToString() + " K";
+                            if (body.surfacePressure != null) { bodyPressureTag.Text = body.surfacePressure.ToString(); } else { bodyPressureTag.Text = "None"; }
+                            bodyVolcanismTag.Text = body.volcanismType;
+                            bodyAtmosphereTag.Text = body.atmosphereType;
 
-                        bodyOrbitalTag.Text = body.orbitalPeriod.ToString() + " Days";
-                        bodyRotationalTag.Text = body.rotationalPeriod.ToString() + " Days";
-                    }
-                    else if (body.type == "Star")
-                    {
-                        starDetailView.BringToFront();
-                        starNameTag.Text = body.name;
-                        starClassTag.Text = body.subType;
-                        starAgeTag.Text = body.age.ToString();
-                        if (body.isScoopable == true) { starScoopableTag.Text = "Yes"; } else { starScoopableTag.Text = "No"; }
-                        starSpectralClassTag.Text = body.spectralClass;
-                        starLuminosityTag.Text = body.luminosity;
-                        starAbsoluteMagnitutdeTag.Text = body.absoluteMagnitude.ToString();
-                        starSolarMassTag.Text = body.solarMasses.ToString();
-                        starSolarRadiusTag.Text = body.solarRadius.ToString();
-                        starTempTag.Text = body.surfaceTemperature.ToString() + " K"; ;
-                        if (body.orbitalPeriod != null) { starOrbitalTag.Text = body.orbitalPeriod.ToString(); } else { starOrbitalTag.Text = "n/a"; }
-                        starRotationalTag.Text = body.rotationalPeriod.ToString() + " Days";
+                            bodyOrbitalTag.Text = body.orbitalPeriod.ToString() + " Days";
+                            bodyRotationalTag.Text = body.rotationalPeriod.ToString() + " Days";
+                        }
+                        else if (body.type == "Star")
+                        {
+                            starDetailView.BringToFront();
+                            starNameTag.Text = body.name;
+                            //starDiscoverTag.Text = body.discoveryInfo.First<Discovery>().ToString();
+                            if (body.isMainStar == true) { mainStarTag.Text = "Yes"; } else { mainStarTag.Text = "No"; }
+                            starClassTag.Text = body.subType;
+                            starAgeTag.Text = body.age.ToString();
+                            if (body.isScoopable == true) { starScoopableTag.Text = "Yes"; } else { starScoopableTag.Text = "No"; }
+                            starSpectralClassTag.Text = body.spectralClass;
+                            starLuminosityTag.Text = body.luminosity;
+                            starAbsoluteMagnitutdeTag.Text = body.absoluteMagnitude.ToString();
+                            starSolarMassTag.Text = body.solarMasses.ToString();
+                            starSolarRadiusTag.Text = body.solarRadius.ToString();
+                            starTempTag.Text = body.surfaceTemperature.ToString() + " K"; ;
+                            if (body.orbitalPeriod != null) { starOrbitalTag.Text = body.orbitalPeriod.ToString(); } else { starOrbitalTag.Text = "n/a"; }
+                            starRotationalTag.Text = body.rotationalPeriod.ToString() + " Days";
+                        }
                     }
                 }
             }
@@ -812,9 +856,22 @@ namespace ED_Hud_Extension
             using var response = await _client.SendAsync(request, ct).ConfigureAwait(false);
             response.EnsureSuccessStatusCode();
 
-            string json = await response.Content.ReadAsStringAsync(ct).ConfigureAwait(false);
-            await File.WriteAllTextAsync("C:\\EDHE\\res\\systemdata.json", json, ct).ConfigureAwait(false);
-
+            try
+            {
+                string json = await response.Content.ReadAsStringAsync(ct).ConfigureAwait(false);
+                await File.WriteAllTextAsync("C:\\EDHE\\res\\systemdata.json", json, ct).ConfigureAwait(false);
+            }
+            catch (IOException)
+            {
+                System.Windows.Forms.Timer waitTimer = new System.Windows.Forms.Timer();
+                waitTimer.Interval = 50;
+                waitTimer.Tick += (s, args) =>
+                {
+                    waitTimer.Stop();
+                    fetchStarData(url, ct);
+                };
+                waitTimer.Start();
+            }
         }
 
         private static readonly HttpClient _client = new HttpClient(new SocketsHttpHandler
@@ -828,11 +885,25 @@ namespace ED_Hud_Extension
 
         public void clearBodyList()
         {
-            Invoke(new Action(() => bodyListPanel.Controls.Clear()));
-            foreach (Label lbl in bodyListPanel.Controls)
+            if (bodyListPanel.Controls.Count != 0)
             {
-                lbl.Dispose();
+                foreach (Label lbl in bodyListPanel.Controls)
+                {
+                    Invoke(new Action(() => lbl.Dispose()));
+                }
             }
+
+            //if (bodyListPanel.Controls.OfType<Label>().Count() != 0)
+            //{
+            //    foreach (Label lbl in bodyListPanel.Controls)
+            //    {
+            //        lbl.BeginInvoke(new Action(() => Dispose()));
+            //    }
+            //}
+            //else
+            //{
+            //    return;
+            //}
         }
     }
 }

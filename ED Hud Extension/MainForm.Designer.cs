@@ -2274,9 +2274,9 @@ namespace ED_Hud_Extension
             verLabel.ForeColor = Color.FromArgb(192, 64, 0);
             verLabel.Location = new Point(1710, 16);
             verLabel.Name = "verLabel";
-            verLabel.Size = new Size(77, 15);
+            verLabel.Size = new Size(84, 15);
             verLabel.TabIndex = 1;
-            verLabel.Text = "version 0.1.9";
+            verLabel.Text = "version 0.1.9a";
             verLabel.TextAlign = ContentAlignment.MiddleRight;
             // 
             // statusLabel
