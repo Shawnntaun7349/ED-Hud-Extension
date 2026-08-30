@@ -4,17 +4,22 @@ A second-monitor program for Frontier Development's Elite: Dangerous.
 
 Developed by Sean Roe 
 
-Current Version : 0.1.8
+Current Version : 0.1.9
 
 --- Planned Features ---
 Expansion on Combat Panel to show more player data, such as Power Distributor levels, current shield status, etc.
 Expansion on Exploration Panel to give the player a list of bodies in the current system, with an option to select a particular body &
-see a more detailed breakdown of that body. [Body Type, notable Signals, est. scan value, etc.] - to include integration w/ EDSM via EDDN.
+see a more detailed breakdown of that body. [Body Type, notable Signals, est. scan value, etc.] - to include integration w/ EDSM via EDDN.*
 Implementation of Stationing Panel to display data on the current Station/Settlement, Market data, Mission data, etc.
 Implementation of Mining Panel to display a list of Hotspots, notable stations for selling various Materials, etc.
 [Tentatively] A Color changing mechanism of some kind to allow the user to customize the appearance of their UI [in EDHE, not in-game. EDHM-UI exists and is fantastic.] [https://bluemystical.github.io/edhm-api/]
 
+*Exploration Panel planned feature is currently in development & undergoing early deployment.
+
 --- Update Notes ---
+Version 0.1.9
+Significant updates to Exploration Panel, centered around the introduction of the two primary subpanels; the BodyList panel & DetailView panels. Initial implementation of an automatic data retrieval from EDSM upon loading Elite or entering a new System to dynamically generate a list of Bodies, allowing the user to select one body from the list to view much more information on that body. Began working on ironing out various issues resulting from the nightmare that is .NET.
+
 Version 0.1.8
 Implemented a Status Reader class for retrieving and handling data from the Status.json file, 
 Continued fleshing out the Exploration Panel w/ newly-acquired Status data,
