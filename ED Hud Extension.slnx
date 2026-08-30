@@ -1,6 +1,4 @@
 <Solution>
   <Folder Name="/Solution Items/" />
-  <Project Path="ED Hud Extension/ED Hud Extension.csproj">
-    <BuildType Project="Release" />
-  </Project>
+  <Project Path="ED Hud Extension/ED Hud Extension.csproj" />
 </Solution>

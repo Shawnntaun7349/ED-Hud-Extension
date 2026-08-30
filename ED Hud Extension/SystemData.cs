@@ -1,7 +1,4 @@
-﻿using OpenTK.Compute.OpenCL;
-using System.Diagnostics;
-using System.Security.Policy;
-using System.Text.Json;
+﻿using System.Text.Json;
 
 namespace ED_Hud_Extension
 {
@@ -44,8 +41,8 @@ namespace ED_Hud_Extension
             public float? solarRadius { get;set; } //for stars only
             public float? earthMasses { get;set; } //for planets only
             public double? surfaceTemperature { get;set; } 
-            public double? orbitalPeriod { get;set; }
-            public double? rotationalPeriod { get;set; }
+            public float? orbitalPeriod { get;set; } 
+            public float? rotationalPeriod { get;set; }
             public List<Belt>? belts { get;set; }
             public bool? isLandable { get;set; } //for planets only
             public float? gravity { get;set; } //for planets only
@@ -113,7 +110,13 @@ namespace ED_Hud_Extension
 
             if (system.bodies is null)
             {
-
+                foreach(Label lbl in panel.Controls)
+                {
+                    if (lbl.Tag == "systemDataErrorLabel")
+                    {
+                        lbl.Invoke(new Action(() => lbl.Visible = true));
+                    }
+                }
             }
             else
             {
@@ -204,7 +207,7 @@ namespace ED_Hud_Extension
             //once all that's done, identify what body the user selected
 
             var form = ((Control)sender).FindForm();
-            form.BeginInvoke(new Action(() => ((MainForm)form).detailHiderPanel.Visible = false));
+            form.BeginInvoke(new Action(() => ((MainForm)form).detailHiderPanel.SendToBack()));
             form.BeginInvoke(new Action(() => ((MainForm)form).loadDetails(lbl.Text, bodies))); //good lord have I learned to hate C# because of this line
         }
 

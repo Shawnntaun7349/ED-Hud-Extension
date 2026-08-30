@@ -1,10 +1,9 @@
 using EliteJournalReader;
 using EliteJournalReader.Events;
-using System.Collections;
 using System.Diagnostics;
-using System.Runtime.CompilerServices;
-using System.Text.Json;
+using System.Security.Policy;
 using static ED_Hud_Extension.SystemData;
+using static ED_Hud_Extension.NavData;
 using static Functions;
 using static Globals;
 using static StatusReader;
@@ -102,7 +101,7 @@ namespace ED_Hud_Extension
 
             DateTimeOffset yOffset = DateTimeOffset.UtcNow.AddYears(1286);
             string starTime = DateTime.UtcNow.ToString("HH:mm");
-            string starDate = yOffset.ToString();
+            string starDate = yOffset.ToString("dddd, MMMM dd, yyyy");
             locDTTag.Text = DateTime.Now.ToString("dddd, MMMM dd, yyyy \nHH:mm");
             starDateTag.Text = starDate;
             starTimeTag.Text = starTime;
@@ -210,6 +209,8 @@ namespace ED_Hud_Extension
 
             Invoke(new Action(() => homeLSTag.Text = "scanning..."));
             Invoke(new Action(() => homeSysTag.Text = "scanning..."));
+
+            Invoke(new Action(() => fetchNavRoute(expCurrentSystemTag, expDestinationTag, this)));
         }
 
         private void rankEvent(object? sender, RankEvent.RankEventArgs e) //fires on startup
@@ -280,20 +281,12 @@ namespace ED_Hud_Extension
 
             if (pWanted) { Invoke(new Action(() => homeLSTag.Text = "Wanted")); Invoke(new Action(() => homeLSTag.ForeColor = Color.DarkRed)); }
             else { Invoke(new Action(() => homeLSTag.Text = "Clean")); Invoke(new Action(() => homeLSTag.ForeColor = Color.FromArgb(192, 64, 0))); }
-            Invoke(new Action(() => homeSysTag.Text = pCurrentSystem));
 
             Invoke(new Action(() => combatSysAllegianceTag.Text = systemAllegiance));
             Invoke(new Action(() => combatSysGovTag.Text = systemGovernment));
             Invoke(new Action(() => combatSysSecTag.Text = systemSecurity));
-
-            if (this.InvokeRequired)
-            {
-                BeginInvoke(new Action(() => updateLocationData(pCurrentSystem)));
-            }
-            else
-            {
-                updateLocationData(pCurrentSystem);
-            }
+            if (this.InvokeRequired) { BeginInvoke(new Action(() => updateLocationData(pCurrentSystem))); }
+            else { updateLocationData(pCurrentSystem); }
         }
 
         private void underAttack(object? sender, UnderAttackEvent.UnderAttackEventArgs e) //take a fucken guess what this one's for
@@ -455,39 +448,47 @@ namespace ED_Hud_Extension
         {
             if (e.Timestamp > startUpTime)
             {
+                Invoke(new Action(() => fetchNavRoute(expNextSystemTag, expDestinationTag, this)));
+                if (routeLength == 0)
+                {
+                    Invoke(new Action(() => expNextSystemTag.Text = e.Name));
+                    Invoke(new Action(() => expDestinationTag.Text = e.Name));
+                }
             }
             else { /*ignore the event as it occured before edhe started*/ }
-            Invoke(new Action(() => expNextSystemTag.Text = e.Name.ToString()));
         }
 
-        private void fsdStartJump(object? sender, StartJumpEvent.StartJumpEventArgs e)
+        private void fsdStartJump(object? sender, StartJumpEvent.StartJumpEventArgs e) //fires when the player starts a star-to-star jump, or when entering supercruise
         {
             if (e.Timestamp > startUpTime)
             {
+                //Invoke(new Action(() => fsdTag.Text = "engaging"));
             }
             else { /*ignore the event as it occured before edhe started*/ }
-            Invoke(new Action(() => fsdTag.Text = "energizing"));
         }
 
         private void fsdJump(object? sender, FSDJumpEvent.FSDJumpEventArgs e)
         {
             pCurrentSystem = e.StarSystem.ToString();
+
             Invoke(new Action(() => expCurrentSystemTag.Text = pCurrentSystem));
-            Invoke(new Action(() => expNextSystemTag.Text = pCurrentSystem));
 
             Invoke(new Action(() => clearBodyList()));
             Invoke(new Action(() => updateLocationData(pCurrentSystem)));
+
+            if (routeActive) { Invoke(new Action(() => updateRoute(expNextSystemTag, expDestinationTag))); }
+            
+            //if (StatusTags.Supercruise) { Invoke(new Action(() => fsdTag.Text = "supercruise")); }
         }
 
         private void navCleared(object? sender, NavRouteClearEvent.NavRouteClearEventArgs e)
         {
-            while (fsdCooldown != 0)
+            if (e.Timestamp > startUpTime)
             {
-                //wait for cooldown to complete
+                Invoke(new Action(() => expNextSystemTag.Text = "none"));
+                Invoke(new Action(() => expDestinationTag.Text = "none"));
+                clearRoute();
             }
-
-            Invoke(new Action(() => fsdTag.Text = "ready"));
-
         }
 
         private void refuelAllEvent(object? sender, RefuelAllEvent.RefuelAllEventArgs args) //journal watcher requires full and partial refueling calls to be seperate, so 
@@ -520,20 +521,20 @@ namespace ED_Hud_Extension
 
         private async void updateLocationData(string system)
         {
-            if (this.InvokeRequired)
+            if (InvokeRequired)
             {
-                this.Invoke(new Action(() => updateLocationData(system)));
+                Invoke(new Action(() => updateLocationData(system)));
                 return;
             }
 
             Invoke(new Action(() => detailHiderPanel.BringToFront()));
             detailHiderPanel.BringToFront();
             expCurrentSystemTag.Text = system;
-            await fetchStarData("https://www.edsm.net/api-system-v1/bodies?systemName=" + system); //get the system data
+            await OnSystemChanged(system); //get the system data
 
             try
             {
-                if (this.InvokeRequired)
+                if (InvokeRequired)
                 {
                     BeginInvoke(new Action(() => clearBodyList()));
                     BeginInvoke(new Action(() => systemData.loadSystemData(bodyListPanel, system)));
@@ -570,11 +571,9 @@ namespace ED_Hud_Extension
             Invoke(new Action(() => linkLabel.ForeColor = Color.DarkRed));
         }
 
-        private async void simulateButton_Click(object sender, EventArgs e)
+        private void simulateButton_Click(object sender, EventArgs e)
         {
-            clearBodyList();
-            updateLocationData(pCurrentSystem);
-            //expCurrentSystemTag.TextChanged -= simulateButton_Click;
+            Invoke(new Action(() => detailHiderPanel.BringToFront()));
         }
 
         private void settingsButton_Click(object sender, EventArgs e) //opens the settings menu
@@ -599,28 +598,35 @@ namespace ED_Hud_Extension
         {
             DateTimeOffset yOffset = DateTimeOffset.UtcNow.AddYears(1286);
             string starTime = DateTime.UtcNow.ToString("HH:mm");
-            string starDate = yOffset.ToString();
+            string starDate = yOffset.ToString("dddd, MMMM dd, yyyy");
             Invoke(new Action(() => locDTTag.Text = DateTime.Now.ToString("dddd, MMMM dd, yyyy \nHH:mm")));
             Invoke(new Action(() => starDateTag.Text = starDate));
             Invoke(new Action(() => starTimeTag.Text = starTime));
         }
 
-        public static void readTimerCallback(object? sender)
+        public void readTimerCallback(object? sender) //update status information
         {
-            readStatus(journalPath, sf, ff);
-        }
+            try
+            {
+                readStatus(journalPath + "\\status.json", sf, ff);
+            }
+            catch (IOException)
+            {
+                System.Windows.Forms.Timer waitTimer = new System.Windows.Forms.Timer();
+                waitTimer.Interval = 25;
+                waitTimer.Tick += (s, args) =>
+                {
+                    waitTimer.Stop();
+                    readStatus(journalPath + "\\status.json", sf, ff);
+                };
+                waitTimer.Start();
+            }
 
-        private void fsdCooldownCallbackMethod(object state)
-        {
-            if (fsdCooldown < 10)
-            {
-                fsdCooldown++;
-            }
-            else
-            {
-                Invoke(new Action(() => fsdTag.Text = "ready"));
-                fsdTimer.Dispose();
-            }
+            if (StatusTags.FsdCooldown) { Invoke(new Action(() => fsdTag.Text = "cooling down")); }
+            else if (StatusTags.FsdCharging) { Invoke(new Action(() => fsdTag.Text = "charging")); }
+            else if (StatusTags.FsdMassLocked) { Invoke(new Action(() => fsdTag.Text = "mass locked")); }
+            else if (StatusTags.FsdJump) { Invoke(new Action(() => fsdTag.Text = "jumping")); }
+            else { Invoke(new Action(() => fsdTag.Text = "ready")); }
         }
 
         //'animation' methods
@@ -768,6 +774,13 @@ namespace ED_Hud_Extension
             homePanel.BringToFront();
             dividerPanel.BringToFront();
             dividerPanel.Visible = true;
+            foreach (Control c in this.Controls)
+            {
+                if (c.Tag == "uiButtons")
+                {
+                    c.Enabled = true;
+                }
+            }
             if (statusEnabled) { Invoke(new Action(() => statusLabel.Text = statBase + "session started, parsing journal")); }
         }
 
@@ -820,8 +833,11 @@ namespace ED_Hud_Extension
                             bodyVolcanismTag.Text = body.volcanismType;
                             bodyAtmosphereTag.Text = body.atmosphereType;
 
-                            bodyOrbitalTag.Text = body.orbitalPeriod.ToString() + " Days";
-                            bodyRotationalTag.Text = body.rotationalPeriod.ToString() + " Days";
+                            decimal roundedOrbital = Math.Round((decimal)body.orbitalPeriod, 2);
+                            decimal roundedRotational = Math.Round((decimal)body.rotationalPeriod, 2);
+
+                            bodyOrbitalTag.Text = roundedOrbital.ToString() + " Days";
+                            bodyRotationalTag.Text = roundedRotational.ToString() + " Days";
                         }
                         else if (body.type == "Star")
                         {
@@ -849,8 +865,9 @@ namespace ED_Hud_Extension
            it is currently awaiting the proper implementation of the exploration panel as a whole, but it was a horrible nightmare to get it
            to work for some reason so it's just going to live here until it's ready to be updated and employed
         */
-        public static async Task fetchStarData(string url, CancellationToken ct = default) //thank you EDSM
+        public static async Task fetchStarData(string systemName, CancellationToken ct = default) //thank you EDSM
         {
+            string url = "https://www.edsm.net/api-system-v1/bodies?systemName=" + systemName;
             using var request = new HttpRequestMessage(HttpMethod.Get, url);
             request.Headers.ConnectionClose = true;
             using var response = await _client.SendAsync(request, ct).ConfigureAwait(false);
@@ -892,18 +909,29 @@ namespace ED_Hud_Extension
                     Invoke(new Action(() => lbl.Dispose()));
                 }
             }
+        }
 
-            //if (bodyListPanel.Controls.OfType<Label>().Count() != 0)
-            //{
-            //    foreach (Label lbl in bodyListPanel.Controls)
-            //    {
-            //        lbl.BeginInvoke(new Action(() => Dispose()));
-            //    }
-            //}
-            //else
-            //{
-            //    return;
-            //}
+
+
+        //a good ol debounce setup so we don't accidentally flood EDSM with 700 GET requests in 0.3 seconds
+        private static CancellationTokenSource systemQueryCts;
+
+        private async Task OnSystemChanged(string systemName)
+        {
+            systemQueryCts?.Cancel();
+            systemQueryCts = new CancellationTokenSource();
+            var token = systemQueryCts.Token;
+            try
+            {
+                await Task.Delay(100, token);
+
+                await fetchStarData(systemName, token);
+                Invoke(new Action(() => homeSysTag.Text = pCurrentSystem));
+            }
+            catch (TaskCanceledException)
+            {
+
+            }
         }
     }
 }

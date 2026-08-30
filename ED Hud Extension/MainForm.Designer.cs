@@ -120,6 +120,9 @@ namespace ED_Hud_Extension
             locDTLabel = new Label();
             explorePanel = new Panel();
             panel1 = new Panel();
+            detailHiderPanel = new Panel();
+            hiderPaneLabel2 = new Label();
+            hiderPanelLabel1 = new Label();
             starDetailView = new Panel();
             starBeltsTag = new Label();
             starRotationalTag = new Label();
@@ -151,9 +154,6 @@ namespace ED_Hud_Extension
             starDiscoverLabel = new Label();
             starNameLabel = new Label();
             starScoopLabel = new Label();
-            detailHiderPanel = new Panel();
-            hiderPaneLabel2 = new Label();
-            hiderPanelLabel1 = new Label();
             planetDetailView = new Panel();
             bodyRotationalTag = new Label();
             bodyOrbitalTag = new Label();
@@ -194,6 +194,7 @@ namespace ED_Hud_Extension
             bodiesDivPanel = new Panel();
             starCountTag = new Label();
             bodyListPanel = new Panel();
+            systemDataErrorLabel = new Label();
             bodyCountTag = new Label();
             fsdTag = new Label();
             fsdLabel = new Label();
@@ -209,9 +210,10 @@ namespace ED_Hud_Extension
             initPanel.SuspendLayout();
             homePanel.SuspendLayout();
             explorePanel.SuspendLayout();
-            starDetailView.SuspendLayout();
             detailHiderPanel.SuspendLayout();
+            starDetailView.SuspendLayout();
             planetDetailView.SuspendLayout();
+            bodyListPanel.SuspendLayout();
             statusPanel.SuspendLayout();
             SuspendLayout();
             // 
@@ -663,6 +665,7 @@ namespace ED_Hud_Extension
             // combatButton
             // 
             combatButton.BackColor = SystemColors.ActiveCaptionText;
+            combatButton.Enabled = false;
             combatButton.FlatStyle = FlatStyle.Popup;
             combatButton.Font = new Font("Oxanium ExtraBold", 9F, FontStyle.Bold);
             combatButton.ForeColor = Color.FromArgb(192, 64, 0);
@@ -670,6 +673,7 @@ namespace ED_Hud_Extension
             combatButton.Name = "combatButton";
             combatButton.Size = new Size(92, 23);
             combatButton.TabIndex = 25;
+            combatButton.Tag = "uiButtons";
             combatButton.Text = "Combat";
             combatButton.UseVisualStyleBackColor = false;
             combatButton.Click += combatButton_Click;
@@ -677,6 +681,7 @@ namespace ED_Hud_Extension
             // explorationButton
             // 
             explorationButton.BackColor = SystemColors.ActiveCaptionText;
+            explorationButton.Enabled = false;
             explorationButton.FlatStyle = FlatStyle.Popup;
             explorationButton.Font = new Font("Oxanium ExtraBold", 9F, FontStyle.Bold);
             explorationButton.ForeColor = Color.FromArgb(192, 64, 0);
@@ -684,6 +689,7 @@ namespace ED_Hud_Extension
             explorationButton.Name = "explorationButton";
             explorationButton.Size = new Size(92, 23);
             explorationButton.TabIndex = 26;
+            explorationButton.Tag = "uiButtons";
             explorationButton.Text = "Exploration";
             explorationButton.UseVisualStyleBackColor = false;
             explorationButton.Click += explorationButton_Click;
@@ -691,6 +697,7 @@ namespace ED_Hud_Extension
             // homeButton
             // 
             homeButton.BackColor = SystemColors.ActiveCaptionText;
+            homeButton.Enabled = false;
             homeButton.FlatStyle = FlatStyle.Popup;
             homeButton.Font = new Font("Oxanium ExtraBold", 9F, FontStyle.Bold);
             homeButton.ForeColor = Color.FromArgb(192, 64, 0);
@@ -698,6 +705,7 @@ namespace ED_Hud_Extension
             homeButton.Name = "homeButton";
             homeButton.Size = new Size(92, 23);
             homeButton.TabIndex = 27;
+            homeButton.Tag = "uiButtons";
             homeButton.Text = "Home";
             homeButton.UseVisualStyleBackColor = false;
             homeButton.Click += homeButton_Click;
@@ -724,7 +732,7 @@ namespace ED_Hud_Extension
             // 
             enviroDone.Font = new Font("Oxanium", 21.75F);
             enviroDone.ForeColor = Color.FromArgb(192, 64, 0);
-            enviroDone.Location = new Point(1113, 385);
+            enviroDone.Location = new Point(1028, 385);
             enviroDone.Name = "enviroDone";
             enviroDone.Size = new Size(84, 36);
             enviroDone.TabIndex = 73;
@@ -735,7 +743,7 @@ namespace ED_Hud_Extension
             // 
             uplinkDone.Font = new Font("Oxanium", 21.75F);
             uplinkDone.ForeColor = Color.FromArgb(192, 64, 0);
-            uplinkDone.Location = new Point(1113, 421);
+            uplinkDone.Location = new Point(1028, 421);
             uplinkDone.Name = "uplinkDone";
             uplinkDone.Size = new Size(84, 36);
             uplinkDone.TabIndex = 72;
@@ -746,7 +754,7 @@ namespace ED_Hud_Extension
             // 
             clientDone.Font = new Font("Oxanium", 21.75F);
             clientDone.ForeColor = Color.FromArgb(192, 64, 0);
-            clientDone.Location = new Point(1113, 460);
+            clientDone.Location = new Point(1028, 460);
             clientDone.Name = "clientDone";
             clientDone.Size = new Size(84, 36);
             clientDone.TabIndex = 74;
@@ -757,7 +765,7 @@ namespace ED_Hud_Extension
             // 
             diagDone.Font = new Font("Oxanium", 21.75F);
             diagDone.ForeColor = Color.FromArgb(192, 64, 0);
-            diagDone.Location = new Point(1113, 349);
+            diagDone.Location = new Point(1028, 349);
             diagDone.Name = "diagDone";
             diagDone.Size = new Size(84, 36);
             diagDone.TabIndex = 71;
@@ -768,7 +776,7 @@ namespace ED_Hud_Extension
             // 
             initDone.Font = new Font("Oxanium", 21.75F);
             initDone.ForeColor = Color.FromArgb(192, 64, 0);
-            initDone.Location = new Point(1113, 313);
+            initDone.Location = new Point(1028, 313);
             initDone.Name = "initDone";
             initDone.Size = new Size(84, 36);
             initDone.TabIndex = 70;
@@ -779,7 +787,7 @@ namespace ED_Hud_Extension
             // 
             waitingClientLabel.Font = new Font("Oxanium", 21.75F);
             waitingClientLabel.ForeColor = Color.FromArgb(192, 64, 0);
-            waitingClientLabel.Location = new Point(623, 460);
+            waitingClientLabel.Location = new Point(538, 460);
             waitingClientLabel.Name = "waitingClientLabel";
             waitingClientLabel.Size = new Size(414, 36);
             waitingClientLabel.TabIndex = 69;
@@ -790,7 +798,7 @@ namespace ED_Hud_Extension
             // 
             waitingConnectLabel.Font = new Font("Oxanium", 21.75F);
             waitingConnectLabel.ForeColor = Color.FromArgb(192, 64, 0);
-            waitingConnectLabel.Location = new Point(623, 421);
+            waitingConnectLabel.Location = new Point(538, 421);
             waitingConnectLabel.Name = "waitingConnectLabel";
             waitingConnectLabel.Size = new Size(463, 36);
             waitingConnectLabel.TabIndex = 65;
@@ -801,7 +809,7 @@ namespace ED_Hud_Extension
             // 
             initLabel.Font = new Font("Oxanium", 21.75F);
             initLabel.ForeColor = Color.FromArgb(192, 64, 0);
-            initLabel.Location = new Point(623, 313);
+            initLabel.Location = new Point(538, 313);
             initLabel.Name = "initLabel";
             initLabel.Size = new Size(442, 36);
             initLabel.TabIndex = 66;
@@ -811,7 +819,7 @@ namespace ED_Hud_Extension
             // 
             diagLabel.Font = new Font("Oxanium", 21.75F);
             diagLabel.ForeColor = Color.FromArgb(192, 64, 0);
-            diagLabel.Location = new Point(623, 349);
+            diagLabel.Location = new Point(538, 349);
             diagLabel.Name = "diagLabel";
             diagLabel.Size = new Size(477, 36);
             diagLabel.TabIndex = 67;
@@ -822,7 +830,7 @@ namespace ED_Hud_Extension
             // 
             enviroLabel.Font = new Font("Oxanium", 21.75F);
             enviroLabel.ForeColor = Color.FromArgb(192, 64, 0);
-            enviroLabel.Location = new Point(623, 385);
+            enviroLabel.Location = new Point(538, 385);
             enviroLabel.Name = "enviroLabel";
             enviroLabel.Size = new Size(442, 36);
             enviroLabel.TabIndex = 68;
@@ -878,7 +886,7 @@ namespace ED_Hud_Extension
             starTimeTag.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             starTimeTag.Font = new Font("Oxanium", 21.75F);
             starTimeTag.ForeColor = Color.FromArgb(192, 64, 0);
-            starTimeTag.Location = new Point(1517, 73);
+            starTimeTag.Location = new Point(1517, 79);
             starTimeTag.Name = "starTimeTag";
             starTimeTag.Size = new Size(285, 36);
             starTimeTag.TabIndex = 100;
@@ -1212,9 +1220,9 @@ namespace ED_Hud_Extension
             starDateTag.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             starDateTag.Font = new Font("Oxanium", 21.75F);
             starDateTag.ForeColor = Color.FromArgb(192, 64, 0);
-            starDateTag.Location = new Point(1240, 38);
+            starDateTag.Location = new Point(1224, 39);
             starDateTag.Name = "starDateTag";
-            starDateTag.Size = new Size(562, 42);
+            starDateTag.Size = new Size(578, 36);
             starDateTag.TabIndex = 66;
             starDateTag.Text = "Wednesday, August 18th 3312";
             starDateTag.TextAlign = ContentAlignment.MiddleRight;
@@ -1281,8 +1289,8 @@ namespace ED_Hud_Extension
             // explorePanel
             // 
             explorePanel.Controls.Add(panel1);
-            explorePanel.Controls.Add(starDetailView);
             explorePanel.Controls.Add(detailHiderPanel);
+            explorePanel.Controls.Add(starDetailView);
             explorePanel.Controls.Add(planetDetailView);
             explorePanel.Controls.Add(expNextSystemTag);
             explorePanel.Controls.Add(expNextSystemLabel);
@@ -1310,6 +1318,36 @@ namespace ED_Hud_Extension
             panel1.Name = "panel1";
             panel1.Size = new Size(2, 880);
             panel1.TabIndex = 83;
+            // 
+            // detailHiderPanel
+            // 
+            detailHiderPanel.Controls.Add(hiderPaneLabel2);
+            detailHiderPanel.Controls.Add(hiderPanelLabel1);
+            detailHiderPanel.Location = new Point(1148, 0);
+            detailHiderPanel.Name = "detailHiderPanel";
+            detailHiderPanel.Size = new Size(649, 880);
+            detailHiderPanel.TabIndex = 113;
+            // 
+            // hiderPaneLabel2
+            // 
+            hiderPaneLabel2.Font = new Font("Oxanium", 21.75F);
+            hiderPaneLabel2.ForeColor = SystemColors.Control;
+            hiderPaneLabel2.Location = new Point(181, 321);
+            hiderPaneLabel2.Name = "hiderPaneLabel2";
+            hiderPaneLabel2.Size = new Size(332, 113);
+            hiderPaneLabel2.TabIndex = 115;
+            hiderPaneLabel2.Text = "Please select a body from the list on the left to view body details";
+            // 
+            // hiderPanelLabel1
+            // 
+            hiderPanelLabel1.AutoSize = true;
+            hiderPanelLabel1.Font = new Font("Oxanium", 21.75F);
+            hiderPanelLabel1.ForeColor = Color.FromArgb(192, 64, 0);
+            hiderPanelLabel1.Location = new Point(147, 14);
+            hiderPanelLabel1.Name = "hiderPanelLabel1";
+            hiderPanelLabel1.Size = new Size(377, 36);
+            hiderPanelLabel1.TabIndex = 114;
+            hiderPanelLabel1.Text = "Planetary Body Detail View";
             // 
             // starDetailView
             // 
@@ -1681,36 +1719,6 @@ namespace ED_Hud_Extension
             starScoopLabel.TabIndex = 97;
             starScoopLabel.Text = "Scoopable : ";
             starScoopLabel.TextAlign = ContentAlignment.TopRight;
-            // 
-            // detailHiderPanel
-            // 
-            detailHiderPanel.Controls.Add(hiderPaneLabel2);
-            detailHiderPanel.Controls.Add(hiderPanelLabel1);
-            detailHiderPanel.Location = new Point(1148, 0);
-            detailHiderPanel.Name = "detailHiderPanel";
-            detailHiderPanel.Size = new Size(649, 880);
-            detailHiderPanel.TabIndex = 113;
-            // 
-            // hiderPaneLabel2
-            // 
-            hiderPaneLabel2.Font = new Font("Oxanium", 21.75F);
-            hiderPaneLabel2.ForeColor = SystemColors.Control;
-            hiderPaneLabel2.Location = new Point(181, 321);
-            hiderPaneLabel2.Name = "hiderPaneLabel2";
-            hiderPaneLabel2.Size = new Size(332, 113);
-            hiderPaneLabel2.TabIndex = 115;
-            hiderPaneLabel2.Text = "Please select a body from the list on the left to view body details";
-            // 
-            // hiderPanelLabel1
-            // 
-            hiderPanelLabel1.AutoSize = true;
-            hiderPanelLabel1.Font = new Font("Oxanium", 21.75F);
-            hiderPanelLabel1.ForeColor = Color.FromArgb(192, 64, 0);
-            hiderPanelLabel1.Location = new Point(147, 14);
-            hiderPanelLabel1.Name = "hiderPanelLabel1";
-            hiderPanelLabel1.Size = new Size(377, 36);
-            hiderPanelLabel1.TabIndex = 114;
-            hiderPanelLabel1.Text = "Planetary Body Detail View";
             // 
             // planetDetailView
             // 
@@ -2085,12 +2093,11 @@ namespace ED_Hud_Extension
             // 
             // expNextSystemTag
             // 
-            expNextSystemTag.AutoSize = true;
             expNextSystemTag.Font = new Font("Oxanium", 21.75F);
             expNextSystemTag.ForeColor = SystemColors.Control;
             expNextSystemTag.Location = new Point(895, 31);
             expNextSystemTag.Name = "expNextSystemTag";
-            expNextSystemTag.Size = new Size(83, 36);
+            expNextSystemTag.Size = new Size(217, 114);
             expNextSystemTag.TabIndex = 94;
             expNextSystemTag.Text = "none";
             // 
@@ -2172,11 +2179,24 @@ namespace ED_Hud_Extension
             // 
             bodyListPanel.AutoScroll = true;
             bodyListPanel.BackColor = Color.Black;
+            bodyListPanel.Controls.Add(systemDataErrorLabel);
             bodyListPanel.ForeColor = SystemColors.Desktop;
             bodyListPanel.Location = new Point(2, 348);
             bodyListPanel.Name = "bodyListPanel";
             bodyListPanel.Size = new Size(652, 535);
             bodyListPanel.TabIndex = 89;
+            // 
+            // systemDataErrorLabel
+            // 
+            systemDataErrorLabel.Font = new Font("Oxanium", 21.75F);
+            systemDataErrorLabel.ForeColor = SystemColors.Control;
+            systemDataErrorLabel.Location = new Point(6, 12);
+            systemDataErrorLabel.Name = "systemDataErrorLabel";
+            systemDataErrorLabel.Size = new Size(485, 113);
+            systemDataErrorLabel.TabIndex = 116;
+            systemDataErrorLabel.Tag = "systemErrorLabel";
+            systemDataErrorLabel.Text = "Error : System Data unavailable";
+            systemDataErrorLabel.Visible = false;
             // 
             // bodyCountTag
             // 
@@ -2274,9 +2294,9 @@ namespace ED_Hud_Extension
             verLabel.ForeColor = Color.FromArgb(192, 64, 0);
             verLabel.Location = new Point(1710, 16);
             verLabel.Name = "verLabel";
-            verLabel.Size = new Size(84, 15);
+            verLabel.Size = new Size(77, 15);
             verLabel.TabIndex = 1;
-            verLabel.Text = "version 0.1.9a";
+            verLabel.Text = "version 0.2.0";
             verLabel.TextAlign = ContentAlignment.MiddleRight;
             // 
             // statusLabel
@@ -2297,6 +2317,7 @@ namespace ED_Hud_Extension
             // stationButton
             // 
             stationButton.BackColor = SystemColors.ActiveCaptionText;
+            stationButton.Enabled = false;
             stationButton.FlatStyle = FlatStyle.Popup;
             stationButton.Font = new Font("Oxanium ExtraBold", 9F, FontStyle.Bold);
             stationButton.ForeColor = Color.FromArgb(192, 64, 0);
@@ -2304,6 +2325,7 @@ namespace ED_Hud_Extension
             stationButton.Name = "stationButton";
             stationButton.Size = new Size(92, 23);
             stationButton.TabIndex = 70;
+            stationButton.Tag = "uiButtons";
             stationButton.Text = "Stationing";
             stationButton.UseVisualStyleBackColor = false;
             // 
@@ -2318,8 +2340,8 @@ namespace ED_Hud_Extension
             Controls.Add(explorePanel);
             Controls.Add(combatPanel);
             Controls.Add(homePanel);
-            Controls.Add(initPanel);
             Controls.Add(statusPanel);
+            Controls.Add(initPanel);
             Controls.Add(exitButton);
             Controls.Add(settingsButton);
             Controls.Add(restartSessionButton);
@@ -2341,12 +2363,13 @@ namespace ED_Hud_Extension
             homePanel.PerformLayout();
             explorePanel.ResumeLayout(false);
             explorePanel.PerformLayout();
-            starDetailView.ResumeLayout(false);
-            starDetailView.PerformLayout();
             detailHiderPanel.ResumeLayout(false);
             detailHiderPanel.PerformLayout();
+            starDetailView.ResumeLayout(false);
+            starDetailView.PerformLayout();
             planetDetailView.ResumeLayout(false);
             planetDetailView.PerformLayout();
+            bodyListPanel.ResumeLayout(false);
             statusPanel.ResumeLayout(false);
             statusPanel.PerformLayout();
             ResumeLayout(false);
@@ -2528,5 +2551,6 @@ namespace ED_Hud_Extension
         private Label starDiscoverTag;
         private Label starNameTag;
         private Label starScoopableTag;
+        public Label systemDataErrorLabel;
     }
 }

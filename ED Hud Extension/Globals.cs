@@ -191,7 +191,7 @@ public class Globals
     public static string systemSecurity;
     public static bool pWanted;
     public static string pFactionRep;
-
+    public static bool routeActive;
     public static DateTime fsdJumpTS;
     public static DateTime locationTS;
 }

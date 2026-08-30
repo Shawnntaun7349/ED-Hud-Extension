@@ -1,13 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Text;
-using System.Text.Json;
-using System.Windows.Forms;
-
-using static Globals;
+﻿using static Globals;
 
 namespace ED_Hud_Extension
 {

@@ -31,8 +31,8 @@ public class StatusReader
     public class Root
     {
         public DateTime timestamp { get; set; }
-        public ShipFlag Flags { get; set; }
-        public OnFootFlag Flags2 { get; set; }
+        public uint Flags { get; set; }
+        public uint Flags2 { get; set; }
         public List<int> Pips { get; set; }
         public int FireGroup { get; set; }
         public int GuiFocus { get; set; }
@@ -113,90 +113,81 @@ public class StatusReader
 
     public static void readStatus(string path, ShipFlag currentShip, OnFootFlag currentFoot)
     {
-        if (!statusReaderLive) //if it's not live, start the reader
+        statusReaderLive = true;
+        if (File.Exists(path))
         {
-            statusReaderLive = true;
-            if (File.Exists(path))
-            {
-                string sFile = File.ReadAllText(path);
-                using JsonDocument doc = JsonDocument.Parse(sFile);
+            string sFile = File.ReadAllText(path);
+            using JsonDocument doc = JsonDocument.Parse(sFile);
 
-                string timeStamp = doc.RootElement.GetProperty("timestamp").ToString();
-                DateTime statusTS = DateTime.Parse(timeStamp);
+            string timeStamp = doc.RootElement.GetProperty("timestamp").ToString();
+            DateTime statusTS = DateTime.Parse(timeStamp);
 
-                if (statusTS < DateTime.Now)
-                {
-                    return; //go away, this is an old status file n we're not loaded in yet
-                }
+            int status = Int32.Parse(doc.RootElement.GetProperty("Flags").ToString());
+            if (status == 0) { doc.Dispose(); return; }
 
-                Root root = JsonSerializer.Deserialize<Root>(doc);
-                Fuel fuel = JsonSerializer.Deserialize<Fuel>(doc);
-                Destination destination = JsonSerializer.Deserialize<Destination>(doc);
+            Root root = JsonSerializer.Deserialize<Root>(doc);
+            Fuel fuel = JsonSerializer.Deserialize<Fuel>(doc);
+            Destination destination = JsonSerializer.Deserialize<Destination>(doc);
 
-                ShipFlag flag = root.Flags;
-                OnFootFlag flag2 = root.Flags2;
+            ShipFlag flag = (ShipFlag)root.Flags ;
+            OnFootFlag flag2 = (OnFootFlag)root.Flags2;
 
-                systemPips = root.Pips[0];
-                enginePips = root.Pips[1];
-                weaponPips = root.Pips[2];
+            systemPips = root.Pips[0];
+            enginePips = root.Pips[1];
+            weaponPips = root.Pips[2];
 
-                fireGroup = root.FireGroup;
-                guiFocus = root.GuiFocus;
+            fireGroup = root.FireGroup;
+            guiFocus = root.GuiFocus;
 
-                fuelMain = fuel.FuelMain;
-                fuelRes = fuel.FuelReservoir;
+            fuelMain = fuel.FuelMain;
+            fuelRes = fuel.FuelReservoir;
 
-                Landed = currentShip.HasFlag(ShipFlag.Landed);
-                Docked = currentShip.HasFlag(ShipFlag.Docked);
-                GearDown = currentShip.HasFlag(ShipFlag.GearDown);
-                ShieldsUp = currentShip.HasFlag(ShipFlag.ShieldsUp);
-                Supercruise = currentShip.HasFlag(ShipFlag.Supercruise);
-                FAOff = currentShip.HasFlag(ShipFlag.FAOff);
-                HardpointsDeployed = currentShip.HasFlag(ShipFlag.HardpointsDeployed);
-                InWing = currentShip.HasFlag(ShipFlag.InWing);
-                LightsOn = currentShip.HasFlag(ShipFlag.LightsOn);
-                CargoScoopDeployed = currentShip.HasFlag(ShipFlag.CargoScoopDeployed);
-                SilentRunning = currentShip.HasFlag(ShipFlag.SilentRunning);
-                ScoopingFuel = currentShip.HasFlag(ShipFlag.ScoopingFuel);
-                SrvHandBrake = currentShip.HasFlag(ShipFlag.SrvHandBrake);
-                SrvTurretView = currentShip.HasFlag(ShipFlag.SrvTurretView);
-                SrvTurretRetracted = currentShip.HasFlag(ShipFlag.SrvTurretRetracted);
-                SrvDriveAssist = currentShip.HasFlag(ShipFlag.SrvDriveAssist);
-                FsdMassLocked = currentShip.HasFlag(ShipFlag.FsdMassLocked);
-                FsdCharging = currentShip.HasFlag(ShipFlag.FsdCharging);
-                FsdCooldown = currentShip.HasFlag(ShipFlag.FsdCooldown);
-                OverHeating = currentShip.HasFlag(ShipFlag.OverHeating);
-                IsInDanger = currentShip.HasFlag(ShipFlag.IsInDanger);
-                InMainShip = currentShip.HasFlag(ShipFlag.InMainShip);
-                InFighter = currentShip.HasFlag(ShipFlag.InFighter);
-                InSrv = currentShip.HasFlag(ShipFlag.InSrv);
-                HudInAnalysisMode = currentShip.HasFlag(ShipFlag.HudInAnalysisMode);
-                NightVision = currentShip.HasFlag(ShipFlag.NightVision);
-                FsdJump = currentShip.HasFlag(ShipFlag.FsdJump);
-                SrvHighBeam = currentShip.HasFlag(ShipFlag.SrvHighBeam);
+            Landed = flag.HasFlag(ShipFlag.Landed);
+            Docked = flag.HasFlag(ShipFlag.Docked);
+            GearDown = flag.HasFlag(ShipFlag.GearDown);
+            ShieldsUp = flag.HasFlag(ShipFlag.ShieldsUp);
+            Supercruise = flag.HasFlag(ShipFlag.Supercruise);
+            FAOff = flag.HasFlag(ShipFlag.FAOff);
+            HardpointsDeployed = flag.HasFlag(ShipFlag.HardpointsDeployed);
+            InWing = flag.HasFlag(ShipFlag.InWing);
+            LightsOn = flag.HasFlag(ShipFlag.LightsOn);
+            CargoScoopDeployed = flag.HasFlag(ShipFlag.CargoScoopDeployed);
+            SilentRunning = flag.HasFlag(ShipFlag.SilentRunning);
+            ScoopingFuel = flag.HasFlag(ShipFlag.ScoopingFuel);
+            SrvHandBrake = flag.HasFlag(ShipFlag.SrvHandBrake);
+            SrvTurretView = flag.HasFlag(ShipFlag.SrvTurretView);
+            SrvTurretRetracted = flag.HasFlag(ShipFlag.SrvTurretRetracted);
+            SrvDriveAssist = flag.HasFlag(ShipFlag.SrvDriveAssist);
+            FsdMassLocked = flag.HasFlag(ShipFlag.FsdMassLocked);
+            FsdCharging = flag.HasFlag(ShipFlag.FsdCharging);
+            FsdCooldown = flag.HasFlag(ShipFlag.FsdCooldown);
+            OverHeating = flag.HasFlag(ShipFlag.OverHeating);
+            IsInDanger = flag.HasFlag(ShipFlag.IsInDanger);
+            InMainShip = flag.HasFlag(ShipFlag.InMainShip);
+            InFighter = flag.HasFlag(ShipFlag.InFighter);
+            InSrv = flag.HasFlag(ShipFlag.InSrv);
+            HudInAnalysisMode = flag.HasFlag(ShipFlag.HudInAnalysisMode);
+            NightVision = flag.HasFlag(ShipFlag.NightVision);
+            FsdJump = flag.HasFlag(ShipFlag.FsdJump);
+            SrvHighBeam = flag.HasFlag(ShipFlag.SrvHighBeam);
 
-                OnFoot = currentFoot.HasFlag(OnFootFlag.OnFoot);
-                InTaxi = currentFoot.HasFlag(OnFootFlag.InTaxi);
-                InMulticrew = currentFoot.HasFlag(OnFootFlag.InMultiCrew);
-                OnFootInStation = currentFoot.HasFlag(OnFootFlag.OnFootInStation);
-                OnFootOnPlanet = currentFoot.HasFlag(OnFootFlag.OnFootOnPlanet);
-                LowOxygen = currentFoot.HasFlag(OnFootFlag.LowOxygen);
-                LowHealth = currentFoot.HasFlag(OnFootFlag.LowHealth);
-                Hot = currentFoot.HasFlag(OnFootFlag.Hot);
-                Cold = currentFoot.HasFlag(OnFootFlag.Cold);
-                VeryHot = currentFoot.HasFlag(OnFootFlag.VeryHot);
-                VeryCold = currentFoot.HasFlag(OnFootFlag.VeryCold);
-                GlideMode = currentFoot.HasFlag(OnFootFlag.GlideMode);
-                OnFootInHangar = currentFoot.HasFlag(OnFootFlag.OnFootInHangar);
-                OnFootSocialSpace = currentFoot.HasFlag(OnFootFlag.OnFootSocialSpace);
-                OnFootExterior = currentFoot.HasFlag(OnFootFlag.OnFootExterior);
-                BreathableAtmosphere = currentFoot.HasFlag(OnFootFlag.BreathableAtmosphere);
-                AimDownSight = currentFoot.HasFlag(OnFootFlag.AimDownSight);
-            }
-        }
-        else
-        {
-            return; //if it's already live, fuck off so we dont have 17 readers running at the same time
+            OnFoot = flag2.HasFlag(OnFootFlag.OnFoot);
+            InTaxi = flag2.HasFlag(OnFootFlag.InTaxi);
+            InMulticrew = flag2.HasFlag(OnFootFlag.InMultiCrew);
+            OnFootInStation = flag2.HasFlag(OnFootFlag.OnFootInStation);
+            OnFootOnPlanet = flag2.HasFlag(OnFootFlag.OnFootOnPlanet);
+            LowOxygen = flag2.HasFlag(OnFootFlag.LowOxygen);
+            LowHealth = flag2.HasFlag(OnFootFlag.LowHealth);
+            Hot = flag2.HasFlag(OnFootFlag.Hot);
+            Cold = flag2.HasFlag(OnFootFlag.Cold);
+            VeryHot = flag2.HasFlag(OnFootFlag.VeryHot);
+            VeryCold = flag2.HasFlag(OnFootFlag.VeryCold);
+            GlideMode = flag2.HasFlag(OnFootFlag.GlideMode);
+            OnFootInHangar = flag2.HasFlag(OnFootFlag.OnFootInHangar);
+            OnFootSocialSpace = flag2.HasFlag(OnFootFlag.OnFootSocialSpace);
+            OnFootExterior = flag2.HasFlag(OnFootFlag.OnFootExterior);
+            BreathableAtmosphere = flag2.HasFlag(OnFootFlag.BreathableAtmosphere);
+            AimDownSight = flag2.HasFlag(OnFootFlag.AimDownSight);
         }
     }
 }
