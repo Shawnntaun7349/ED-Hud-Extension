@@ -13,7 +13,7 @@ Implementation of Stationing Panel to display data on the current Station/Settle
 Implementation of Mining Panel to display a list of Hotspots, notable stations for selling various Materials, etc.
 [Tentatively] A Color changing mechanism of some kind to allow the user to customize the appearance of their UI [in EDHE, not in-game. EDHM-UI exists and is fantastic.] [https://bluemystical.github.io/edhm-api/]
 
-**--- Update Notes ---**
+**--- Update Notes ---**  
 **Version 0.2.0**  
 Final early-stage update to Exploration Panel: implemented debounce method to prevent abuse of EDSM's API, integrated new NavData class to handle parsing of NavRoute.json file to handle multi-stage navigation routes. Published first Release for early debugging & later implementation of planned automatic updates feature.
 
