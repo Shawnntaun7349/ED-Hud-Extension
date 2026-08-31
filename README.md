@@ -2,16 +2,15 @@
 
 A second-monitor program for Frontier Development's Elite: Dangerous.  
 
-Developed by Sean Roe   
+*Developed by Sean Roe*   
 
-Current Version : 0.1.9a  
+Current Version : 0.2.0  
 
 **--- Planned Features ---**  
-Expansion on Combat Panel to show more player data, such as Power Distributor levels, current shield status, etc.
-
-Implementation of Stationing Panel to display data on the current Station/Settlement, Market data, Mission data, etc.
-Implementation of Mining Panel to display a list of Hotspots, notable stations for selling various Materials, etc.
-[Tentatively] A Color changing mechanism of some kind to allow the user to customize the appearance of their UI [in EDHE, not in-game. EDHM-UI exists and is fantastic.] [https://bluemystical.github.io/edhm-api/]
+- Expansion on Combat Panel to show more player data, such as Power Distributor levels, current shield status, etc.
+- Implementation of Stationing Panel to display data on the current Station/Settlement, Market data, Mission data, etc.
+- Implementation of Mining Panel to display a list of Hotspots, notable stations for selling various Materials, etc.
+- [Tentatively] A Color changing mechanism of some kind to allow the user to customize the appearance of their UI [in EDHE, not in-game. EDHM-UI exists and is fantastic.] [https://bluemystical.github.io/edhm-api/]
 
 **--- Update Notes ---**  
 **Version 0.2.0**  
