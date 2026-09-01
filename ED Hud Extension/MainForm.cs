@@ -7,6 +7,8 @@ using static ED_Hud_Extension.NavData;
 using static Functions;
 using static Globals;
 using static StatusReader;
+using static ED_Hud_Extension.Loadouts;
+using System.Diagnostics.Tracing;
 
 namespace ED_Hud_Extension
 {
@@ -164,6 +166,9 @@ namespace ED_Hud_Extension
 
             //nav events
             watcher.GetEvent<NavRouteClearEvent>().Fired += navCleared;
+
+            //on foot events
+            watcher.GetEvent<SuitLoadoutEvent>().Fired += suitLoadoutEvent;
         }
 
         //journal events
@@ -202,10 +207,20 @@ namespace ED_Hud_Extension
             if (pLoan == 0) { Invoke(new Action(() => homeLBTag.Text = "None")); }
             else { Invoke(new Action(() => homeLBTag.Text = pLoanBalanceFormatted)); }
 
-            Invoke(new Action(() => curShipTag.Text = args.Ship));
-            Invoke(new Action(() => curShipDesTag.Text = args.ShipName));
-            Invoke(new Action(() => curShipIDTag.Text = args.ShipIdent));
-            Invoke(new Action(() => curShipFuelTag.Text = (currentFuelLevel + " / " + maxFuelLevel)));
+            if (StatusTags.OnFoot)
+            {
+                Invoke(new Action(() => curShipTag.Text = args.Ship));
+                Invoke(new Action(() => curShipDesTag.Text = args.ShipName));
+                Invoke(new Action(() => curShipIDTag.Text = args.ShipIdent));
+                Invoke(new Action(() => curShipFuelTag.Text = (currentFuelLevel + " / " + maxFuelLevel)));
+            }
+            else
+            {
+                Invoke(new Action(() => curShipTag.Text = args.Ship));
+                Invoke(new Action(() => curShipDesTag.Text = args.ShipName));
+                Invoke(new Action(() => curShipIDTag.Text = args.ShipIdent));
+                Invoke(new Action(() => curShipFuelTag.Text = (currentFuelLevel + " / " + maxFuelLevel)));
+            }
 
             Invoke(new Action(() => homeLSTag.Text = "scanning..."));
             Invoke(new Action(() => homeSysTag.Text = "scanning..."));
@@ -562,6 +577,96 @@ namespace ED_Hud_Extension
 
         }
 
+        private void suitLoadoutEvent(object? sender, SuitLoadoutEvent.SuitLoadoutEventArgs e)
+        {
+            //suit name and mods list
+            Invoke(new Action(() => equippedSuitTag.Text = convertName(e.SuitName)));
+            string suitModList = "";
+            foreach (string mod in e.SuitMods)
+            {
+                if (!suitModList.Contains(mod))
+                {
+                    suitModList += convertName(mod) + ",  ";
+                }
+            }
+            if (suitModList.Length != 0) 
+            { suitModList = suitModList.TrimEnd(',', ' ') + "."; } else { suitModList = "-none-"; }
+            Invoke(new Action(() => suitModsTag.Text = suitModList));
+
+            int weaponCount = e.Modules.Length;
+            if (equippedSuitTag.Text.Contains("Dominator"))
+            {
+                //adjust the weapon label set
+                Invoke(new Action(() => weaponOneLabel.Text = "Primary Slot 1 : "));
+                Invoke(new Action(() => weaponTwoLabel.Text = "Primary Slot 2 : "));
+                Invoke(new Action(() => weaponThreeLabel.Text = "Secondary Slot : "));
+                Invoke(new Action(() => weaponThreeModsLabel.Text = "Weapon Mods : "));
+
+            }
+            else
+            {
+                //adjust the labels, hide the third set
+                Invoke(new Action(() => weaponOneLabel.Text = "Primary Slot : "));
+                Invoke(new Action(() => weaponTwoLabel.Text = "Secondary Slot : "));
+                Invoke(new Action(() => weaponThreeLabel.Text = ""));
+                Invoke(new Action(() => weaponThreeTag.Text = ""));
+                Invoke(new Action(() => weaponThreeModsLabel.Text = ""));
+                Invoke(new Action(() => weaponThreeModTag.Text = ""));
+            }
+            //weapon one name and mods list
+            if (e.Modules.Length >= 1)
+            {
+                Invoke(new Action(() => weaponOneTag.Text = e.Modules[0].ModuleName_Localised + ", Grade " + e.Modules[0].Class));
+
+                string weaponOneModList = "";
+                foreach (string mod in e.Modules[0].WeaponMods)
+                {
+                    if (!weaponOneModList.Contains(convertName(mod)))
+                    { weaponOneModList += convertName(mod) + ",  "; }
+                }
+                if (weaponOneModList.Length != 0)
+                { weaponOneModList = weaponOneModList.TrimEnd(',', ' ') + "."; }
+                else { weaponOneModList = "-none-"; }
+                Invoke(new Action(() => weaponOneModTag.Text = weaponOneModList));
+            }
+            else { Invoke(new Action(() => weaponTwoModTag.Text = "-none-")); Invoke(new Action(() => weaponTwoTag.Text = "-none-")); }
+
+
+            //weapon two name and mods list
+            if (e.Modules.Length >= 2)
+            {
+                Invoke(new Action(() => weaponTwoTag.Text = e.Modules[1].ModuleName_Localised + ", Grade " + e.Modules[1].Class));
+
+                string weaponTwoModList = "";
+                foreach (string mod in e.Modules[1].WeaponMods)
+                {
+                    if (!weaponTwoModList.Contains(convertName(mod)))
+                    { weaponTwoModList += convertName(mod) + ",  "; }
+                }
+                if (weaponTwoModList.Length != 0)
+                { weaponTwoModList = weaponTwoModList.TrimEnd(',', ' ') + "."; }
+                else { weaponTwoModList = "-none-"; }
+                Invoke(new Action(() => weaponTwoModTag.Text = weaponTwoModList));
+            } else { Invoke(new Action(() => weaponTwoModTag.Text = "-none-")); Invoke(new Action(() => weaponTwoTag.Text = "-none-")); }
+
+            if (e.Modules.Length == 3)
+            {
+                //weapon three name and mods list
+                Invoke(new Action(() => weaponThreeTag.Text = e.Modules[2].ModuleName_Localised + ", Grade " + e.Modules[2].Class));
+
+                string weaponThreeModList = "";
+                foreach (string mod in e.Modules[2].WeaponMods)
+                {
+                    if (!weaponThreeModList.Contains(convertName(mod)))
+                    { weaponThreeModList += convertName(mod) + ",  "; }
+                }
+                if (weaponThreeModList.Length != 0)
+                { weaponThreeModList = weaponThreeModList.TrimEnd(',', ' ') + "."; }
+                else { weaponThreeModList = "-none-"; }
+                Invoke(new Action(() => weaponThreeModTag.Text = weaponThreeModList));
+            } else { Invoke(new Action(() => weaponThreeModTag.Text = "")); Invoke(new Action(() => weaponThreeTag.Text = "")); }
+        }
+
         //--------------------- sidebar ui methods ---------------------
 
         private void restartSessionButton_Click(object sender, EventArgs e) //used to manually reset the player's session if it doesn't reset automatically
@@ -627,6 +732,15 @@ namespace ED_Hud_Extension
             else if (StatusTags.FsdMassLocked) { Invoke(new Action(() => fsdTag.Text = "mass locked")); }
             else if (StatusTags.FsdJump) { Invoke(new Action(() => fsdTag.Text = "jumping")); }
             else { Invoke(new Action(() => fsdTag.Text = "ready")); }
+
+            if (StatusTags.OnFoot) { Invoke(new Action(() => onFootPanel.Visible = true)); }
+            if (!StatusTags.OnFoot) { Invoke(new Action(() => onFootPanel.Visible = false)); }
+
+            if (StatusTags.OnFoot)
+            {
+                Invoke(new Action(() => healthBar.Value = pFootHealth));
+                Invoke(new Action(() => oxygenBar.Value = pFootOxygen));
+            }
         }
 
         //'animation' methods
@@ -651,7 +765,7 @@ namespace ED_Hud_Extension
                 else if (steps == 3)
                 {
                     Invoke(new Action(() => enviroDone.Visible = true));
-                    waitingConnectLabel.Invoke(new Action(() => waitingConnectLabel.Visible = true));
+                    Invoke(new Action(() => waitingConnectLabel.Visible = true));
                     steps++;
                 }
                 else if (!timeToClear) // ... animation loop ///run while waiting for the journalwatcher to identify the proper journal to read
@@ -660,13 +774,13 @@ namespace ED_Hud_Extension
                     if (animDots < 3) //if that string has less than 3 periods
                     {
                         animConnectionText = animConnectionText + ".";
-                        waitingConnectLabel.Invoke(new Action(() => waitingConnectLabel.Text = animConnectionText));
+                        Invoke(new Action(() => waitingConnectLabel.Text = animConnectionText));
                         animDots++;
                     }
                     else if (!newJournal)//if that string has all 3 periods, reset it it back to one.
                     {
                         animConnectionText = animConnectionTextBase;
-                        waitingConnectLabel.Invoke(new Action(() => waitingConnectLabel.Text = animConnectionText));
+                        Invoke(new Action(() => waitingConnectLabel.Text = animConnectionText));
                         animDots = 1;
 
                         if (gameRunning())
@@ -823,7 +937,7 @@ namespace ED_Hud_Extension
                             planetDetailView.BringToFront();
                             bodyNameTag.Text = body.name;
                             bodyTypeTag.Text = body.subType;
-                            //bodyDiscoveryTag.Text = body.discoveryInfo.First<Discovery>().ToString();
+                            //bodyDiscoveryTag.Text = body.discoveryInfo.First().ToString();
                             if (body.isLandable == true) { bodyLandableTag.Text = "Yes"; } else { bodyLandableTag.Text = "No"; }
                             bodyGravityTag.Text = body.gravity.ToString() + " G";
                             bodyMassTag.Text = body.earthMasses.ToString();
@@ -843,7 +957,7 @@ namespace ED_Hud_Extension
                         {
                             starDetailView.BringToFront();
                             starNameTag.Text = body.name;
-                            //starDiscoverTag.Text = body.discoveryInfo.First<Discovery>().ToString();
+                            //starDiscoverTag.Text = body.discoveryInfo.First().ToString();
                             if (body.isMainStar == true) { mainStarTag.Text = "Yes"; } else { mainStarTag.Text = "No"; }
                             starClassTag.Text = body.subType;
                             starAgeTag.Text = body.age.ToString();
@@ -910,8 +1024,6 @@ namespace ED_Hud_Extension
                 }
             }
         }
-
-
 
         //a good ol debounce setup so we don't accidentally flood EDSM with 700 GET requests in 0.3 seconds
         private static CancellationTokenSource systemQueryCts;

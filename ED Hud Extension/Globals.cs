@@ -96,6 +96,9 @@ public class Globals
         public static bool BreathableAtmosphere;
     }
 
+    public static int pFootHealth;
+    public static int pFootOxygen;
+
     // --------------------- player variables ---------------------
     //player stuff
     public static string pCombatRank;

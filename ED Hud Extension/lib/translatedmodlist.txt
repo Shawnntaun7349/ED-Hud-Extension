@@ -1,0 +1,58 @@
+breakdown : 
+
+get a table to cross reference SuitName to readable name, ie. TacticalSuit_Class5 to Grade 5 Dominator
+
+
+SuitName 		| 		Legible Name
+------------------------------------
+TacticalSuit 	|  		Dominator
+UtilitySuit	    |  		Maverick
+ExplorationSuit	|		Artemis
+FlightSuit		|		Flight Suit     -- why is this one the only one with a correctly localised name?
+
+
+//all mods have the 'suit_' prefix
+Suit Mods			  	 	  | Legible Name
+--------------------------------------------
+adsmovementspeed	  	 	  | Combat Movement Speed [Better movement speed while ADS]
+backpackcapacity 	  	 	  | Extra Backpack Capacity
+improvedarmourrating  	 	  | Damage Resistance
+improvedjumpassist    	 	  | Improved Jump Assist
+improvedradar 		  	 	  | Enhanced Tracking
+increasedammoreserves 	 	  | Extra Ammo Capacity
+increasedbatterycapacity 	  | Improved Battery Capacity
+increasedmeleedamage 	 	  | Added Melee Damage
+increased02capacity 	 	  | Increased Air Reserves
+increasedshieldregen	 	  | Faster Shield Regeneration
+increasedsprintduration  	  | Increased Sprint Duration
+nightvision				 	  | Night Vision
+quierterfootsteps		 	  | Quieter Footsteps
+reducedtoolbatteryconsumption | Reduced Tool Battery Consumption
+
+/all mods have the 'weapon_' prefix
+Weapon Mods 			  | Legible Name
+------------------------------------------
+suppression_unpressurised | Audio Masking
+suppression_pressurised   | Noise Suppressor
+handling 				  | Faster Handling
+range					  | Greater Range
+headshotdamage			  | Increased Headshot Damage
+accuracy				  | Improved Hipfire Accuracy
+clipsize				  | Increased Magazine Size
+reloadspeed				  | Faster Reload Speed
+stability				  | Imrpoved Stability
+scope					  | Scope
+backpackreloading		  | Stowed Reloading
+
+Dominator Loadout event
+{ "timestamp":"2026-09-01T17:07:28Z", "event":"SuitLoadout", "SuitID":1847634425632320, "SuitName":"tacticalsuit_class5", "SuitName_Localised":"$TacticalSuit_Class1_Name;", "SuitMods":[ "suit_improvedarmourrating", "suit_increasedshieldregen", "suit_increasedammoreserves" ], "LoadoutID":4293000005, "LoadoutName":"Kinetic AR, Plasma MR", 
+
+"Modules":[ { "SlotName":"PrimaryWeapon1", "SuitModuleID":1867385161638207, "ModuleName":"wpn_m_assaultrifle_kinetic_fauto", "ModuleName_Localised":"Karma AR-50", "Class":5, "WeaponMods":[  ] }, 
+			{ "SlotName":"PrimaryWeapon2", "SuitModuleID":1862831271973337, "ModuleName":"wpn_m_shotgun_plasma_doublebarrel", "ModuleName_Localised":"Manticore Intimidator", "Class":5, "WeaponMods":[ "weapon_backpackreloading", "weapon_reloadspeed", "weapon_clipsize", "weapon_handling" ] }, 
+			{ "SlotName":"SecondaryWeapon", "SuitModuleID":1866943996428058, "ModuleName":"wpn_s_pistol_plasma_charged", "ModuleName_Localised":"Manticore Tormentor", "Class":5, "WeaponMods":[ "weapon_headshotdamage" ] } ] }
+
+Maverick Loadout event
+{ "timestamp":"2026-09-01T17:08:42Z", "event":"SuitLoadout", "SuitID":1867997686665348, "SuitName":"utilitysuit_class3", "SuitName_Localised":"$UtilitySuit_Class1_Name;", "SuitMods":[ "suit_increasedbatterycapacity" ], "LoadoutID":4293000003, "LoadoutName":"Maverick", 
+
+"Modules":[ { "SlotName":"PrimaryWeapon1", "SuitModuleID":1862831271973337, "ModuleName":"wpn_m_shotgun_plasma_doublebarrel", "ModuleName_Localised":"Manticore Intimidator", "Class":5, "WeaponMods":[ "weapon_backpackreloading", "weapon_reloadspeed", "weapon_clipsize", "weapon_handling" ] }, 
+			{ "SlotName":"SecondaryWeapon", "SuitModuleID":1866943996428058, "ModuleName":"wpn_s_pistol_plasma_charged", "ModuleName_Localised":"Manticore Tormentor", "Class":5, "WeaponMods":[ "weapon_headshotdamage" ] } ] }

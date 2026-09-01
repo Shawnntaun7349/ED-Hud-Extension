@@ -40,11 +40,11 @@ internal class Functions
 
         //verify the saved game folder path
         string loadedGamePath = doc.RootElement.GetProperty("Game Path").GetString();
-        if (Directory.Exists(loadedGamePath))
+        if (File.Exists(loadedGamePath))
         {
             gamePath = loadedGamePath;
         }
-        else if (Directory.Exists(defaultJournalPath))//if it aint there, try the default path (in case the user has set some custom path that has been reset)
+        else if (File.Exists(defaultJournalPath))//if it aint there, try the default path (in case the user has set some custom path that has been reset)
         {
             gamePath = defaultGamePath;
         }
