@@ -13,6 +13,9 @@ Current Version : 0.2.0
 - [Tentatively] A Color changing mechanism of some kind to allow the user to customize the appearance of their UI [in EDHE, not in-game. EDHM-UI exists and is fantastic.] [https://bluemystical.github.io/edhm-api/]
 
 **--- Update Notes ---**  
+**Version 0.2.1**  
+Introduction of On-Foot Combat Panel feature and underlying methods, including translation from client-side suit & mod names to player-legible names. (i.e. tacticalsuit_class3 to Manticore Dominator, Grade 3). Correction of launch issue causing EDHE instance to crash upon initial startup when failing to properly identify EliteDangerous64.exe file.
+
 **Version 0.2.0**  
 Final early-stage update to Exploration Panel: implemented debounce method to prevent abuse of EDSM's API, integrated new NavData class to handle parsing of NavRoute.json file to handle multi-stage navigation routes. Published first Release for early debugging & later implementation of planned automatic updates feature.
 
