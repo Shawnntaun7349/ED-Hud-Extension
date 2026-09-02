@@ -56,6 +56,7 @@
             edmcTab = new TabPage();
             helpTab = new TabPage();
             restartButton = new Button();
+            checkUpdateButton = new Button();
             settingsTabControl.SuspendLayout();
             genTab.SuspendLayout();
             dispTab.SuspendLayout();
@@ -343,11 +344,22 @@
             restartButton.UseVisualStyleBackColor = true;
             restartButton.Click += restartButton_Click;
             // 
+            // checkUpdateButton
+            // 
+            checkUpdateButton.Location = new Point(174, 415);
+            checkUpdateButton.Name = "checkUpdateButton";
+            checkUpdateButton.Size = new Size(129, 23);
+            checkUpdateButton.TabIndex = 4;
+            checkUpdateButton.Text = "Check for Updates";
+            checkUpdateButton.UseVisualStyleBackColor = true;
+            checkUpdateButton.Click += checkUpdateButton_Click;
+            // 
             // SettingsForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(800, 450);
+            Controls.Add(checkUpdateButton);
             Controls.Add(restartButton);
             Controls.Add(settingsTabControl);
             Controls.Add(applyButton);
@@ -393,5 +405,6 @@
         private TabPage spanshTab;
         private TabPage edmcTab;
         private Button restartButton;
+        private Button checkUpdateButton;
     }
 }

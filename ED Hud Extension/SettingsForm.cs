@@ -1,9 +1,12 @@
 ﻿using static Globals;
+using static ED_Hud_Extension.UpdateService;
 
 namespace ED_Hud_Extension
 {
     public partial class SettingsForm : Form
     {
+        private readonly UpdateService updateService = new UpdateService(new UpdateService.GitHubUpdateChecker());
+
         public SettingsForm()
         {
             InitializeComponent();
@@ -100,6 +103,19 @@ namespace ED_Hud_Extension
         {
             DialogResult restart = MessageBox.Show("Are you sure you want to restart?", "Restart EDHE", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
             if (restart == DialogResult.Yes) { Functions.RestartApplication(); }
+        }
+
+        private async void checkUpdateButton_Click(object sender, EventArgs e)
+        {
+            checkUpdateButton.Enabled = false;
+            try
+            {
+                await updateService.CheckForUpdatesAsync(silent: false);
+            }
+            finally
+            {
+                checkUpdateButton.Enabled = true;
+            }
         }
     }
 }

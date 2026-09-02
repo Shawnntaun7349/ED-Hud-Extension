@@ -1,14 +1,13 @@
 using EliteJournalReader;
 using EliteJournalReader.Events;
 using System.Diagnostics;
-using System.Security.Policy;
+using System.Reflection;
 using static ED_Hud_Extension.SystemData;
 using static ED_Hud_Extension.NavData;
 using static Functions;
 using static Globals;
 using static StatusReader;
 using static ED_Hud_Extension.Loadouts;
-using System.Diagnostics.Tracing;
 
 namespace ED_Hud_Extension
 {
@@ -44,6 +43,7 @@ namespace ED_Hud_Extension
         public static ShipFlag _flag = new ShipFlag();
         public static StatusReader statReader = new StatusReader();
         public SystemData systemData = new SystemData();
+        private readonly UpdateService updateService = new UpdateService(new UpdateService.GitHubUpdateChecker());
 
 
         public bool gameRunning()
@@ -94,8 +94,10 @@ namespace ED_Hud_Extension
 
         }
 
-        private void MainForm_Load(object sender, EventArgs e)
+        private async void MainForm_Load(object sender, EventArgs e)
         {
+            _ = updateService.CheckForUpdatesAsync(silent: true);
+
             mainFormLoaded = true;
             if (statusEnabled) { statusLabel.Text = statBase + "initiating service"; }
             loopTimer = new System.Threading.Timer(readTimerCallback, "Timer State", 50, 50); //start the loop for the status reader
@@ -107,6 +109,8 @@ namespace ED_Hud_Extension
             locDTTag.Text = DateTime.Now.ToString("dddd, MMMM dd, yyyy \nHH:mm");
             starDateTag.Text = starDate;
             starTimeTag.Text = starTime;
+
+            verLabel.Text = "version " + Assembly.GetExecutingAssembly().GetName().Version.ToString();
 
             if (gameRunning() && (!inMainMenu(_flag))) //if the game is already running when EDHE spins up, also if we're not in the main menu (status Flag1 reads 0 until player loads into game proper) 
             {

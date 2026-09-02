@@ -1,0 +1,11 @@
+Main App                          Updater Helper (separate exe)
+   |                                       |
+   |-- checks GitHub API on startup        |
+   |-- shows "Update available" prompt     |
+   |-- user clicks "Update"                |
+   |-- downloads new installer.exe          |
+   |-- launches Updater, passes args -----> |
+   |-- exits                               |-- waits for Main App process to exit
+                                            |-- runs installer.exe /SILENT
+                                            |-- relaunches Main App
+                                            |-- exits itself
