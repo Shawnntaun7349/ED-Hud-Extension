@@ -361,3 +361,7 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+EDHEUpdater/App.config
+EDHEUpdater/EDHEUpdater.csproj
+EDHEUpdater/Properties/Resources.Designer.cs
+EDHEUpdater/Properties/Settings.Designer.cs
