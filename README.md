@@ -4,7 +4,7 @@ A second-monitor program for Frontier Development's Elite: Dangerous.
 
 *Developed by Sean Roe*   
 
-Current Version : 0.2.0  
+Current Version : 0.2.1.1  
 
 **--- Planned Features ---**  
 - Expansion on Combat Panel to show more player data, such as Power Distributor levels, current shield status, etc.
@@ -13,6 +13,9 @@ Current Version : 0.2.0
 - [Tentatively] A Color changing mechanism of some kind to allow the user to customize the appearance of their UI [in EDHE, not in-game. EDHM-UI exists and is fantastic.] [https://bluemystical.github.io/edhm-api/]
 
 **--- Update Notes ---**  
+**Version 0.2.1.1**  
+Implementation of automatic update feature via GitHub API & the EHDE Update tool packaged alongside EDHE proper. Users will be prompted at startup if there is an applicable update, and can run checks manually via the settings menu. Implementation of UpdateServices class to facilitate updates, streamlining of some functions & removal of several unused dependencies. 
+
 **Version 0.2.1**  
 Introduction of On-Foot Combat Panel feature and underlying methods, including translation from client-side suit & mod names to player-legible names. (i.e. tacticalsuit_class3 to Manticore Dominator, Grade 3). Correction of launch issue causing EDHE instance to crash upon initial startup when failing to properly identify EliteDangerous64.exe file.
 
