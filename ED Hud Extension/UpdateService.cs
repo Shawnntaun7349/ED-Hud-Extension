@@ -124,7 +124,7 @@ namespace ED_Hud_Extension
 
             public async Task<string> DownloadUpdateAsync(UpdateInfo info, IProgress<double> progress = null)
             {
-                var tempPath = Path.Combine(Path.GetTempPath(), $"EDHE.{info.Version}.exe");
+                var tempPath = Path.Combine(Path.GetTempPath(), $"EDHE.{info.Version}.exe");    
 
                 using var response = await client.GetAsync(info.DownloadUrl, HttpCompletionOption.ResponseHeadersRead);
                 response.EnsureSuccessStatusCode();

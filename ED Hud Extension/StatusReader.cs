@@ -152,8 +152,16 @@ public class StatusReader
                 {
                     double? health = root.Health*100;
                     double? oxygen = root.Oxygen*100;
-                    pFootHealth = (int)health;
-                    pFootOxygen = (int)oxygen;
+                    try
+                    {
+                        pFootHealth = (int)health;
+                        pFootOxygen = (int)oxygen;
+                    }
+                    catch
+                    {
+                        pFootHealth = 0;
+                        pFootOxygen = 0;
+                    }
                 }
 
                 Landed = flag.HasFlag(ShipFlag.Landed);

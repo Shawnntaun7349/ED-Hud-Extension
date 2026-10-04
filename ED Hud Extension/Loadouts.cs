@@ -4,21 +4,6 @@ namespace ED_Hud_Extension
 {
     public class Loadouts
     {
-        public class Loadout
-        {
-            public string SuitName { get; set; }
-            public string LoadoutName { get; set; }
-            public List<string>? SuitMods { get; set; } 
-            public List<Weapon>? Modules { get; set; } //weapons
-        }
-        public class Weapon 
-        {
-            public string SlotName { get; set; } //slot 1, 2, 3
-            public string ModuleName_Localised { get; set; } //legible weapon name
-            public int Class { get; set; } 
-            public List<string>? WeaponMods { get; set; } 
-        }
-
         public static Dictionary<string, string> conversionTable = new Dictionary<string, string>()
         {   //suit names
             { "flightsuit", "Remlok Flight Suit" },
@@ -66,22 +51,10 @@ namespace ED_Hud_Extension
             { "weapon_backpackreloading", "Stowed Reloading" },
         };
 
-        public static Loadout playerLoadout;
-        public static Weapon loadoutWeapon;
-
         public static string convertName(string inputName)
         {
             if (conversionTable.TryGetValue(inputName, out string? convertedName)) { return convertedName; }
             else return inputName;
-        }
-
-        public  void getLoadoutData()
-        {
-            if (File.Exists(journalPath))
-            {
-                string json = File.ReadAllText(journalPath);
-            }
-            else { /* fucken panic */ }
         }
     }
 }

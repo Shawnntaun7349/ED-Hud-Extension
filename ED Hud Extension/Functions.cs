@@ -1,9 +1,8 @@
 ﻿using System.Text.RegularExpressions;
-
 using System.Text.Json;
-
+using System.Xml;
 using static Globals;
-using System.Runtime.CompilerServices;
+using ED_Hud_Extension;
 
 
 internal class Functions
@@ -62,6 +61,9 @@ internal class Functions
         //make sure the form loads on the correct display
         Screen displayScreen = Screen.AllScreens[savedPrefDisplayIndex];
 		location = displayScreen.WorkingArea.Location;
+
+        //grab the user's key binds
+        KeybindsHandler.retrieveKeyBinds();
 	}
 
     public static void saveSettings()
@@ -173,4 +175,8 @@ internal class Functions
 
         return Regex.Replace(enumRank, @"([a-z])([A-Z])|([A-Z]+)([A-Z][a-z])", "$1$4 $2$3");
     } 
+
+    public void readKeybinds()
+    {
+    }
 }

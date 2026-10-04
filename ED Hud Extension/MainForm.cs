@@ -8,6 +8,7 @@ using static Functions;
 using static Globals;
 using static StatusReader;
 using static ED_Hud_Extension.Loadouts;
+using Newtonsoft.Json.Linq;
 
 namespace ED_Hud_Extension
 {
@@ -18,6 +19,7 @@ namespace ED_Hud_Extension
         private static System.Threading.Timer connectingTimer;
         private static System.Threading.Timer scanTimer;
         private static System.Threading.Timer fsdTimer;
+        private static System.Threading.Timer restartTimer;
 
         //bits for the connection 'animation'
         private static System.Threading.Timer animTimer;
@@ -103,15 +105,17 @@ namespace ED_Hud_Extension
             loopTimer = new System.Threading.Timer(readTimerCallback, "Timer State", 50, 50); //start the loop for the status reader
             localTimer = new System.Threading.Timer(localCallbackMethod, "Timer State", 100, 250);
 
-            DateTimeOffset yOffset = DateTimeOffset.UtcNow.AddYears(1286);
+            //1286 year offset
             string starTime = DateTime.UtcNow.ToString("HH:mm");
-            string starDate = yOffset.ToString("dddd, MMMM dd, yyyy");
+            string starDate = DateTime.UtcNow.ToString("dddd, MMMM dd,");
+            string starYear = ((int)DateTime.UtcNow.Year + 1286).ToString();
             locDTTag.Text = DateTime.Now.ToString("dddd, MMMM dd, yyyy \nHH:mm");
             starDateTag.Text = starDate;
             starTimeTag.Text = starTime;
+            starYearTag.Text = starYear;
 
             verLabel.Text = "version " + Assembly.GetExecutingAssembly().GetName().Version.ToString();
-
+            
             if (gameRunning() && (!inMainMenu(_flag))) //if the game is already running when EDHE spins up, also if we're not in the main menu (status Flag1 reads 0 until player loads into game proper) 
             {
                 initiateWatcher();
@@ -150,7 +154,10 @@ namespace ED_Hud_Extension
             watcher.GetEvent<RankEvent>().Fired += rankEvent;
             watcher.GetEvent<ProgressEvent>().Fired += progressEvent;
             watcher.GetEvent<ReputationEvent>().Fired += repEvent;
-            watcher.GetEvent<LocationEvent>().Fired += locationEvent; 
+            watcher.GetEvent<LocationEvent>().Fired += locationEvent;
+
+            watcher.GetEvent<EmbarkEvent>().Fired += embark;
+            watcher.GetEvent<DisembarkEvent>().Fired += disembark;
 
             //shutting down
             watcher.GetEvent<ShutdownEvent>().Fired += gameShutDown;
@@ -173,16 +180,25 @@ namespace ED_Hud_Extension
 
             //on foot events
             watcher.GetEvent<SuitLoadoutEvent>().Fired += suitLoadoutEvent;
+            //backpack events
+            watcher.GetEvent<BackpackEvent>().Fired += backpackEvent;
+            watcher.GetEvent<BackpackChangeEvent>().Fired += backpackChange;
+            watcher.GetEvent<UseConsumableEvent>().Fired += useConsumable;
+            watcher.GetEvent<CollectItemsEvent>().Fired += collectItems;
+
+            //srv / vessel events
+            watcher.GetEvent<LaunchSRVEvent>().Fired += launchSrvEvent;
+            watcher.GetEvent<LaunchVesselEvent>().Fired += launchVesselEvent;
         }
 
         //journal events
-        private void newJournalMethod(object? sender, NewJournalFileEvent.NewJournalFileEventArgs args) //fires on startup
+        private void newJournalMethod(object? sender, NewJournalFileEvent.NewJournalFileEventArgs e) //fires on startup
         {
             newJournal = true;
             if (statusEnabled) { Invoke(new Action(() => statusLabel.Text = statBase + "new journal file generated, initiating reader")); }
         }
 
-        private void loadInitialData(object? sender, LoadGameEvent.LoadGameEventArgs args) //fires on startup
+        private void loadInitialData(object? sender, LoadGameEvent.LoadGameEventArgs e) //fires on startup
         {
             if (newJournal) { if (statusEnabled) { Invoke(new Action(() => statusLabel.Text = statBase + "new journal generated, parsing")); } }
             else { if (statusEnabled) { Invoke(new Action(() => statusLabel.Text = statBase + "current journal identified, parsing")); } }
@@ -191,18 +207,18 @@ namespace ED_Hud_Extension
             Invoke(new Action(() => linkLabel.ForeColor = Color.FromArgb(192, 64, 0)));
 
             Invoke(new Action(() => welcomeLabel.Text = ""));
-            Invoke(new Action(() => welcomeLabel.Text += "Welcome, Commander\n" + args.Commander));
+            Invoke(new Action(() => welcomeLabel.Text += "Welcome, Commander\n" + e.Commander));
             clientReady = true;
-            currentFuelLevel = args.FuelLevel;
-            maxFuelLevel = args.FuelCapacity;
-            pShipType = args.Ship;
-            pShipName = args.ShipName;
-            pShipID = args.ShipIdent;
+            currentFuelLevel = e.FuelLevel;
+            maxFuelLevel = e.FuelCapacity;
+            pShipType = e.Ship_Localised;
+            pShipName = e.ShipName;
+            pShipID = e.ShipIdent;
 
-            gameMode = args.GameMode.ToString();
+            gameMode = e.GameMode.ToString();
 
-            pCreditBalance = args.Credits;
-            pLoan = args.Loan;
+            pCreditBalance = e.Credits;
+            pLoan = e.Loan;
 
             string pCreditBalanceFormatted = string.Format("{0:N0}", pCreditBalance);
             string pLoanBalanceFormatted = string.Format("{0:N0}", pLoan);
@@ -213,16 +229,16 @@ namespace ED_Hud_Extension
 
             if (StatusTags.OnFoot)
             {
-                Invoke(new Action(() => curShipTag.Text = args.Ship));
-                Invoke(new Action(() => curShipDesTag.Text = args.ShipName));
-                Invoke(new Action(() => curShipIDTag.Text = args.ShipIdent));
-                Invoke(new Action(() => curShipFuelTag.Text = (currentFuelLevel + " / " + maxFuelLevel)));
+                Invoke(new Action(() => curVesselTag.Text = "-embark to reestablish vessel uplink-"));
+                Invoke(new Action(() => curVesselNameTag.Text = "-waiting for embarkation-"));
+                Invoke(new Action(() => curVesselIDTag.Text = "-waiting for embarkation-"));
+                Invoke(new Action(() => curShipFuelTag.Text = "-waiting for embarkation-"));
             }
             else
             {
-                Invoke(new Action(() => curShipTag.Text = args.Ship));
-                Invoke(new Action(() => curShipDesTag.Text = args.ShipName));
-                Invoke(new Action(() => curShipIDTag.Text = args.ShipIdent));
+                Invoke(new Action(() => curVesselTag.Text = e.Ship_Localised));
+                Invoke(new Action(() => curVesselNameTag.Text = e.ShipName));
+                Invoke(new Action(() => curVesselIDTag.Text = e.ShipIdent));
                 Invoke(new Action(() => curShipFuelTag.Text = (currentFuelLevel + " / " + maxFuelLevel)));
             }
 
@@ -306,6 +322,16 @@ namespace ED_Hud_Extension
             Invoke(new Action(() => combatSysSecTag.Text = systemSecurity));
             if (this.InvokeRequired) { BeginInvoke(new Action(() => updateLocationData(pCurrentSystem))); }
             else { updateLocationData(pCurrentSystem); }
+        }
+
+        private void embark(object? sender, EmbarkEvent.EmbarkEventArgs e) //get on the ship/srv/slv
+        {
+            
+        }
+
+        private void disembark(object? sender, DisembarkEvent.DisembarkEventArgs e) //get off the ship/srv/slv
+        {
+
         }
 
         private void underAttack(object? sender, UnderAttackEvent.UnderAttackEventArgs e) //take a fucken guess what this one's for
@@ -534,8 +560,20 @@ namespace ED_Hud_Extension
                 Invoke(new Action(() => MessageBox.Show(this, "Elite Dangerous has shut down. EDHE will remain operational but will need restarted in the case of a new session.", "Uplink Lost", MessageBoxButtons.OK, MessageBoxIcon.Warning)));
                 Invoke(new Action(() => linkLabel.Text = " uplink integrity lost"));
                 Invoke(new Action(() => linkLabel.ForeColor = Color.DarkRed));
-                shutdownTime = DateTime.Now;
+                //shutdownTime = DateTime.Now;
+                restartTimer = new System.Threading.Timer(waitForRestart, "Timer State", 50, 100);
             }
+        }
+
+        private void waitForRestart(object? sender)
+        {
+            if (gameRunning())
+            {
+                Invoke(new Action(() => linkLabel.Text = "uplink integrity : high"));
+                Invoke(new Action(() => linkLabel.ForeColor = ColorTranslator.FromHtml("#C0400")));
+                restartTimer.Change(0, Timeout.Infinite);
+            }
+            else return;
         }
 
         private async void updateLocationData(string system)
@@ -671,6 +709,135 @@ namespace ED_Hud_Extension
             } else { Invoke(new Action(() => weaponThreeModTag.Text = "")); Invoke(new Action(() => weaponThreeTag.Text = "")); }
         }
 
+        private void launchVesselEvent(object? sender, LaunchVesselEvent.LaunchVesselEventArgs e)
+        {
+            //despite the fact that the player can assign Designations & Callsigns to SLVs, the journal won't actually offer them in the output
+            Invoke(new Action(() => curVesselTag.Text = e.VesselType_Localised));
+            Invoke(new Action(() => curVesselNameTag.Text = "SLV"));
+            Invoke(new Action(() => curVesselIDTag.Text = e.ID.ToString()));
+        }
+
+        private void launchSrvEvent(object? sender, LaunchSRVEvent.LaunchSRVEventArgs e)
+        {
+            Invoke(new Action(() => curVesselTag.Text = e.SRVType_Localised));
+            Invoke(new Action(() => curVesselNameTag.Text = "SRV"));
+            Invoke(new Action(() => curVesselIDTag.Text = e.ID.ToString()));
+
+        }
+
+        private void shipyardSwapEvent(object? sender, ShipyardSwapEvent.ShipyardSwapEventArgs e) //will always fire in sequence with loadoutEvent & shipLockerEvent
+        {
+            Invoke(new Action(() => curVesselTag.Text = e.ShipType_Localised));
+        }
+
+        private void loadoutEvent(object? sender, LoadoutEvent.LoadoutEventArgs e)
+        {
+            Invoke(new Action(() => curVesselTag.Text = e.Ship));
+            Invoke(new Action(() => curVesselNameTag.Text = e.ShipIdent));
+            Invoke(new Action(() => curVesselIDTag.Text = e.ShipID.ToString()));
+        }
+
+        private void backpackEvent(object? sender, BackpackEvent.BackpackEventArgs e) //establish the initial backpack loadout
+        {
+            foreach (Consumable c in e.Consumables)
+            {
+                if (c.Name == "healthpack")
+                {
+                    healthPackCount = c.Count;
+                    Invoke(new Action(() => healthPackTag.Text = c.Count + " / 2"));
+                }
+                if (c.Name == "energycell")
+                {
+                    energyCellCount = c.Count;
+                    Invoke(new Action(() => energyCellTag.Text = c.Count + " / 2"));
+                }
+                if (c.Name == "amm_grenade_frag")
+                {
+                    fragGrenadeCount = c.Count;
+                    Invoke(new Action(() => fragGrenadeTag.Text = c.Count + " / 3"));
+                }
+                if (c.Name == "amm_grenade_emp")
+                {
+                    empCount = c.Count;
+                    Invoke(new Action(() => empTag.Text = c.Count + " / 3"));
+                }
+                if (c.Name == "amm_grenade_shield")
+                {
+                    shieldProjectorCount = c.Count;
+                    Invoke(new Action(() => shieldProjectorTag.Text = c.Count + " / 2"));
+                }
+            }
+        }
+
+        private void backpackChange(object? sender, BackpackChangeEvent.BackpackChangeEventArgs e) //only way to track *used* grenades, because of course it is
+        {
+            if (e.Removed is not null) //if the change is removing an item
+            {
+                //check for the grenades, healthpacks & energy cells have their own event. for some reason.
+                if (e.Removed[0].Name == "amm_grenade_frag")
+                {
+                    fragGrenadeCount--;
+                    Invoke(new Action(() => fragGrenadeTag.Text = fragGrenadeCount + " / 3"));
+                }
+                if (e.Removed[0].Name == "amm_grenade_emp")
+                {
+                    empCount--;
+                    Invoke(new Action(() => empTag.Text = empCount + " / 3"));
+                }
+                if (e.Removed[0].Name == "amm_grenade_shield")
+                {
+                    shieldProjectorCount--;
+                    Invoke(new Action(() => shieldProjectorTag.Text = shieldProjectorCount + " / 2"));
+                }
+            }
+        }
+
+        private void collectItems(object? sender, CollectItemsEvent.CollectItemsEventArgs e)
+        {
+            if (e.Timestamp > startUpTime)
+            {
+                if (e.Name == "healthpack")
+                {
+                    healthPackCount++;
+                    Invoke(new Action(() => healthPackTag.Text = healthPackCount + " / 2"));
+                }
+                if (e.Name == "energycell")
+                {
+                    energyCellCount++;
+                    Invoke(new Action(() => energyCellTag.Text = energyCellCount + " / 2"));
+                }
+                if (e.Name == "amm_grenade_frag")
+                {
+                    fragGrenadeCount++;
+                    Invoke(new Action(() => fragGrenadeTag.Text = fragGrenadeCount + " / 3"));
+                }
+                if (e.Name == "amm_grenade_emp")
+                {
+                    empCount++;
+                    Invoke(new Action(() => empTag.Text = empCount + " / 3"));
+                }
+                if (e.Name == "ammm_grenade_shield")
+                {
+                    shieldProjectorCount++;
+                    Invoke(new Action(() => shieldProjectorTag.Text = shieldProjectorCount + " / 2"));
+                }
+            }
+        }
+
+        private void useConsumable(object? sender, UseConsumableEvent.UseConsumableEventArgs e) //no grenades, for some reason
+        {
+            if (e.Name == "healthpack")
+            {
+                healthPackCount--;
+                Invoke(new Action(() => healthPackTag.Text = healthPackCount + " / 2"));
+            }
+            if (e.Name == "energycell")
+            {
+                energyCellCount--;
+                Invoke(new Action(() => energyCellTag.Text = energyCellCount + " / 2"));
+            }
+        }
+
         //--------------------- sidebar ui methods ---------------------
 
         private void restartSessionButton_Click(object sender, EventArgs e) //used to manually reset the player's session if it doesn't reset automatically
@@ -678,6 +845,7 @@ namespace ED_Hud_Extension
             Invoke(new Action(() => MessageBox.Show(this, "Elite Dangerous has shut down. EDHE will remain operational but will need restarted in the case of a new session.", "Uplink Lost", MessageBoxButtons.OK, MessageBoxIcon.Warning)));
             Invoke(new Action(() => linkLabel.Text = " uplink integrity lost"));
             Invoke(new Action(() => linkLabel.ForeColor = Color.DarkRed));
+            //Invoke(new Action(() => Refresh()));
         }
 
         private void simulateButton_Click(object sender, EventArgs e)
@@ -705,19 +873,20 @@ namespace ED_Hud_Extension
         //timer methods
         private void localCallbackMethod(object state)
         {
-            DateTimeOffset yOffset = DateTimeOffset.UtcNow.AddYears(1286);
             string starTime = DateTime.UtcNow.ToString("HH:mm");
-            string starDate = yOffset.ToString("dddd, MMMM dd, yyyy");
+            string starDate = DateTime.UtcNow.ToString("dddd, MMMM dd,");
+            string starYear = ((int)DateTime.UtcNow.Year + 1286).ToString();
             Invoke(new Action(() => locDTTag.Text = DateTime.Now.ToString("dddd, MMMM dd, yyyy \nHH:mm")));
             Invoke(new Action(() => starDateTag.Text = starDate));
             Invoke(new Action(() => starTimeTag.Text = starTime));
+            Invoke(new Action(() => starYearTag.Text = starYear));
         }
 
         public void readTimerCallback(object? sender) //update status information
         {
             try
             {
-                readStatus(journalPath + "\\status.json", sf, ff);
+                readStatus(journalPath + "\\Status.json", sf, ff);
             }
             catch (IOException)
             {
@@ -726,7 +895,7 @@ namespace ED_Hud_Extension
                 waitTimer.Tick += (s, args) =>
                 {
                     waitTimer.Stop();
-                    readStatus(journalPath + "\\status.json", sf, ff);
+                    readStatus(journalPath + "\\Status.json", sf, ff);
                 };
                 waitTimer.Start();
             }
@@ -740,10 +909,16 @@ namespace ED_Hud_Extension
             if (StatusTags.OnFoot) { Invoke(new Action(() => onFootPanel.Visible = true)); }
             if (!StatusTags.OnFoot) { Invoke(new Action(() => onFootPanel.Visible = false)); }
 
-            if (StatusTags.OnFoot)
+            if (StatusTags.OnFoot) //load up the on foot stuff
             {
                 Invoke(new Action(() => healthBar.Value = pFootHealth));
                 Invoke(new Action(() => oxygenBar.Value = pFootOxygen));
+
+                Invoke(new Action(() => healthpackKeyTag.Text = "Keybind [" + healthPackKey + "]"));
+                Invoke(new Action(() => energyCellKeyTag.Text = "Keybind [" + energyCellKey + "]"));
+                Invoke(new Action(() => fragGrenadeKeyTag.Text = "Keybind [" + fragGrenadeKey + "]"));
+                Invoke(new Action(() => empKeyTag.Text = "Keybind [" + empKey + "]"));
+                Invoke(new Action(() => shieldProjectorKeyTag.Text = "Keybind [" + shieldProjectorKey + "]"));
             }
         }
 
@@ -941,7 +1116,7 @@ namespace ED_Hud_Extension
                             planetDetailView.BringToFront();
                             bodyNameTag.Text = body.name;
                             bodyTypeTag.Text = body.subType;
-                            //bodyDiscoveryTag.Text = body.discoveryInfo.First().ToString();
+                            if (body.discoveryInfo != null) { bodyDiscoveryTag.Text = body.discoveryInfo[0].cmdrName; } else { bodyDiscoveryTag.Text = "n/a"; }
                             if (body.isLandable == true) { bodyLandableTag.Text = "Yes"; } else { bodyLandableTag.Text = "No"; }
                             bodyGravityTag.Text = body.gravity.ToString() + " G";
                             bodyMassTag.Text = body.earthMasses.ToString();
@@ -961,7 +1136,7 @@ namespace ED_Hud_Extension
                         {
                             starDetailView.BringToFront();
                             starNameTag.Text = body.name;
-                            //starDiscoverTag.Text = body.discoveryInfo.First().ToString();
+                            if (body.discoveryInfo != null) { bodyDiscoveryTag.Text = body.discoveryInfo[0].cmdrName; } else { bodyDiscoveryTag.Text = "n/a"; }
                             if (body.isMainStar == true) { mainStarTag.Text = "Yes"; } else { mainStarTag.Text = "No"; }
                             starClassTag.Text = body.subType;
                             starAgeTag.Text = body.age.ToString();
@@ -979,10 +1154,6 @@ namespace ED_Hud_Extension
                 }
             }
         }
-        /* the following method is the basis for the method that will be employed when the player arrives at a new system for exploration. 
-           it is currently awaiting the proper implementation of the exploration panel as a whole, but it was a horrible nightmare to get it
-           to work for some reason so it's just going to live here until it's ready to be updated and employed
-        */
         public static async Task fetchStarData(string systemName, CancellationToken ct = default) //thank you EDSM
         {
             string url = "https://www.edsm.net/api-system-v1/bodies?systemName=" + systemName;
@@ -1046,7 +1217,7 @@ namespace ED_Hud_Extension
             }
             catch (TaskCanceledException)
             {
-
+                //dont do anything, cos that's the whole ass point
             }
         }
     }

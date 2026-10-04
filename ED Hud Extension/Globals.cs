@@ -18,8 +18,9 @@ public class Globals
     // --------------------- settings variables ---------------------
     //files & paths
     public static string settingsPath = "C:\\EDHE\\Settings.json";
-    public static string defaultJournalPath = "C:\\Users\\" + Environment.GetEnvironmentVariable("USERNAME") + "\\Saved Games\\Frontier Developments\\Elite Dangerous";
+    public static string defaultJournalPath = "C:\\Users\\" + Environment.GetEnvironmentVariable("USERPROFILE") + "\\Saved Games\\Frontier Developments\\Elite Dangerous";
     public static string defaultGamePath = "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Elite Dangerous\\Products\\elite-dangerous-odyssey-64\\EliteDangerous64.exe";
+    public static string defaultKeybindsPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Frontier Developments\\Elite Dangerous\\Options\\Bindings\\Custom.4.2.binds");
     public static string logPath = "C:\\EDHE\\log.txt";
     public static string journalPath;
     public static string gamePath;
@@ -37,6 +38,13 @@ public class Globals
 
     //user settings - audio
     public static bool mindYourOwnDamnBusiness;
+
+    //user settings - keybinds
+    public static string fragGrenadeKey;
+    public static string empKey;
+    public static string shieldProjectorKey;
+    public static string healthPackKey;
+    public static string energyCellKey;
 
     public static bool statusReaderLive;
 
@@ -98,6 +106,12 @@ public class Globals
 
     public static int pFootHealth;
     public static int pFootOxygen;
+    public static int healthPackCount;
+    public static int energyCellCount;
+    public static int fragGrenadeCount;
+    public static int empCount;
+    public static int shieldProjectorCount;
+
 
     // --------------------- player variables ---------------------
     //player stuff

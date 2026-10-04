@@ -35,6 +35,23 @@ namespace ED_Hud_Extension
             restartSessionButton = new Button();
             combatPanel = new Panel();
             onFootPanel = new Panel();
+            empKeyTag = new Label();
+            empTag = new Label();
+            empLabel = new Label();
+            shieldProjectorKeyTag = new Label();
+            shieldProjectorTag = new Label();
+            shieldProjectorLabel = new Label();
+            fragGrenadeKeyTag = new Label();
+            fragGrenadeTag = new Label();
+            fragGrenadeLabel = new Label();
+            energyCellKeyTag = new Label();
+            healthpackKeyTag = new Label();
+            energyCellTag = new Label();
+            healthPackTag = new Label();
+            label3 = new Label();
+            healthPackLabel = new Label();
+            energyCellLabel = new Label();
+            ofDivPanel = new Panel();
             weaponThreeModTag = new Label();
             weaponThreeTag = new Label();
             weaponTwoModTag = new Label();
@@ -104,6 +121,7 @@ namespace ED_Hud_Extension
             diagLabel = new Label();
             enviroLabel = new Label();
             homePanel = new Panel();
+            starYearTag = new Label();
             starTimeTag = new Label();
             homeARLabel = new Label();
             homeARTag = new Label();
@@ -126,14 +144,14 @@ namespace ED_Hud_Extension
             homeTRTag = new Label();
             homeLBLabel = new Label();
             curShipFuelTag = new Label();
-            curShipIDTag = new Label();
-            curShipDesTag = new Label();
-            curShipTag = new Label();
+            curVesselIDTag = new Label();
+            curVesselNameTag = new Label();
+            curVesselTag = new Label();
             shipFuelLabel = new Label();
-            shipIDLabel = new Label();
+            curVesselIDLabel = new Label();
             linkLabel = new Label();
-            shipNameLabel = new Label();
-            shipLabel = new Label();
+            curVesselNameLabel = new Label();
+            vesselLabel = new Label();
             starDateTag = new Label();
             waitingSTTag = new Label();
             starDTLabel = new Label();
@@ -296,6 +314,23 @@ namespace ED_Hud_Extension
             // 
             // onFootPanel
             // 
+            onFootPanel.Controls.Add(empKeyTag);
+            onFootPanel.Controls.Add(empTag);
+            onFootPanel.Controls.Add(empLabel);
+            onFootPanel.Controls.Add(shieldProjectorKeyTag);
+            onFootPanel.Controls.Add(shieldProjectorTag);
+            onFootPanel.Controls.Add(shieldProjectorLabel);
+            onFootPanel.Controls.Add(fragGrenadeKeyTag);
+            onFootPanel.Controls.Add(fragGrenadeTag);
+            onFootPanel.Controls.Add(fragGrenadeLabel);
+            onFootPanel.Controls.Add(energyCellKeyTag);
+            onFootPanel.Controls.Add(healthpackKeyTag);
+            onFootPanel.Controls.Add(energyCellTag);
+            onFootPanel.Controls.Add(healthPackTag);
+            onFootPanel.Controls.Add(label3);
+            onFootPanel.Controls.Add(healthPackLabel);
+            onFootPanel.Controls.Add(energyCellLabel);
+            onFootPanel.Controls.Add(ofDivPanel);
             onFootPanel.Controls.Add(weaponThreeModTag);
             onFootPanel.Controls.Add(weaponThreeTag);
             onFootPanel.Controls.Add(weaponTwoModTag);
@@ -321,83 +356,267 @@ namespace ED_Hud_Extension
             onFootPanel.Size = new Size(1802, 894);
             onFootPanel.TabIndex = 93;
             // 
+            // empKeyTag
+            // 
+            empKeyTag.AutoSize = true;
+            empKeyTag.Font = new Font("Oxanium", 20F, FontStyle.Bold | FontStyle.Italic);
+            empKeyTag.ForeColor = Color.White;
+            empKeyTag.Location = new Point(307, 741);
+            empKeyTag.Name = "empKeyTag";
+            empKeyTag.Size = new Size(162, 34);
+            empKeyTag.TabIndex = 134;
+            empKeyTag.Text = "Keybind [9]";
+            // 
+            // empTag
+            // 
+            empTag.AutoSize = true;
+            empTag.Font = new Font("Oxanium", 26.25F, FontStyle.Bold);
+            empTag.ForeColor = Color.White;
+            empTag.Location = new Point(625, 700);
+            empTag.Name = "empTag";
+            empTag.Size = new Size(90, 44);
+            empTag.TabIndex = 133;
+            empTag.Text = "0 / 3";
+            // 
+            // empLabel
+            // 
+            empLabel.AutoSize = true;
+            empLabel.Font = new Font("Oxanium", 26.25F, FontStyle.Bold);
+            empLabel.ForeColor = Color.FromArgb(192, 64, 0);
+            empLabel.Location = new Point(303, 697);
+            empLabel.Name = "empLabel";
+            empLabel.Size = new Size(284, 44);
+            empLabel.TabIndex = 132;
+            empLabel.Text = "EMP Grenades : ";
+            // 
+            // shieldProjectorKeyTag
+            // 
+            shieldProjectorKeyTag.AutoSize = true;
+            shieldProjectorKeyTag.Font = new Font("Oxanium", 20F, FontStyle.Bold | FontStyle.Italic);
+            shieldProjectorKeyTag.ForeColor = Color.White;
+            shieldProjectorKeyTag.Location = new Point(307, 819);
+            shieldProjectorKeyTag.Name = "shieldProjectorKeyTag";
+            shieldProjectorKeyTag.Size = new Size(162, 34);
+            shieldProjectorKeyTag.TabIndex = 131;
+            shieldProjectorKeyTag.Text = "Keybind [0]";
+            // 
+            // shieldProjectorTag
+            // 
+            shieldProjectorTag.AutoSize = true;
+            shieldProjectorTag.Font = new Font("Oxanium", 26.25F, FontStyle.Bold);
+            shieldProjectorTag.ForeColor = Color.White;
+            shieldProjectorTag.Location = new Point(625, 775);
+            shieldProjectorTag.Name = "shieldProjectorTag";
+            shieldProjectorTag.Size = new Size(90, 44);
+            shieldProjectorTag.TabIndex = 130;
+            shieldProjectorTag.Text = "0 / 2";
+            // 
+            // shieldProjectorLabel
+            // 
+            shieldProjectorLabel.AutoSize = true;
+            shieldProjectorLabel.Font = new Font("Oxanium", 26.25F, FontStyle.Bold);
+            shieldProjectorLabel.ForeColor = Color.FromArgb(192, 64, 0);
+            shieldProjectorLabel.Location = new Point(303, 775);
+            shieldProjectorLabel.Name = "shieldProjectorLabel";
+            shieldProjectorLabel.Size = new Size(330, 44);
+            shieldProjectorLabel.TabIndex = 129;
+            shieldProjectorLabel.Text = "Shield Projectors : ";
+            // 
+            // fragGrenadeKeyTag
+            // 
+            fragGrenadeKeyTag.AutoSize = true;
+            fragGrenadeKeyTag.Font = new Font("Oxanium", 20F, FontStyle.Bold | FontStyle.Italic);
+            fragGrenadeKeyTag.ForeColor = Color.White;
+            fragGrenadeKeyTag.Location = new Point(307, 663);
+            fragGrenadeKeyTag.Name = "fragGrenadeKeyTag";
+            fragGrenadeKeyTag.Size = new Size(162, 34);
+            fragGrenadeKeyTag.TabIndex = 128;
+            fragGrenadeKeyTag.Text = "Keybind [8]";
+            // 
+            // fragGrenadeTag
+            // 
+            fragGrenadeTag.AutoSize = true;
+            fragGrenadeTag.Font = new Font("Oxanium", 26.25F, FontStyle.Bold);
+            fragGrenadeTag.ForeColor = Color.White;
+            fragGrenadeTag.Location = new Point(625, 619);
+            fragGrenadeTag.Name = "fragGrenadeTag";
+            fragGrenadeTag.Size = new Size(90, 44);
+            fragGrenadeTag.TabIndex = 127;
+            fragGrenadeTag.Text = "0 / 3";
+            // 
+            // fragGrenadeLabel
+            // 
+            fragGrenadeLabel.AutoSize = true;
+            fragGrenadeLabel.Font = new Font("Oxanium", 26.25F, FontStyle.Bold);
+            fragGrenadeLabel.ForeColor = Color.FromArgb(192, 64, 0);
+            fragGrenadeLabel.Location = new Point(303, 619);
+            fragGrenadeLabel.Name = "fragGrenadeLabel";
+            fragGrenadeLabel.Size = new Size(283, 44);
+            fragGrenadeLabel.TabIndex = 126;
+            fragGrenadeLabel.Text = "Frag Grenades : ";
+            // 
+            // energyCellKeyTag
+            // 
+            energyCellKeyTag.AutoSize = true;
+            energyCellKeyTag.Font = new Font("Oxanium", 20F, FontStyle.Bold | FontStyle.Italic);
+            energyCellKeyTag.ForeColor = Color.White;
+            energyCellKeyTag.Location = new Point(303, 585);
+            energyCellKeyTag.Name = "energyCellKeyTag";
+            energyCellKeyTag.Size = new Size(162, 34);
+            energyCellKeyTag.TabIndex = 125;
+            energyCellKeyTag.Text = "Keybind [7]";
+            // 
+            // healthpackKeyTag
+            // 
+            healthpackKeyTag.AutoSize = true;
+            healthpackKeyTag.Font = new Font("Oxanium", 20F, FontStyle.Bold | FontStyle.Italic);
+            healthpackKeyTag.ForeColor = Color.White;
+            healthpackKeyTag.Location = new Point(303, 504);
+            healthpackKeyTag.Name = "healthpackKeyTag";
+            healthpackKeyTag.Size = new Size(162, 34);
+            healthpackKeyTag.TabIndex = 124;
+            healthpackKeyTag.Text = "Keybind [6]";
+            // 
+            // energyCellTag
+            // 
+            energyCellTag.AutoSize = true;
+            energyCellTag.Font = new Font("Oxanium", 26.25F, FontStyle.Bold);
+            energyCellTag.ForeColor = Color.White;
+            energyCellTag.Location = new Point(625, 541);
+            energyCellTag.Name = "energyCellTag";
+            energyCellTag.Size = new Size(90, 44);
+            energyCellTag.TabIndex = 123;
+            energyCellTag.Text = "0 / 2";
+            // 
+            // healthPackTag
+            // 
+            healthPackTag.AutoSize = true;
+            healthPackTag.Font = new Font("Oxanium", 26.25F, FontStyle.Bold);
+            healthPackTag.ForeColor = Color.White;
+            healthPackTag.Location = new Point(625, 464);
+            healthPackTag.Name = "healthPackTag";
+            healthPackTag.Size = new Size(90, 44);
+            healthPackTag.TabIndex = 122;
+            healthPackTag.Text = "0 / 2";
+            // 
+            // label3
+            // 
+            label3.AutoSize = true;
+            label3.Font = new Font("Oxanium", 26.25F, FontStyle.Bold);
+            label3.ForeColor = Color.FromArgb(192, 64, 0);
+            label3.Location = new Point(299, 389);
+            label3.Name = "label3";
+            label3.Size = new Size(269, 44);
+            label3.TabIndex = 121;
+            label3.Text = "Consumables : ";
+            // 
+            // healthPackLabel
+            // 
+            healthPackLabel.AutoSize = true;
+            healthPackLabel.Font = new Font("Oxanium", 26.25F, FontStyle.Bold);
+            healthPackLabel.ForeColor = Color.FromArgb(192, 64, 0);
+            healthPackLabel.Location = new Point(299, 464);
+            healthPackLabel.Name = "healthPackLabel";
+            healthPackLabel.Size = new Size(192, 44);
+            healthPackLabel.TabIndex = 120;
+            healthPackLabel.Text = "Med Kits : ";
+            // 
+            // energyCellLabel
+            // 
+            energyCellLabel.AutoSize = true;
+            energyCellLabel.Font = new Font("Oxanium", 26.25F, FontStyle.Bold);
+            energyCellLabel.ForeColor = Color.FromArgb(192, 64, 0);
+            energyCellLabel.Location = new Point(299, 541);
+            energyCellLabel.Name = "energyCellLabel";
+            energyCellLabel.Size = new Size(250, 44);
+            energyCellLabel.TabIndex = 119;
+            energyCellLabel.Text = "Energy Cells : ";
+            // 
+            // ofDivPanel
+            // 
+            ofDivPanel.BackColor = Color.FromArgb(192, 64, 0);
+            ofDivPanel.Location = new Point(2, 382);
+            ofDivPanel.Name = "ofDivPanel";
+            ofDivPanel.Size = new Size(1800, 2);
+            ofDivPanel.TabIndex = 118;
+            // 
             // weaponThreeModTag
             // 
-            weaponThreeModTag.Font = new Font("Oxanium", 26.25F, FontStyle.Bold | FontStyle.Italic, GraphicsUnit.Point, 0);
+            weaponThreeModTag.Font = new Font("Oxanium", 20F, FontStyle.Bold | FontStyle.Italic);
             weaponThreeModTag.ForeColor = Color.White;
-            weaponThreeModTag.Location = new Point(299, 450);
+            weaponThreeModTag.Location = new Point(218, 339);
             weaponThreeModTag.Name = "weaponThreeModTag";
-            weaponThreeModTag.Size = new Size(1475, 44);
+            weaponThreeModTag.Size = new Size(1475, 31);
             weaponThreeModTag.TabIndex = 117;
             // 
             // weaponThreeTag
             // 
             weaponThreeTag.AutoSize = true;
-            weaponThreeTag.Font = new Font("Oxanium", 26.25F, FontStyle.Bold | FontStyle.Italic, GraphicsUnit.Point, 0);
+            weaponThreeTag.Font = new Font("Oxanium", 20F, FontStyle.Bold | FontStyle.Italic);
             weaponThreeTag.ForeColor = Color.White;
-            weaponThreeTag.Location = new Point(299, 406);
+            weaponThreeTag.Location = new Point(218, 304);
             weaponThreeTag.Name = "weaponThreeTag";
-            weaponThreeTag.Size = new Size(128, 44);
+            weaponThreeTag.Size = new Size(99, 34);
             weaponThreeTag.TabIndex = 116;
             weaponThreeTag.Text = "-none-";
             // 
             // weaponTwoModTag
             // 
-            weaponTwoModTag.Font = new Font("Oxanium", 26.25F, FontStyle.Bold | FontStyle.Italic, GraphicsUnit.Point, 0);
+            weaponTwoModTag.Font = new Font("Oxanium", 20F, FontStyle.Bold | FontStyle.Italic);
             weaponTwoModTag.ForeColor = Color.White;
-            weaponTwoModTag.Location = new Point(301, 318);
+            weaponTwoModTag.Location = new Point(218, 236);
             weaponTwoModTag.Name = "weaponTwoModTag";
-            weaponTwoModTag.Size = new Size(1475, 44);
+            weaponTwoModTag.Size = new Size(1475, 31);
             weaponTwoModTag.TabIndex = 115;
             // 
             // weaponTwoTag
             // 
             weaponTwoTag.AutoSize = true;
-            weaponTwoTag.Font = new Font("Oxanium", 26.25F, FontStyle.Bold | FontStyle.Italic, GraphicsUnit.Point, 0);
+            weaponTwoTag.Font = new Font("Oxanium", 20F, FontStyle.Bold | FontStyle.Italic);
             weaponTwoTag.ForeColor = Color.White;
-            weaponTwoTag.Location = new Point(299, 272);
+            weaponTwoTag.Location = new Point(218, 202);
             weaponTwoTag.Name = "weaponTwoTag";
-            weaponTwoTag.Size = new Size(128, 44);
+            weaponTwoTag.Size = new Size(99, 34);
             weaponTwoTag.TabIndex = 114;
             weaponTwoTag.Text = "-none-";
             // 
             // suitModsTag
             // 
-            suitModsTag.Font = new Font("Oxanium", 26.25F, FontStyle.Bold | FontStyle.Italic, GraphicsUnit.Point, 0);
+            suitModsTag.Font = new Font("Oxanium", 20F, FontStyle.Bold | FontStyle.Italic);
             suitModsTag.ForeColor = Color.White;
-            suitModsTag.Location = new Point(301, 58);
+            suitModsTag.Location = new Point(218, 36);
             suitModsTag.Name = "suitModsTag";
-            suitModsTag.Size = new Size(1475, 44);
+            suitModsTag.Size = new Size(1475, 34);
             suitModsTag.TabIndex = 113;
             // 
             // equippedSuitTag
             // 
             equippedSuitTag.AutoSize = true;
-            equippedSuitTag.Font = new Font("Oxanium", 26.25F, FontStyle.Bold | FontStyle.Italic, GraphicsUnit.Point, 0);
+            equippedSuitTag.Font = new Font("Oxanium", 20F, FontStyle.Bold | FontStyle.Italic);
             equippedSuitTag.ForeColor = Color.White;
-            equippedSuitTag.Location = new Point(299, 14);
+            equippedSuitTag.Location = new Point(218, 2);
             equippedSuitTag.Name = "equippedSuitTag";
-            equippedSuitTag.Size = new Size(128, 44);
+            equippedSuitTag.Size = new Size(99, 34);
             equippedSuitTag.TabIndex = 112;
             equippedSuitTag.Text = "-none-";
             // 
             // weaponOneModTag
             // 
-            weaponOneModTag.Font = new Font("Oxanium", 26.25F, FontStyle.Bold | FontStyle.Italic, GraphicsUnit.Point, 0);
+            weaponOneModTag.Font = new Font("Oxanium", 20F, FontStyle.Bold | FontStyle.Italic);
             weaponOneModTag.ForeColor = Color.White;
-            weaponOneModTag.Location = new Point(301, 192);
+            weaponOneModTag.Location = new Point(218, 142);
             weaponOneModTag.Name = "weaponOneModTag";
-            weaponOneModTag.Size = new Size(1475, 44);
+            weaponOneModTag.Size = new Size(1475, 30);
             weaponOneModTag.TabIndex = 111;
             // 
             // weaponOneTag
             // 
             weaponOneTag.AutoSize = true;
-            weaponOneTag.Font = new Font("Oxanium", 26.25F, FontStyle.Bold | FontStyle.Italic, GraphicsUnit.Point, 0);
+            weaponOneTag.Font = new Font("Oxanium", 20F, FontStyle.Bold | FontStyle.Italic);
             weaponOneTag.ForeColor = Color.White;
-            weaponOneTag.Location = new Point(299, 145);
+            weaponOneTag.Location = new Point(218, 104);
             weaponOneTag.Name = "weaponOneTag";
-            weaponOneTag.Size = new Size(128, 44);
+            weaponOneTag.Size = new Size(99, 34);
             weaponOneTag.TabIndex = 110;
             weaponOneTag.Text = "-none-";
             // 
@@ -406,7 +625,7 @@ namespace ED_Hud_Extension
             oxygenLabel.AutoSize = true;
             oxygenLabel.Font = new Font("Oxanium", 26.25F, FontStyle.Bold);
             oxygenLabel.ForeColor = Color.FromArgb(192, 64, 0);
-            oxygenLabel.Location = new Point(8, 612);
+            oxygenLabel.Location = new Point(5, 464);
             oxygenLabel.Name = "oxygenLabel";
             oxygenLabel.Size = new Size(169, 44);
             oxygenLabel.TabIndex = 106;
@@ -417,7 +636,7 @@ namespace ED_Hud_Extension
             healthLabel.AutoSize = true;
             healthLabel.Font = new Font("Oxanium", 26.25F, FontStyle.Bold);
             healthLabel.ForeColor = Color.FromArgb(192, 64, 0);
-            healthLabel.Location = new Point(8, 537);
+            healthLabel.Location = new Point(4, 389);
             healthLabel.Name = "healthLabel";
             healthLabel.Size = new Size(156, 44);
             healthLabel.TabIndex = 105;
@@ -426,7 +645,7 @@ namespace ED_Hud_Extension
             // oxygenBar
             // 
             oxygenBar.ForeColor = Color.FromArgb(192, 64, 0);
-            oxygenBar.Location = new Point(8, 659);
+            oxygenBar.Location = new Point(10, 511);
             oxygenBar.Name = "oxygenBar";
             oxygenBar.Size = new Size(260, 23);
             oxygenBar.Step = 1;
@@ -437,7 +656,7 @@ namespace ED_Hud_Extension
             // 
             healthBar.BackColor = Color.Black;
             healthBar.ForeColor = Color.FromArgb(192, 64, 0);
-            healthBar.Location = new Point(8, 586);
+            healthBar.Location = new Point(10, 438);
             healthBar.Name = "healthBar";
             healthBar.Size = new Size(260, 23);
             healthBar.Step = 1;
@@ -447,88 +666,88 @@ namespace ED_Hud_Extension
             // weaponThreeModsLabel
             // 
             weaponThreeModsLabel.AutoSize = true;
-            weaponThreeModsLabel.Font = new Font("Oxanium", 26.25F, FontStyle.Bold);
+            weaponThreeModsLabel.Font = new Font("Oxanium", 20.25F, FontStyle.Bold);
             weaponThreeModsLabel.ForeColor = Color.FromArgb(192, 64, 0);
-            weaponThreeModsLabel.Location = new Point(8, 450);
+            weaponThreeModsLabel.Location = new Point(-1, 338);
             weaponThreeModsLabel.Name = "weaponThreeModsLabel";
-            weaponThreeModsLabel.Size = new Size(278, 44);
+            weaponThreeModsLabel.Size = new Size(215, 34);
             weaponThreeModsLabel.TabIndex = 102;
             weaponThreeModsLabel.Text = "Weapon Mods : ";
             // 
             // weaponThreeLabel
             // 
             weaponThreeLabel.AutoSize = true;
-            weaponThreeLabel.Font = new Font("Oxanium", 26.25F, FontStyle.Bold);
+            weaponThreeLabel.Font = new Font("Oxanium", 20.25F, FontStyle.Bold);
             weaponThreeLabel.ForeColor = Color.FromArgb(192, 64, 0);
-            weaponThreeLabel.Location = new Point(8, 406);
+            weaponThreeLabel.Location = new Point(-1, 304);
             weaponThreeLabel.Name = "weaponThreeLabel";
-            weaponThreeLabel.Size = new Size(295, 44);
+            weaponThreeLabel.Size = new Size(227, 34);
             weaponThreeLabel.TabIndex = 101;
             weaponThreeLabel.Text = "Secondary Slot : ";
             // 
             // weaponTwoModsLabel
             // 
             weaponTwoModsLabel.AutoSize = true;
-            weaponTwoModsLabel.Font = new Font("Oxanium", 26.25F, FontStyle.Bold);
+            weaponTwoModsLabel.Font = new Font("Oxanium", 20.25F, FontStyle.Bold);
             weaponTwoModsLabel.ForeColor = Color.FromArgb(192, 64, 0);
-            weaponTwoModsLabel.Location = new Point(8, 318);
+            weaponTwoModsLabel.Location = new Point(-1, 236);
             weaponTwoModsLabel.Name = "weaponTwoModsLabel";
-            weaponTwoModsLabel.Size = new Size(278, 44);
+            weaponTwoModsLabel.Size = new Size(215, 34);
             weaponTwoModsLabel.TabIndex = 99;
             weaponTwoModsLabel.Text = "Weapon Mods : ";
             // 
             // weaponTwoLabel
             // 
             weaponTwoLabel.AutoSize = true;
-            weaponTwoLabel.Font = new Font("Oxanium", 26.25F, FontStyle.Bold);
+            weaponTwoLabel.Font = new Font("Oxanium", 20.25F, FontStyle.Bold);
             weaponTwoLabel.ForeColor = Color.FromArgb(192, 64, 0);
-            weaponTwoLabel.Location = new Point(8, 274);
+            weaponTwoLabel.Location = new Point(-1, 202);
             weaponTwoLabel.Name = "weaponTwoLabel";
-            weaponTwoLabel.Size = new Size(279, 44);
+            weaponTwoLabel.Size = new Size(215, 34);
             weaponTwoLabel.TabIndex = 98;
             weaponTwoLabel.Text = "Primary Slot 2 : ";
             // 
             // weaponOneModsLabel
             // 
             weaponOneModsLabel.AutoSize = true;
-            weaponOneModsLabel.Font = new Font("Oxanium", 26.25F, FontStyle.Bold);
+            weaponOneModsLabel.Font = new Font("Oxanium", 20.25F, FontStyle.Bold);
             weaponOneModsLabel.ForeColor = Color.FromArgb(192, 64, 0);
-            weaponOneModsLabel.Location = new Point(8, 189);
+            weaponOneModsLabel.Location = new Point(0, 138);
             weaponOneModsLabel.Name = "weaponOneModsLabel";
-            weaponOneModsLabel.Size = new Size(278, 44);
+            weaponOneModsLabel.Size = new Size(215, 34);
             weaponOneModsLabel.TabIndex = 96;
             weaponOneModsLabel.Text = "Weapon Mods : ";
             // 
             // ofSuitModsLabel
             // 
             ofSuitModsLabel.AutoSize = true;
-            ofSuitModsLabel.Font = new Font("Oxanium", 26.25F, FontStyle.Bold);
+            ofSuitModsLabel.Font = new Font("Oxanium", 20.25F, FontStyle.Bold);
             ofSuitModsLabel.ForeColor = Color.FromArgb(192, 64, 0);
-            ofSuitModsLabel.Location = new Point(8, 58);
+            ofSuitModsLabel.Location = new Point(0, 36);
             ofSuitModsLabel.Name = "ofSuitModsLabel";
-            ofSuitModsLabel.Size = new Size(211, 44);
+            ofSuitModsLabel.Size = new Size(162, 34);
             ofSuitModsLabel.TabIndex = 95;
             ofSuitModsLabel.Text = "Suit Mods : ";
             // 
             // weaponOneLabel
             // 
             weaponOneLabel.AutoSize = true;
-            weaponOneLabel.Font = new Font("Oxanium", 26.25F, FontStyle.Bold);
+            weaponOneLabel.Font = new Font("Oxanium", 20.25F, FontStyle.Bold);
             weaponOneLabel.ForeColor = Color.FromArgb(192, 64, 0);
-            weaponOneLabel.Location = new Point(8, 145);
+            weaponOneLabel.Location = new Point(0, 104);
             weaponOneLabel.Name = "weaponOneLabel";
-            weaponOneLabel.Size = new Size(279, 44);
+            weaponOneLabel.Size = new Size(215, 34);
             weaponOneLabel.TabIndex = 94;
             weaponOneLabel.Text = "Primary Slot 1 : ";
             // 
             // ofSuitLabel
             // 
             ofSuitLabel.AutoSize = true;
-            ofSuitLabel.Font = new Font("Oxanium", 26.25F, FontStyle.Bold);
+            ofSuitLabel.Font = new Font("Oxanium", 20.25F, FontStyle.Bold);
             ofSuitLabel.ForeColor = Color.FromArgb(192, 64, 0);
-            ofSuitLabel.Location = new Point(8, 14);
+            ofSuitLabel.Location = new Point(0, 2);
             ofSuitLabel.Name = "ofSuitLabel";
-            ofSuitLabel.Size = new Size(276, 44);
+            ofSuitLabel.Size = new Size(212, 34);
             ofSuitLabel.TabIndex = 93;
             ofSuitLabel.Text = "Equipped Suit : ";
             // 
@@ -1102,6 +1321,7 @@ namespace ED_Hud_Extension
             // homePanel
             // 
             homePanel.BackColor = SystemColors.ActiveCaptionText;
+            homePanel.Controls.Add(starYearTag);
             homePanel.Controls.Add(starTimeTag);
             homePanel.Controls.Add(homeARLabel);
             homePanel.Controls.Add(homeARTag);
@@ -1124,14 +1344,14 @@ namespace ED_Hud_Extension
             homePanel.Controls.Add(homeTRTag);
             homePanel.Controls.Add(homeLBLabel);
             homePanel.Controls.Add(curShipFuelTag);
-            homePanel.Controls.Add(curShipIDTag);
-            homePanel.Controls.Add(curShipDesTag);
-            homePanel.Controls.Add(curShipTag);
+            homePanel.Controls.Add(curVesselIDTag);
+            homePanel.Controls.Add(curVesselNameTag);
+            homePanel.Controls.Add(curVesselTag);
             homePanel.Controls.Add(shipFuelLabel);
-            homePanel.Controls.Add(shipIDLabel);
+            homePanel.Controls.Add(curVesselIDLabel);
             homePanel.Controls.Add(linkLabel);
-            homePanel.Controls.Add(shipNameLabel);
-            homePanel.Controls.Add(shipLabel);
+            homePanel.Controls.Add(curVesselNameLabel);
+            homePanel.Controls.Add(vesselLabel);
             homePanel.Controls.Add(starDateTag);
             homePanel.Controls.Add(waitingSTTag);
             homePanel.Controls.Add(starDTLabel);
@@ -1142,6 +1362,18 @@ namespace ED_Hud_Extension
             homePanel.Name = "homePanel";
             homePanel.Size = new Size(1802, 1031);
             homePanel.TabIndex = 63;
+            // 
+            // starYearTag
+            // 
+            starYearTag.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            starYearTag.Font = new Font("Oxanium", 21.75F);
+            starYearTag.ForeColor = Color.FromArgb(192, 64, 0);
+            starYearTag.Location = new Point(1716, 39);
+            starYearTag.Name = "starYearTag";
+            starYearTag.Size = new Size(86, 36);
+            starYearTag.TabIndex = 101;
+            starYearTag.Text = "3312";
+            starYearTag.TextAlign = ContentAlignment.MiddleRight;
             // 
             // starTimeTag
             // 
@@ -1259,7 +1491,7 @@ namespace ED_Hud_Extension
             homeLSTag.AutoSize = true;
             homeLSTag.Font = new Font("Oxanium", 30F, FontStyle.Bold);
             homeLSTag.ForeColor = Color.FromArgb(192, 64, 0);
-            homeLSTag.Location = new Point(299, 432);
+            homeLSTag.Location = new Point(341, 432);
             homeLSTag.Name = "homeLSTag";
             homeLSTag.Size = new Size(257, 50);
             homeLSTag.TabIndex = 90;
@@ -1292,7 +1524,7 @@ namespace ED_Hud_Extension
             homeSysTag.AutoSize = true;
             homeSysTag.Font = new Font("Oxanium", 30F, FontStyle.Bold);
             homeSysTag.ForeColor = Color.FromArgb(192, 64, 0);
-            homeSysTag.Location = new Point(299, 382);
+            homeSysTag.Location = new Point(341, 382);
             homeSysTag.Name = "homeSysTag";
             homeSysTag.Size = new Size(288, 50);
             homeSysTag.TabIndex = 86;
@@ -1380,45 +1612,45 @@ namespace ED_Hud_Extension
             curShipFuelTag.AutoSize = true;
             curShipFuelTag.Font = new Font("Oxanium", 30F, FontStyle.Bold);
             curShipFuelTag.ForeColor = Color.FromArgb(192, 64, 0);
-            curShipFuelTag.Location = new Point(299, 332);
+            curShipFuelTag.Location = new Point(341, 332);
             curShipFuelTag.Name = "curShipFuelTag";
             curShipFuelTag.Size = new Size(212, 50);
             curShipFuelTag.TabIndex = 76;
             curShipFuelTag.Text = "fuel_level";
             // 
-            // curShipIDTag
+            // curVesselIDTag
             // 
-            curShipIDTag.AutoSize = true;
-            curShipIDTag.Font = new Font("Oxanium", 30F, FontStyle.Bold);
-            curShipIDTag.ForeColor = Color.FromArgb(192, 64, 0);
-            curShipIDTag.Location = new Point(299, 282);
-            curShipIDTag.Name = "curShipIDTag";
-            curShipIDTag.Size = new Size(159, 50);
-            curShipIDTag.TabIndex = 75;
-            curShipIDTag.Text = "ship_id";
+            curVesselIDTag.AutoSize = true;
+            curVesselIDTag.Font = new Font("Oxanium", 30F, FontStyle.Bold);
+            curVesselIDTag.ForeColor = Color.FromArgb(192, 64, 0);
+            curVesselIDTag.Location = new Point(341, 282);
+            curVesselIDTag.Name = "curVesselIDTag";
+            curVesselIDTag.Size = new Size(159, 50);
+            curVesselIDTag.TabIndex = 75;
+            curVesselIDTag.Text = "ship_id";
             // 
-            // curShipDesTag
+            // curVesselNameTag
             // 
-            curShipDesTag.AutoSize = true;
-            curShipDesTag.Font = new Font("Oxanium", 30F, FontStyle.Bold);
-            curShipDesTag.ForeColor = Color.FromArgb(192, 64, 0);
-            curShipDesTag.Location = new Point(299, 232);
-            curShipDesTag.Name = "curShipDesTag";
-            curShipDesTag.Size = new Size(229, 50);
-            curShipDesTag.TabIndex = 74;
-            curShipDesTag.Text = "ship_name";
-            curShipDesTag.TextAlign = ContentAlignment.TopRight;
+            curVesselNameTag.AutoSize = true;
+            curVesselNameTag.Font = new Font("Oxanium", 30F, FontStyle.Bold);
+            curVesselNameTag.ForeColor = Color.FromArgb(192, 64, 0);
+            curVesselNameTag.Location = new Point(341, 232);
+            curVesselNameTag.Name = "curVesselNameTag";
+            curVesselNameTag.Size = new Size(229, 50);
+            curVesselNameTag.TabIndex = 74;
+            curVesselNameTag.Text = "ship_name";
+            curVesselNameTag.TextAlign = ContentAlignment.TopRight;
             // 
-            // curShipTag
+            // curVesselTag
             // 
-            curShipTag.AutoSize = true;
-            curShipTag.Font = new Font("Oxanium", 30F, FontStyle.Bold);
-            curShipTag.ForeColor = Color.FromArgb(192, 64, 0);
-            curShipTag.Location = new Point(299, 178);
-            curShipTag.Name = "curShipTag";
-            curShipTag.Size = new Size(210, 50);
-            curShipTag.TabIndex = 73;
-            curShipTag.Text = "ship_type";
+            curVesselTag.AutoSize = true;
+            curVesselTag.Font = new Font("Oxanium", 30F, FontStyle.Bold);
+            curVesselTag.ForeColor = Color.FromArgb(192, 64, 0);
+            curVesselTag.Location = new Point(341, 178);
+            curVesselTag.Name = "curVesselTag";
+            curVesselTag.Size = new Size(210, 50);
+            curVesselTag.TabIndex = 73;
+            curVesselTag.Text = "ship_type";
             // 
             // shipFuelLabel
             // 
@@ -1431,16 +1663,16 @@ namespace ED_Hud_Extension
             shipFuelLabel.TabIndex = 72;
             shipFuelLabel.Text = "Fuel Level  :";
             // 
-            // shipIDLabel
+            // curVesselIDLabel
             // 
-            shipIDLabel.AutoSize = true;
-            shipIDLabel.Font = new Font("Oxanium", 30F, FontStyle.Bold);
-            shipIDLabel.ForeColor = SystemColors.Control;
-            shipIDLabel.Location = new Point(4, 282);
-            shipIDLabel.Name = "shipIDLabel";
-            shipIDLabel.Size = new Size(93, 50);
-            shipIDLabel.TabIndex = 71;
-            shipIDLabel.Text = "ID  :";
+            curVesselIDLabel.AutoSize = true;
+            curVesselIDLabel.Font = new Font("Oxanium", 30F, FontStyle.Bold);
+            curVesselIDLabel.ForeColor = SystemColors.Control;
+            curVesselIDLabel.Location = new Point(4, 282);
+            curVesselIDLabel.Name = "curVesselIDLabel";
+            curVesselIDLabel.Size = new Size(93, 50);
+            curVesselIDLabel.TabIndex = 71;
+            curVesselIDLabel.Text = "ID  :";
             // 
             // linkLabel
             // 
@@ -1454,37 +1686,37 @@ namespace ED_Hud_Extension
             linkLabel.Tag = "uplinkLabel";
             linkLabel.Text = "uplink integrity : high";
             // 
-            // shipNameLabel
+            // curVesselNameLabel
             // 
-            shipNameLabel.AutoSize = true;
-            shipNameLabel.Font = new Font("Oxanium", 30F, FontStyle.Bold);
-            shipNameLabel.ForeColor = SystemColors.Control;
-            shipNameLabel.Location = new Point(4, 232);
-            shipNameLabel.Name = "shipNameLabel";
-            shipNameLabel.Size = new Size(280, 50);
-            shipNameLabel.TabIndex = 68;
-            shipNameLabel.Text = "Designation  :";
-            shipNameLabel.TextAlign = ContentAlignment.TopRight;
+            curVesselNameLabel.AutoSize = true;
+            curVesselNameLabel.Font = new Font("Oxanium", 30F, FontStyle.Bold);
+            curVesselNameLabel.ForeColor = SystemColors.Control;
+            curVesselNameLabel.Location = new Point(4, 232);
+            curVesselNameLabel.Name = "curVesselNameLabel";
+            curVesselNameLabel.Size = new Size(280, 50);
+            curVesselNameLabel.TabIndex = 68;
+            curVesselNameLabel.Text = "Designation  :";
+            curVesselNameLabel.TextAlign = ContentAlignment.TopRight;
             // 
-            // shipLabel
+            // vesselLabel
             // 
-            shipLabel.AutoSize = true;
-            shipLabel.Font = new Font("Oxanium", 30F, FontStyle.Bold);
-            shipLabel.ForeColor = SystemColors.Control;
-            shipLabel.Location = new Point(4, 178);
-            shipLabel.Name = "shipLabel";
-            shipLabel.Size = new Size(291, 50);
-            shipLabel.TabIndex = 67;
-            shipLabel.Text = "Current Ship  :";
+            vesselLabel.AutoSize = true;
+            vesselLabel.Font = new Font("Oxanium", 30F, FontStyle.Bold);
+            vesselLabel.ForeColor = SystemColors.Control;
+            vesselLabel.Location = new Point(4, 178);
+            vesselLabel.Name = "vesselLabel";
+            vesselLabel.Size = new Size(331, 50);
+            vesselLabel.TabIndex = 67;
+            vesselLabel.Text = "Current Vessel  :";
             // 
             // starDateTag
             // 
             starDateTag.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             starDateTag.Font = new Font("Oxanium", 21.75F);
             starDateTag.ForeColor = Color.FromArgb(192, 64, 0);
-            starDateTag.Location = new Point(1224, 39);
+            starDateTag.Location = new Point(1241, 39);
             starDateTag.Name = "starDateTag";
-            starDateTag.Size = new Size(578, 36);
+            starDateTag.Size = new Size(484, 36);
             starDateTag.TabIndex = 66;
             starDateTag.Text = "Wednesday, August 18th 3312";
             starDateTag.TextAlign = ContentAlignment.MiddleRight;
@@ -2597,11 +2829,11 @@ namespace ED_Hud_Extension
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = SystemColors.ActiveCaptionText;
             ClientSize = new Size(1920, 1080);
+            Controls.Add(homePanel);
             Controls.Add(dividerPanel);
             Controls.Add(stationButton);
             Controls.Add(combatPanel);
             Controls.Add(explorePanel);
-            Controls.Add(homePanel);
             Controls.Add(statusPanel);
             Controls.Add(initPanel);
             Controls.Add(exitButton);
@@ -2671,8 +2903,8 @@ namespace ED_Hud_Extension
         public Button exitButton;
         public Label starDateTag;
         public EliteJournalReader.JournalWatcher journalWatcher;
-        public Label shipNameLabel;
-        public Label shipLabel;
+        public Label curVesselNameLabel;
+        public Label vesselLabel;
         public Label initLabel;
         public Label diagLabel;
         public Label enviroLabel;
@@ -2681,11 +2913,11 @@ namespace ED_Hud_Extension
         public Label statusLabel;
         public Label waitingClientLabel;
         public Label shipFuelLabel;
-        public Label shipIDLabel;
+        public Label curVesselIDLabel;
         public Label curShipFuelTag;
-        public Label curShipIDTag;
-        public Label curShipDesTag;
-        public Label curShipTag;
+        public Label curVesselIDTag;
+        public Label curVesselNameTag;
+        public Label curVesselTag;
         public Label verLabel;
         public Label homeLSTag;
         public Label homeLSLabel;
@@ -2837,5 +3069,23 @@ namespace ED_Hud_Extension
         public Label equippedSuitTag;
         public Label weaponOneModTag;
         public Label weaponOneTag;
+        private Panel ofDivPanel;
+        public Label label3;
+        public Label healthPackLabel;
+        public Label energyCellLabel;
+        public Label energyCellTag;
+        public Label healthPackTag;
+        public Label energyCellKeyTag;
+        public Label healthpackKeyTag;
+        public Label empKeyTag;
+        public Label empTag;
+        public Label empLabel;
+        public Label shieldProjectorKeyTag;
+        public Label shieldProjectorTag;
+        public Label shieldProjectorLabel;
+        public Label fragGrenadeKeyTag;
+        public Label fragGrenadeTag;
+        public Label fragGrenadeLabel;
+        public Label starYearTag;
     }
 }
