@@ -13,7 +13,7 @@ Current Version : 0.2.1.2a
 - [Tentatively] A Color changing mechanism of some kind to allow the user to customize the appearance of their UI [in EDHE, not in-game. EDHM-UI exists and is fantastic.] [https://bluemystical.github.io/edhm-api/]
 
 **--- Update Notes ---**  
-**Version 0.2.1.2a**
+**Version 0.2.1.2a**  
 More hotfixes, corrections to how some information is fetched and displayed for various UI elements.
 
 **Version 0.2.1.2**  
