@@ -13,6 +13,9 @@ Current Version : 0.2.1.1
 - [Tentatively] A Color changing mechanism of some kind to allow the user to customize the appearance of their UI [in EDHE, not in-game. EDHM-UI exists and is fantastic.] [https://bluemystical.github.io/edhm-api/]
 
 **--- Update Notes ---**  
+**Version 0.2.1.2**  
+Minor hotfixes for Elite: Dangerous update 4.4.1.1.
+
 **Version 0.2.1.1**  
 Implementation of automatic update feature via GitHub API & the EHDE Update tool packaged alongside EDHE proper. Users will be prompted at startup if there is an applicable update, and can run checks manually via the settings menu. Implementation of UpdateServices class to facilitate updates, streamlining of some functions & removal of several unused dependencies. 
 
