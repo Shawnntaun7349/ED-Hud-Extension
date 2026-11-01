@@ -2830,9 +2830,9 @@ namespace ED_Hud_Extension
             BackColor = SystemColors.ActiveCaptionText;
             ClientSize = new Size(1920, 1080);
             Controls.Add(homePanel);
+            Controls.Add(combatPanel);
             Controls.Add(dividerPanel);
             Controls.Add(stationButton);
-            Controls.Add(combatPanel);
             Controls.Add(explorePanel);
             Controls.Add(statusPanel);
             Controls.Add(initPanel);

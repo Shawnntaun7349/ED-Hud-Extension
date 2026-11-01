@@ -175,6 +175,7 @@ public class Globals
 
     //ship stuff
     //from journal
+    public static string motherShip;
     public static string pShipType;
     public static string pShipName;
     public static string pShipID;

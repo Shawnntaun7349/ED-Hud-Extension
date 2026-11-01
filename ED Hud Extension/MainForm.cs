@@ -2,13 +2,13 @@ using EliteJournalReader;
 using EliteJournalReader.Events;
 using System.Diagnostics;
 using System.Reflection;
+using Newtonsoft.Json.Linq;
+using System.Runtime.CompilerServices;
 using static ED_Hud_Extension.SystemData;
 using static ED_Hud_Extension.NavData;
 using static Functions;
 using static Globals;
 using static StatusReader;
-using static ED_Hud_Extension.Loadouts;
-using Newtonsoft.Json.Linq;
 
 namespace ED_Hud_Extension
 {
@@ -156,11 +156,8 @@ namespace ED_Hud_Extension
             watcher.GetEvent<ReputationEvent>().Fired += repEvent;
             watcher.GetEvent<LocationEvent>().Fired += locationEvent;
 
-            watcher.GetEvent<EmbarkEvent>().Fired += embark;
-            watcher.GetEvent<DisembarkEvent>().Fired += disembark;
-
             //shutting down
-            watcher.GetEvent<ShutdownEvent>().Fired += gameShutDown;
+            watcher.GetEvent<ShutdownEvent>().Fired += gameShutDownEvent;
 
             //refueling
             watcher.GetEvent<RefuelAllEvent>().Fired += refuelAllEvent;
@@ -171,24 +168,31 @@ namespace ED_Hud_Extension
             watcher.GetEvent<ShipTargetedEvent>().Fired += shipTargetedEvent;
 
             //fsd events
-            watcher.GetEvent<FSDTargetEvent>().Fired += fsdTarget;
-            watcher.GetEvent<FSDJumpEvent>().Fired += fsdJump;
-            watcher.GetEvent<StartJumpEvent>().Fired += fsdStartJump;
+            watcher.GetEvent<FSDTargetEvent>().Fired += fsdTargetEvent;
+            watcher.GetEvent<FSDJumpEvent>().Fired += fsdJumpEvent;
+            watcher.GetEvent<StartJumpEvent>().Fired += fsdStartJumpEvent;
 
             //nav events
-            watcher.GetEvent<NavRouteClearEvent>().Fired += navCleared;
+            watcher.GetEvent<NavRouteClearEvent>().Fired += navClearedEvent;
 
             //on foot events
             watcher.GetEvent<SuitLoadoutEvent>().Fired += suitLoadoutEvent;
             //backpack events
             watcher.GetEvent<BackpackEvent>().Fired += backpackEvent;
-            watcher.GetEvent<BackpackChangeEvent>().Fired += backpackChange;
-            watcher.GetEvent<UseConsumableEvent>().Fired += useConsumable;
-            watcher.GetEvent<CollectItemsEvent>().Fired += collectItems;
+            watcher.GetEvent<BackpackChangeEvent>().Fired += backpackChangeEvent;
+            watcher.GetEvent<UseConsumableEvent>().Fired += useConsumableEvent;
+            watcher.GetEvent<CollectItemsEvent>().Fired += collectItemsEvent;
 
             //srv / vessel events
             watcher.GetEvent<LaunchSRVEvent>().Fired += launchSrvEvent;
             watcher.GetEvent<LaunchVesselEvent>().Fired += launchVesselEvent;
+            watcher.GetEvent<DockSRVEvent>().Fired += dockSrvEvent;
+
+            //ship events
+            watcher.GetEvent<ShipyardSwapEvent>().Fired += shipyardSwapEvent;
+            watcher.GetEvent<LoadoutEvent>().Fired += loadoutEvent;
+            watcher.GetEvent<EmbarkEvent>().Fired += embarkEvent;
+            watcher.GetEvent<DisembarkEvent>().Fired += disembarkEvent;
         }
 
         //journal events
@@ -211,9 +215,11 @@ namespace ED_Hud_Extension
             clientReady = true;
             currentFuelLevel = e.FuelLevel;
             maxFuelLevel = e.FuelCapacity;
-            pShipType = e.Ship_Localised;
             pShipName = e.ShipName;
             pShipID = e.ShipIdent;
+
+            if (e.Ship_Localised != null){ pShipType = e.Ship_Localised; }
+            else { pShipType = convertName(e.Ship); }
 
             gameMode = e.GameMode.ToString();
 
@@ -236,7 +242,17 @@ namespace ED_Hud_Extension
             }
             else
             {
-                Invoke(new Action(() => curVesselTag.Text = e.Ship_Localised));
+                if (e.Ship_Localised != null)
+                {
+                    Invoke(new Action(() => curVesselTag.Text = e.Ship_Localised.ToString()));
+                    motherShip = e.Ship_Localised;
+                }
+                else
+                {
+                    Invoke(new Action(() => curVesselTag.Text = convertName(e.Ship)));
+                    motherShip = curVesselTag.Text;
+                }
+                
                 Invoke(new Action(() => curVesselNameTag.Text = e.ShipName));
                 Invoke(new Action(() => curVesselIDTag.Text = e.ShipIdent));
                 Invoke(new Action(() => curShipFuelTag.Text = (currentFuelLevel + " / " + maxFuelLevel)));
@@ -324,17 +340,17 @@ namespace ED_Hud_Extension
             else { updateLocationData(pCurrentSystem); }
         }
 
-        private void embark(object? sender, EmbarkEvent.EmbarkEventArgs e) //get on the ship/srv/slv
+        private void embarkEvent(object? sender, EmbarkEvent.EmbarkEventArgs e) //get on the ship/srv/slv
         {
             
         }
 
-        private void disembark(object? sender, DisembarkEvent.DisembarkEventArgs e) //get off the ship/srv/slv
+        private void disembarkEvent(object? sender, DisembarkEvent.DisembarkEventArgs e) //get off the ship/srv/slv
         {
 
         }
 
-        private void underAttack(object? sender, UnderAttackEvent.UnderAttackEventArgs e) //take a fucken guess what this one's for
+        private void underAttackEvent(object? sender, UnderAttackEvent.UnderAttackEventArgs e) //take a fucken guess what this one's for
         {
             attackerTarget = e.Target.ToString();
             pUnderAttack = true;
@@ -371,10 +387,19 @@ namespace ED_Hud_Extension
                     foreach (Label lbl in combatPanel.Controls.OfType<Label>().Where(lbl => lbl.Tag != null && lbl.Tag.ToString() == "combatTag"))
                     {
                         Invoke(new Action(() => lbl.Text = "[awaiting scan]"));
+                        Invoke(new Action(() => lbl.ForeColor = Color.White));
                     }
 
-                    targetShip = e.Ship_Localised;
-                    Invoke(new Action(() => targetShipTag.Text = targetShip.ToString()));
+                    if (e.Ship_Localised != null) //some ships have Ship:"[ship-name] Ship_Localised:"[in-game ship-name]". Why. But I ask again, why.
+                    {
+                        targetShip = e.Ship_Localised;
+                        Invoke(new Action(() => targetShipTag.Text = targetShip.ToString()));
+                    }
+                    else
+                    {
+                        targetShip = convertName(e.Ship);
+                        Invoke(new Action(() => targetShipTag.Text = targetShip.ToString()));
+                    }
                     scanLevel = e.ScanStage;
                 }
                 else
@@ -436,8 +461,9 @@ namespace ED_Hud_Extension
                     }
                     if (e.LegalStatus == "Wanted") //if they're wanted here
                     {
+                        totalBounty += (int)e.Bounty;
                         Invoke(new Action(() => targetLegalStatusTag.ForeColor = Color.DarkRed));
-                        if (totalBounty + (int)e.Bounty > totalBounty) //and they're wanted elsewhere
+                        if (totalBounty != (int)e.Bounty && totalBounty + (int)e.Bounty > totalBounty) //and they're wanted elsewhere
                         {
                             totalBounty += (int)e.Bounty;
                             Invoke(new Action(() => targetLegalStatusTag.Text = "Wanted && Warranted")); //fucken get em
@@ -489,7 +515,7 @@ namespace ED_Hud_Extension
             else { /*ignore the event as it occured before edhe started*/ }
         }
 
-        private void fsdTarget(object? sender, FSDTargetEvent.FSDTargetEventArgs e)
+        private void fsdTargetEvent(object? sender, FSDTargetEvent.FSDTargetEventArgs e)
         {
             if (e.Timestamp > startUpTime)
             {
@@ -503,7 +529,7 @@ namespace ED_Hud_Extension
             else { /*ignore the event as it occured before edhe started*/ }
         }
 
-        private void fsdStartJump(object? sender, StartJumpEvent.StartJumpEventArgs e) //fires when the player starts a star-to-star jump, or when entering supercruise
+        private void fsdStartJumpEvent(object? sender, StartJumpEvent.StartJumpEventArgs e) //fires when the player starts a star-to-star jump, or when entering supercruise
         {
             if (e.Timestamp > startUpTime)
             {
@@ -512,7 +538,7 @@ namespace ED_Hud_Extension
             else { /*ignore the event as it occured before edhe started*/ }
         }
 
-        private void fsdJump(object? sender, FSDJumpEvent.FSDJumpEventArgs e)
+        private void fsdJumpEvent(object? sender, FSDJumpEvent.FSDJumpEventArgs e)
         {
             pCurrentSystem = e.StarSystem.ToString();
 
@@ -526,7 +552,7 @@ namespace ED_Hud_Extension
             //if (StatusTags.Supercruise) { Invoke(new Action(() => fsdTag.Text = "supercruise")); }
         }
 
-        private void navCleared(object? sender, NavRouteClearEvent.NavRouteClearEventArgs e)
+        private void navClearedEvent(object? sender, NavRouteClearEvent.NavRouteClearEventArgs e)
         {
             if (e.Timestamp > startUpTime)
             {
@@ -548,7 +574,7 @@ namespace ED_Hud_Extension
             Invoke(new Action(() => curShipFuelTag.Text = (currentFuelLevel + " / " + maxFuelLevel)));
         }
 
-        private void gameShutDown(object? sender, ShutdownEvent.ShutdownEventArgs e)
+        private void gameShutDownEvent(object? sender, ShutdownEvent.ShutdownEventArgs e)
         {
             if (autoShutDownEnabled && e.Timestamp > startUpTime)
             {
@@ -621,6 +647,13 @@ namespace ED_Hud_Extension
 
         private void suitLoadoutEvent(object? sender, SuitLoadoutEvent.SuitLoadoutEventArgs e)
         {
+            //update the landing page data
+            Invoke(new Action(() => curVesselTag.Text = "-embark to reestablish vessel uplink-"));
+            Invoke(new Action(() => curVesselNameTag.Text = "-waiting for embarkation-"));
+            Invoke(new Action(() => curVesselIDTag.Text = "-waiting for embarkation-"));
+            Invoke(new Action(() => curShipFuelTag.Text = "-waiting for embarkation-"));
+
+            //do a whole bunch of shit pertaining to suit loadout data
             //suit name and mods list
             Invoke(new Action(() => equippedSuitTag.Text = convertName(e.SuitName)));
             string suitModList = "";
@@ -712,29 +745,37 @@ namespace ED_Hud_Extension
         private void launchVesselEvent(object? sender, LaunchVesselEvent.LaunchVesselEventArgs e)
         {
             //despite the fact that the player can assign Designations & Callsigns to SLVs, the journal won't actually offer them in the output
-            Invoke(new Action(() => curVesselTag.Text = e.VesselType_Localised));
-            Invoke(new Action(() => curVesselNameTag.Text = "SLV"));
+            Invoke(new Action(() => curVesselTag.Text = "SLV"));
+            Invoke(new Action(() => curVesselNameTag.Text = e.VesselType_Localised));
             Invoke(new Action(() => curVesselIDTag.Text = e.ID.ToString()));
         }
 
         private void launchSrvEvent(object? sender, LaunchSRVEvent.LaunchSRVEventArgs e)
         {
-            Invoke(new Action(() => curVesselTag.Text = e.SRVType_Localised));
-            Invoke(new Action(() => curVesselNameTag.Text = "SRV"));
+            Invoke(new Action(() => curVesselTag.Text = "SRV"));
+            Invoke(new Action(() => curVesselNameTag.Text = e.SRVType_Localised));
             Invoke(new Action(() => curVesselIDTag.Text = e.ID.ToString()));
-
         }
 
-        private void shipyardSwapEvent(object? sender, ShipyardSwapEvent.ShipyardSwapEventArgs e) //will always fire in sequence with loadoutEvent & shipLockerEvent
+        private void dockSrvEvent(object? sender, DockSRVEvent.DockSRVEventArgs e)
         {
-            Invoke(new Action(() => curVesselTag.Text = e.ShipType_Localised));
+            Invoke(new Action(() => curVesselTag.Text = motherShip)); //update the displayed name, the rest will come from the Loadout event that fires next
         }
 
-        private void loadoutEvent(object? sender, LoadoutEvent.LoadoutEventArgs e)
+        private void shipyardSwapEvent(object? sender, ShipyardSwapEvent.ShipyardSwapEventArgs e) //gives the localised Ship Type data
         {
-            Invoke(new Action(() => curVesselTag.Text = e.Ship));
-            Invoke(new Action(() => curVesselNameTag.Text = e.ShipIdent));
-            Invoke(new Action(() => curVesselIDTag.Text = e.ShipID.ToString()));
+            if (e.ShipType_Localised != null) { Invoke(new Action(() => curVesselTag.Text = e.ShipType_Localised)); } //ship type
+            else { Invoke(new Action(() => curVesselTag.Text = convertName(e.ShipType))); }
+            motherShip = curVesselTag.Text;
+        }
+
+        private void loadoutEvent(object? sender, LoadoutEvent.LoadoutEventArgs e) //gives the Ship Name & Identifier / Callsign
+        {
+            Invoke(new Action(() => curVesselNameTag.Text = e.ShipName));
+            Invoke(new Action(() => curVesselIDTag.Text = e.ShipIdent));
+
+            string fuel = e.FuelCapacity.Main.ToString();
+            Invoke(new Action(() => curShipFuelTag.Text = fuel + " / " + fuel));
         }
 
         private void backpackEvent(object? sender, BackpackEvent.BackpackEventArgs e) //establish the initial backpack loadout
@@ -769,7 +810,7 @@ namespace ED_Hud_Extension
             }
         }
 
-        private void backpackChange(object? sender, BackpackChangeEvent.BackpackChangeEventArgs e) //only way to track *used* grenades, because of course it is
+        private void backpackChangeEvent(object? sender, BackpackChangeEvent.BackpackChangeEventArgs e) //only way to track *used* grenades, because of course it is
         {
             if (e.Removed is not null) //if the change is removing an item
             {
@@ -792,7 +833,7 @@ namespace ED_Hud_Extension
             }
         }
 
-        private void collectItems(object? sender, CollectItemsEvent.CollectItemsEventArgs e)
+        private void collectItemsEvent(object? sender, CollectItemsEvent.CollectItemsEventArgs e)
         {
             if (e.Timestamp > startUpTime)
             {
@@ -824,7 +865,7 @@ namespace ED_Hud_Extension
             }
         }
 
-        private void useConsumable(object? sender, UseConsumableEvent.UseConsumableEventArgs e) //no grenades, for some reason
+        private void useConsumableEvent(object? sender, UseConsumableEvent.UseConsumableEventArgs e) //no grenades, for some reason
         {
             if (e.Name == "healthpack")
             {
