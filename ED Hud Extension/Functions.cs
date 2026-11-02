@@ -1,6 +1,5 @@
 ﻿using System.Text.RegularExpressions;
 using System.Text.Json;
-using System.Xml;
 using static Globals;
 using ED_Hud_Extension;
 
@@ -57,6 +56,7 @@ internal class Functions
         autoShutDownEnabled = Boolean.Parse(doc.RootElement.GetProperty("Auto Shut Down").GetString());
         autoPanelSwitch = Boolean.Parse(doc.RootElement.GetProperty("Auto Switch Always").GetString());
         autoCombatSwitch = Boolean.Parse(doc.RootElement.GetProperty("Auto Switch Combat Only").GetString());
+        capiEnabled = Boolean.Parse(doc.RootElement.GetProperty("cAPI Enabled").GetString());
 
         //make sure the form loads on the correct display
         Screen displayScreen = Screen.AllScreens[savedPrefDisplayIndex];
@@ -77,6 +77,7 @@ internal class Functions
                     { "Journal Path", journalPath.ToString() },
                     { "Game Path", gamePath.ToString() },
                     { "Preferred Display", chosenDisplay.ToString() },
+                    { "cAPI Enabled", capiEnabled.ToString() },
                     { "Status Readout Enabled", statusEnabled.ToString() },
                     { "Auto Shut Down", autoShutDownEnabled.ToString() },
                     { "Auto Switch Always", autoPanelSwitch.ToString() },
@@ -120,6 +121,7 @@ internal class Functions
                     { "Journal Path", defaultJournalPath },
                     { "Game Path", defaultGamePath },
                     { "Preferred Display", "0" },
+                    { "cAPI Enabled", "False" },
                     { "Status Readout Enabled", "True" },
                     { "Auto Shut Down", "False" },
                     { "Auto Switch Always", "False" },

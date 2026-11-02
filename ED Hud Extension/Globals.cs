@@ -30,7 +30,13 @@ public class Globals
     public static bool autoPanelSwitch;
     public static bool autoCombatSwitch;
     public static bool autoShutDownEnabled;
-    
+
+    //user settings - data flow
+    public static bool capiEnabled;
+    public static bool capiConnected;
+    public static string pfxPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "ED_Hud_Extension\\localhost-cert.pfx");
+    public static string tokenPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "ED_Hud_Extension\\access-token.json");
+
     //user settings - display
     public static int savedPrefDisplayIndex;
     public static int chosenDisplay;

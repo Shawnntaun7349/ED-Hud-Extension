@@ -1,5 +1,5 @@
 ﻿using static Globals;
-using static ED_Hud_Extension.UpdateService;
+using static ED_Hud_Extension.OAuth2;
 
 namespace ED_Hud_Extension
 {
@@ -21,7 +21,18 @@ namespace ED_Hud_Extension
             combatSwitchToggle.Checked = autoCombatSwitch;
             autoShutdownToggle.Checked = autoShutDownEnabled;
 
-
+            if (capiConnected)
+            {
+                capiConnectButton.Enabled = false;
+                capiDisconnectButton.Enabled = true;
+                capiStatusTag.Text = "Connected";
+            }
+            else
+            {
+                capiConnectButton.Enabled = true;
+                capiDisconnectButton.Enabled = false;
+                capiStatusTag.Text = "Disconnected";
+            }
         }
 
         private void pathBrowseButton_Click(object sender, EventArgs e) //gimme the god damn journal folder
@@ -115,6 +126,36 @@ namespace ED_Hud_Extension
             finally
             {
                 checkUpdateButton.Enabled = true;
+            }
+        }
+
+        private async void capiConnectButton_Click(object sender, EventArgs e)
+        {
+            //do capi stuff
+            OAuth2 oauth = await new OAuth2Request().AuthorizeAsync();
+            oauth.Save();
+
+            var capi = new CAPI(oauth).GetProfile();
+            File.WriteAllText("C:\\EDHE\\res\\capi\\profile.json", capi.ToString());
+            capiStatusTag.Text = "Connected";
+
+            //player's cmdr name
+
+            capiEnabled = true;
+            capiDisconnectButton.Enabled = true;
+            capiConnectButton.Enabled = false;
+        }
+
+        private void capiDisconnectButton_Click(object sender, EventArgs e)
+        {
+            DialogResult disconnect = MessageBox.Show("Are you sure you want to disconnect?", "Disconnect from Frontier cAPI", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+            if (disconnect == DialogResult.Yes) 
+            {
+                File.Delete(tokenPath);
+                capiDisconnectButton.Enabled = false;
+                capiEnabled = false;
+                capiConnectButton.Enabled = true;
+                capiStatusTag.Text = "Disconnected";
             }
         }
     }

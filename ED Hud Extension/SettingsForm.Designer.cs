@@ -54,12 +54,20 @@
             edsmTab = new TabPage();
             spanshTab = new TabPage();
             edmcTab = new TabPage();
+            capiTab = new TabPage();
+            capiDisconnectButton = new Button();
+            capiConnectButton = new Button();
+            capiAccountTag = new Label();
+            capiAccountLabel = new Label();
+            capiStatusTag = new Label();
+            capiStatusLabel = new Label();
             helpTab = new TabPage();
             restartButton = new Button();
             checkUpdateButton = new Button();
             settingsTabControl.SuspendLayout();
             genTab.SuspendLayout();
             dispTab.SuspendLayout();
+            capiTab.SuspendLayout();
             SuspendLayout();
             // 
             // closeButton
@@ -91,6 +99,7 @@
             settingsTabControl.Controls.Add(edsmTab);
             settingsTabControl.Controls.Add(spanshTab);
             settingsTabControl.Controls.Add(edmcTab);
+            settingsTabControl.Controls.Add(capiTab);
             settingsTabControl.Controls.Add(helpTab);
             settingsTabControl.Location = new Point(12, 12);
             settingsTabControl.Name = "settingsTabControl";
@@ -325,6 +334,81 @@
             edmcTab.TabIndex = 7;
             edmcTab.Text = "EDMC";
             // 
+            // capiTab
+            // 
+            capiTab.BackColor = SystemColors.Control;
+            capiTab.Controls.Add(capiDisconnectButton);
+            capiTab.Controls.Add(capiConnectButton);
+            capiTab.Controls.Add(capiAccountTag);
+            capiTab.Controls.Add(capiAccountLabel);
+            capiTab.Controls.Add(capiStatusTag);
+            capiTab.Controls.Add(capiStatusLabel);
+            capiTab.Location = new Point(4, 24);
+            capiTab.Name = "capiTab";
+            capiTab.Padding = new Padding(3);
+            capiTab.Size = new Size(768, 369);
+            capiTab.TabIndex = 8;
+            capiTab.Text = "cAPI";
+            // 
+            // capiDisconnectButton
+            // 
+            capiDisconnectButton.Enabled = false;
+            capiDisconnectButton.Location = new Point(6, 65);
+            capiDisconnectButton.Name = "capiDisconnectButton";
+            capiDisconnectButton.Size = new Size(208, 23);
+            capiDisconnectButton.TabIndex = 23;
+            capiDisconnectButton.Text = "Disconnect from Frontier Account";
+            capiDisconnectButton.UseVisualStyleBackColor = true;
+            capiDisconnectButton.Click += capiDisconnectButton_Click;
+            // 
+            // capiConnectButton
+            // 
+            capiConnectButton.Location = new Point(6, 36);
+            capiConnectButton.Name = "capiConnectButton";
+            capiConnectButton.Size = new Size(208, 23);
+            capiConnectButton.TabIndex = 22;
+            capiConnectButton.Text = "Connect to Frontier Account";
+            capiConnectButton.UseVisualStyleBackColor = true;
+            capiConnectButton.Click += capiConnectButton_Click;
+            // 
+            // capiAccountTag
+            // 
+            capiAccountTag.AutoSize = true;
+            capiAccountTag.Location = new Point(154, 18);
+            capiAccountTag.Name = "capiAccountTag";
+            capiAccountTag.Size = new Size(25, 15);
+            capiAccountTag.TabIndex = 21;
+            capiAccountTag.Text = "n/a";
+            // 
+            // capiAccountLabel
+            // 
+            capiAccountLabel.AutoSize = true;
+            capiAccountLabel.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            capiAccountLabel.Location = new Point(3, 18);
+            capiAccountLabel.Name = "capiAccountLabel";
+            capiAccountLabel.Size = new Size(125, 15);
+            capiAccountLabel.TabIndex = 20;
+            capiAccountLabel.Text = "Connected Account : ";
+            // 
+            // capiStatusTag
+            // 
+            capiStatusTag.AutoSize = true;
+            capiStatusTag.Location = new Point(154, 3);
+            capiStatusTag.Name = "capiStatusTag";
+            capiStatusTag.Size = new Size(78, 15);
+            capiStatusTag.TabIndex = 18;
+            capiStatusTag.Text = "disconnected";
+            // 
+            // capiStatusLabel
+            // 
+            capiStatusLabel.AutoSize = true;
+            capiStatusLabel.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            capiStatusLabel.Location = new Point(3, 3);
+            capiStatusLabel.Name = "capiStatusLabel";
+            capiStatusLabel.Size = new Size(145, 15);
+            capiStatusLabel.TabIndex = 17;
+            capiStatusLabel.Text = "cAPI Connection Status : ";
+            // 
             // helpTab
             // 
             helpTab.BackColor = SystemColors.Control;
@@ -372,6 +456,8 @@
             genTab.PerformLayout();
             dispTab.ResumeLayout(false);
             dispTab.PerformLayout();
+            capiTab.ResumeLayout(false);
+            capiTab.PerformLayout();
             ResumeLayout(false);
         }
 
@@ -406,5 +492,12 @@
         private TabPage edmcTab;
         private Button restartButton;
         private Button checkUpdateButton;
+        private TabPage capiTab;
+        private Label capiStatusTag;
+        private Label capiStatusLabel;
+        private Label capiAccountTag;
+        private Label capiAccountLabel;
+        private Button capiDisconnectButton;
+        private Button capiConnectButton;
     }
 }

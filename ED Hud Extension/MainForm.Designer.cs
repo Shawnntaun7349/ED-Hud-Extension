@@ -160,9 +160,6 @@ namespace ED_Hud_Extension
             locDTLabel = new Label();
             explorePanel = new Panel();
             panel1 = new Panel();
-            detailHiderPanel = new Panel();
-            hiderPaneLabel2 = new Label();
-            hiderPanelLabel1 = new Label();
             planetDetailView = new Panel();
             bodyRotationalTag = new Label();
             bodyOrbitalTag = new Label();
@@ -194,6 +191,9 @@ namespace ED_Hud_Extension
             bodyDiscoverLabel = new Label();
             planetNameLabel = new Label();
             planetGravityLabel = new Label();
+            detailHiderPanel = new Panel();
+            hiderPaneLabel2 = new Label();
+            hiderPanelLabel1 = new Label();
             starDetailView = new Panel();
             starBeltsTag = new Label();
             starRotationalTag = new Label();
@@ -246,16 +246,23 @@ namespace ED_Hud_Extension
             verLabel = new Label();
             statusLabel = new Label();
             stationButton = new Button();
+            missionsButton = new Button();
+            missionsPanel = new Panel();
+            label36 = new Label();
+            stationsPanel = new Panel();
+            label1 = new Label();
             combatPanel.SuspendLayout();
             onFootPanel.SuspendLayout();
             initPanel.SuspendLayout();
             homePanel.SuspendLayout();
             explorePanel.SuspendLayout();
-            detailHiderPanel.SuspendLayout();
             planetDetailView.SuspendLayout();
+            detailHiderPanel.SuspendLayout();
             starDetailView.SuspendLayout();
             bodyListPanel.SuspendLayout();
             statusPanel.SuspendLayout();
+            missionsPanel.SuspendLayout();
+            stationsPanel.SuspendLayout();
             SuspendLayout();
             // 
             // restartSessionButton
@@ -1783,8 +1790,8 @@ namespace ED_Hud_Extension
             // explorePanel
             // 
             explorePanel.Controls.Add(panel1);
-            explorePanel.Controls.Add(detailHiderPanel);
             explorePanel.Controls.Add(planetDetailView);
+            explorePanel.Controls.Add(detailHiderPanel);
             explorePanel.Controls.Add(starDetailView);
             explorePanel.Controls.Add(expNextSystemTag);
             explorePanel.Controls.Add(expNextSystemLabel);
@@ -1812,36 +1819,6 @@ namespace ED_Hud_Extension
             panel1.Name = "panel1";
             panel1.Size = new Size(2, 880);
             panel1.TabIndex = 83;
-            // 
-            // detailHiderPanel
-            // 
-            detailHiderPanel.Controls.Add(hiderPaneLabel2);
-            detailHiderPanel.Controls.Add(hiderPanelLabel1);
-            detailHiderPanel.Location = new Point(1148, 0);
-            detailHiderPanel.Name = "detailHiderPanel";
-            detailHiderPanel.Size = new Size(649, 880);
-            detailHiderPanel.TabIndex = 113;
-            // 
-            // hiderPaneLabel2
-            // 
-            hiderPaneLabel2.Font = new Font("Oxanium", 21.75F);
-            hiderPaneLabel2.ForeColor = SystemColors.Control;
-            hiderPaneLabel2.Location = new Point(181, 321);
-            hiderPaneLabel2.Name = "hiderPaneLabel2";
-            hiderPaneLabel2.Size = new Size(332, 113);
-            hiderPaneLabel2.TabIndex = 115;
-            hiderPaneLabel2.Text = "Please select a body from the list on the left to view body details";
-            // 
-            // hiderPanelLabel1
-            // 
-            hiderPanelLabel1.AutoSize = true;
-            hiderPanelLabel1.Font = new Font("Oxanium", 21.75F);
-            hiderPanelLabel1.ForeColor = Color.FromArgb(192, 64, 0);
-            hiderPanelLabel1.Location = new Point(147, 14);
-            hiderPanelLabel1.Name = "hiderPanelLabel1";
-            hiderPanelLabel1.Size = new Size(377, 36);
-            hiderPanelLabel1.TabIndex = 114;
-            hiderPanelLabel1.Text = "Planetary Body Detail View";
             // 
             // planetDetailView
             // 
@@ -2213,6 +2190,36 @@ namespace ED_Hud_Extension
             planetGravityLabel.TabIndex = 97;
             planetGravityLabel.Text = "Gravity : ";
             planetGravityLabel.TextAlign = ContentAlignment.TopRight;
+            // 
+            // detailHiderPanel
+            // 
+            detailHiderPanel.Controls.Add(hiderPaneLabel2);
+            detailHiderPanel.Controls.Add(hiderPanelLabel1);
+            detailHiderPanel.Location = new Point(1148, 0);
+            detailHiderPanel.Name = "detailHiderPanel";
+            detailHiderPanel.Size = new Size(649, 880);
+            detailHiderPanel.TabIndex = 113;
+            // 
+            // hiderPaneLabel2
+            // 
+            hiderPaneLabel2.Font = new Font("Oxanium", 21.75F);
+            hiderPaneLabel2.ForeColor = SystemColors.Control;
+            hiderPaneLabel2.Location = new Point(181, 321);
+            hiderPaneLabel2.Name = "hiderPaneLabel2";
+            hiderPaneLabel2.Size = new Size(332, 113);
+            hiderPaneLabel2.TabIndex = 115;
+            hiderPaneLabel2.Text = "Please select a body from the list on the left to view body details";
+            // 
+            // hiderPanelLabel1
+            // 
+            hiderPanelLabel1.AutoSize = true;
+            hiderPanelLabel1.Font = new Font("Oxanium", 21.75F);
+            hiderPanelLabel1.ForeColor = Color.FromArgb(192, 64, 0);
+            hiderPanelLabel1.Location = new Point(147, 14);
+            hiderPanelLabel1.Name = "hiderPanelLabel1";
+            hiderPanelLabel1.Size = new Size(377, 36);
+            hiderPanelLabel1.TabIndex = 114;
+            hiderPanelLabel1.Text = "Planetary Body Detail View";
             // 
             // starDetailView
             // 
@@ -2822,6 +2829,61 @@ namespace ED_Hud_Extension
             stationButton.Tag = "uiButtons";
             stationButton.Text = "Stationing";
             stationButton.UseVisualStyleBackColor = false;
+            stationButton.Click += stationButton_Click;
+            // 
+            // missionsButton
+            // 
+            missionsButton.BackColor = SystemColors.ActiveCaptionText;
+            missionsButton.Enabled = false;
+            missionsButton.FlatStyle = FlatStyle.Popup;
+            missionsButton.Font = new Font("Oxanium ExtraBold", 9F, FontStyle.Bold);
+            missionsButton.ForeColor = Color.FromArgb(192, 64, 0);
+            missionsButton.Location = new Point(12, 130);
+            missionsButton.Name = "missionsButton";
+            missionsButton.Size = new Size(92, 23);
+            missionsButton.TabIndex = 71;
+            missionsButton.Tag = "uiButtons";
+            missionsButton.Text = "Missions";
+            missionsButton.UseVisualStyleBackColor = false;
+            missionsButton.Click += missionsButton_Click;
+            // 
+            // missionsPanel
+            // 
+            missionsPanel.Controls.Add(label36);
+            missionsPanel.Location = new Point(110, 149);
+            missionsPanel.Name = "missionsPanel";
+            missionsPanel.Size = new Size(1802, 894);
+            missionsPanel.TabIndex = 94;
+            // 
+            // label36
+            // 
+            label36.AutoSize = true;
+            label36.Font = new Font("Oxanium", 26.25F, FontStyle.Bold);
+            label36.ForeColor = Color.FromArgb(192, 64, 0);
+            label36.Location = new Point(0, 32);
+            label36.Name = "label36";
+            label36.Size = new Size(192, 44);
+            label36.TabIndex = 92;
+            label36.Text = "Missions : ";
+            // 
+            // stationsPanel
+            // 
+            stationsPanel.Controls.Add(label1);
+            stationsPanel.Location = new Point(110, 149);
+            stationsPanel.Name = "stationsPanel";
+            stationsPanel.Size = new Size(1802, 894);
+            stationsPanel.TabIndex = 95;
+            // 
+            // label1
+            // 
+            label1.AutoSize = true;
+            label1.Font = new Font("Oxanium", 26.25F, FontStyle.Bold);
+            label1.ForeColor = Color.FromArgb(192, 64, 0);
+            label1.Location = new Point(0, 32);
+            label1.Name = "label1";
+            label1.Size = new Size(167, 44);
+            label1.TabIndex = 92;
+            label1.Text = "Station : ";
             // 
             // MainForm
             // 
@@ -2829,11 +2891,14 @@ namespace ED_Hud_Extension
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = SystemColors.ActiveCaptionText;
             ClientSize = new Size(1920, 1080);
+            Controls.Add(stationsPanel);
+            Controls.Add(missionsButton);
+            Controls.Add(missionsPanel);
+            Controls.Add(explorePanel);
             Controls.Add(homePanel);
             Controls.Add(combatPanel);
             Controls.Add(dividerPanel);
             Controls.Add(stationButton);
-            Controls.Add(explorePanel);
             Controls.Add(statusPanel);
             Controls.Add(initPanel);
             Controls.Add(exitButton);
@@ -2859,15 +2924,19 @@ namespace ED_Hud_Extension
             homePanel.PerformLayout();
             explorePanel.ResumeLayout(false);
             explorePanel.PerformLayout();
-            detailHiderPanel.ResumeLayout(false);
-            detailHiderPanel.PerformLayout();
             planetDetailView.ResumeLayout(false);
             planetDetailView.PerformLayout();
+            detailHiderPanel.ResumeLayout(false);
+            detailHiderPanel.PerformLayout();
             starDetailView.ResumeLayout(false);
             starDetailView.PerformLayout();
             bodyListPanel.ResumeLayout(false);
             statusPanel.ResumeLayout(false);
             statusPanel.PerformLayout();
+            missionsPanel.ResumeLayout(false);
+            missionsPanel.PerformLayout();
+            stationsPanel.ResumeLayout(false);
+            stationsPanel.PerformLayout();
             ResumeLayout(false);
         }
 
@@ -3087,5 +3156,10 @@ namespace ED_Hud_Extension
         public Label fragGrenadeTag;
         public Label fragGrenadeLabel;
         public Label starYearTag;
+        public Button missionsButton;
+        public Panel missionsPanel;
+        public Label label36;
+        public Panel stationsPanel;
+        public Label label1;
     }
 }

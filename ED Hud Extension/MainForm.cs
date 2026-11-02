@@ -2,8 +2,6 @@ using EliteJournalReader;
 using EliteJournalReader.Events;
 using System.Diagnostics;
 using System.Reflection;
-using Newtonsoft.Json.Linq;
-using System.Runtime.CompilerServices;
 using static ED_Hud_Extension.SystemData;
 using static ED_Hud_Extension.NavData;
 using static Functions;
@@ -79,6 +77,21 @@ namespace ED_Hud_Extension
             DoubleBuffered = true;
 
             loadSettings();
+            if (capiEnabled)
+            {
+                try
+                {
+                    OAuth2 auth = new OAuth2();
+                    auth.Refresh();
+                    capiConnected = true;
+                }
+                catch
+                {
+                    MessageBox.Show("Frontier cAPI Authorization Error", "Authorization with Frontier's cAPI has encountered an error, please re-authorize manually.", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    capiConnected = false;
+                    return;
+                }
+            }
 
             if (statusEnabled) { statusLabel.Visible = true; }
 
@@ -115,7 +128,7 @@ namespace ED_Hud_Extension
             starYearTag.Text = starYear;
 
             verLabel.Text = "version " + Assembly.GetExecutingAssembly().GetName().Version.ToString();
-            
+
             if (gameRunning() && (!inMainMenu(_flag))) //if the game is already running when EDHE spins up, also if we're not in the main menu (status Flag1 reads 0 until player loads into game proper) 
             {
                 initiateWatcher();
@@ -218,7 +231,7 @@ namespace ED_Hud_Extension
             pShipName = e.ShipName;
             pShipID = e.ShipIdent;
 
-            if (e.Ship_Localised != null){ pShipType = e.Ship_Localised; }
+            if (e.Ship_Localised != null) { pShipType = e.Ship_Localised; }
             else { pShipType = convertName(e.Ship); }
 
             gameMode = e.GameMode.ToString();
@@ -252,7 +265,7 @@ namespace ED_Hud_Extension
                     Invoke(new Action(() => curVesselTag.Text = convertName(e.Ship)));
                     motherShip = curVesselTag.Text;
                 }
-                
+
                 Invoke(new Action(() => curVesselNameTag.Text = e.ShipName));
                 Invoke(new Action(() => curVesselIDTag.Text = e.ShipIdent));
                 Invoke(new Action(() => curShipFuelTag.Text = (currentFuelLevel + " / " + maxFuelLevel)));
@@ -342,7 +355,7 @@ namespace ED_Hud_Extension
 
         private void embarkEvent(object? sender, EmbarkEvent.EmbarkEventArgs e) //get on the ship/srv/slv
         {
-            
+
         }
 
         private void disembarkEvent(object? sender, DisembarkEvent.DisembarkEventArgs e) //get off the ship/srv/slv
@@ -548,7 +561,7 @@ namespace ED_Hud_Extension
             Invoke(new Action(() => updateLocationData(pCurrentSystem)));
 
             if (routeActive) { Invoke(new Action(() => updateRoute(expNextSystemTag, expDestinationTag))); }
-            
+
             //if (StatusTags.Supercruise) { Invoke(new Action(() => fsdTag.Text = "supercruise")); }
         }
 
@@ -664,8 +677,9 @@ namespace ED_Hud_Extension
                     suitModList += convertName(mod) + ",  ";
                 }
             }
-            if (suitModList.Length != 0) 
-            { suitModList = suitModList.TrimEnd(',', ' ') + "."; } else { suitModList = "-none-"; }
+            if (suitModList.Length != 0)
+            { suitModList = suitModList.TrimEnd(',', ' ') + "."; }
+            else { suitModList = "-none-"; }
             Invoke(new Action(() => suitModsTag.Text = suitModList));
 
             int weaponCount = e.Modules.Length;
@@ -722,7 +736,8 @@ namespace ED_Hud_Extension
                 { weaponTwoModList = weaponTwoModList.TrimEnd(',', ' ') + "."; }
                 else { weaponTwoModList = "-none-"; }
                 Invoke(new Action(() => weaponTwoModTag.Text = weaponTwoModList));
-            } else { Invoke(new Action(() => weaponTwoModTag.Text = "-none-")); Invoke(new Action(() => weaponTwoTag.Text = "-none-")); }
+            }
+            else { Invoke(new Action(() => weaponTwoModTag.Text = "-none-")); Invoke(new Action(() => weaponTwoTag.Text = "-none-")); }
 
             if (e.Modules.Length == 3)
             {
@@ -739,7 +754,8 @@ namespace ED_Hud_Extension
                 { weaponThreeModList = weaponThreeModList.TrimEnd(',', ' ') + "."; }
                 else { weaponThreeModList = "-none-"; }
                 Invoke(new Action(() => weaponThreeModTag.Text = weaponThreeModList));
-            } else { Invoke(new Action(() => weaponThreeModTag.Text = "")); Invoke(new Action(() => weaponThreeTag.Text = "")); }
+            }
+            else { Invoke(new Action(() => weaponThreeModTag.Text = "")); Invoke(new Action(() => weaponThreeTag.Text = "")); }
         }
 
         private void launchVesselEvent(object? sender, LaunchVesselEvent.LaunchVesselEventArgs e)
@@ -945,7 +961,7 @@ namespace ED_Hud_Extension
             else if (StatusTags.FsdCharging) { Invoke(new Action(() => fsdTag.Text = "charging")); }
             else if (StatusTags.FsdMassLocked) { Invoke(new Action(() => fsdTag.Text = "mass locked")); }
             else if (StatusTags.FsdJump) { Invoke(new Action(() => fsdTag.Text = "jumping")); }
-            else { Invoke(new Action(() => fsdTag.Text = "ready")); }
+            else {  Invoke(new Action(() => fsdTag.Text = "ready")); }
 
             if (StatusTags.OnFoot) { Invoke(new Action(() => onFootPanel.Visible = true)); }
             if (!StatusTags.OnFoot) { Invoke(new Action(() => onFootPanel.Visible = false)); }
@@ -1136,6 +1152,19 @@ namespace ED_Hud_Extension
         {
             clearInitPanel();
             explorePanel.BringToFront();
+            dividerPanel.BringToFront();
+        }
+        private void stationButton_Click(object sender, EventArgs e)
+        {
+            clearInitPanel();
+            stationsPanel.BringToFront();
+            dividerPanel.BringToFront();
+        }
+
+        private void missionsButton_Click(object sender, EventArgs e)
+        {
+            clearInitPanel();
+            missionsPanel.BringToFront();
             dividerPanel.BringToFront();
         }
 
