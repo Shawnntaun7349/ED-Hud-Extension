@@ -11,11 +11,11 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="System.Configuration.ConfigurationManager" Version="10.0.14" />
+		<FrameworkReference Include="Microsoft.AspNetcore.App"/>
 	</ItemGroup>
 
 	<ItemGroup>
-		<FrameworkReference Include="Microsoft.AspNetcore.App" />
+		<PackageReference Include="Newtonsoft.Json" Version="13.0.4"/>
 	</ItemGroup>
 
 	<ItemGroup>
