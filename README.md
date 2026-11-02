@@ -12,7 +12,7 @@ Current Version : 0.2.2.0
 - Implementation of Mining Panel to display a list of Hotspots, notable stations for selling various Materials, etc.
 - [Tentatively] A Color changing mechanism of some kind to allow the user to customize the appearance of their UI [in EDHE, not in-game. EDHM-UI exists and is fantastic.] [https://bluemystical.github.io/edhm-api/]
 
-**--- Update Notes ---** 
+**--- Update Notes ---**  
 **Version 0.2.2.0**  
 Integration of Frontier's Companion API, implementation of classes for OAuth2 data flow, cAPI handling, etc. Current functionality is limited to very basic data retrieval with no real user impact, with further integration of cAPI data planned for future updates.
 
