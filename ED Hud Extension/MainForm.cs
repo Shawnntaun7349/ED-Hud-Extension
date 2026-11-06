@@ -1134,8 +1134,8 @@ namespace ED_Hud_Extension
         private void combatButton_Click(object sender, EventArgs e)
         {
             arrangeCombatPanel(combatPanel, onFootPanel);
-            scanStageLabel.Location = new Point(((workingAreaPanel.Width / 2) - scanStageLabel.Width + 108) + 10, scanStageLabel.Location.Y);
-            scanStageTag.Location = new Point((workingAreaPanel.Width / 2) + 118, scanStageTag.Location.Y);
+            scanStageLabel.Location = new Point(((workingAreaPanel.Width / 2) - scanStageLabel.Width + 78) + 10, scanStageLabel.Location.Y);
+            scanStageTag.Location = new Point((workingAreaPanel.Width / 2) + 98, scanStageTag.Location.Y);
             combatPanel.BringToFront();
             dividerPanel.BringToFront();
         }
@@ -1143,8 +1143,8 @@ namespace ED_Hud_Extension
         private void explorationButton_Click(object sender, EventArgs e)
         {
             arrangeExplorePanel(explorePanel); //196 apart
-            fsdLabel.Location = new Point(((workingAreaPanel.Width / 2) - fsdLabel.Width + 108) + 10, fsdLabel.Location.Y);
-            fsdTag.Location = new Point((workingAreaPanel.Width / 2) + 108, fsdTag.Location.Y);
+            fsdLabel.Location = new Point(((workingAreaPanel.Width / 2) - fsdLabel.Width + 78) + 10, fsdLabel.Location.Y);
+            fsdTag.Location = new Point((workingAreaPanel.Width / 2) + 98, fsdTag.Location.Y);
             selectBodyLabel.Location = new Point((detailHiderPanel.Width / 2) - (selectBodyLabel.Width / 2) + 28, selectBodyLabel.Location.Y);
             explorePanel.BringToFront();
             detailHiderPanel.BringToFront();

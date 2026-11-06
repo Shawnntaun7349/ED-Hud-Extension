@@ -276,7 +276,7 @@
             prefDisplayMenu.FormattingEnabled = true;
             prefDisplayMenu.Location = new Point(114, 31);
             prefDisplayMenu.Name = "prefDisplayMenu";
-            prefDisplayMenu.Size = new Size(456, 23);
+            prefDisplayMenu.Size = new Size(350, 23);
             prefDisplayMenu.TabIndex = 21;
             // 
             // prefDisplayLabel
