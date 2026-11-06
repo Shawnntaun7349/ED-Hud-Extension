@@ -23,16 +23,17 @@ namespace ED_Hud_Extension
 
             if (capiConnected)
             {
+                capiStatusTag.Text = "Connected";
                 capiConnectButton.Enabled = false;
                 capiDisconnectButton.Enabled = true;
-                capiStatusTag.Text = "Connected";
             }
             else
             {
+                capiStatusTag.Text = "Disconnected";
                 capiConnectButton.Enabled = true;
                 capiDisconnectButton.Enabled = false;
-                capiStatusTag.Text = "Disconnected";
             }
+
         }
 
         private void pathBrowseButton_Click(object sender, EventArgs e) //gimme the god damn journal folder
@@ -49,7 +50,7 @@ namespace ED_Hud_Extension
             }
         }
 
-        private void applyButton_Click(object sender, EventArgs e) //check for errors, then save the user's settings
+        private async void applyButton_Click(object sender, EventArgs e) //check for errors, then save the user's settings
         {
             //then verify the journal folder
             string pathToCheck = journalPath;
@@ -59,7 +60,10 @@ namespace ED_Hud_Extension
             }
             else if (Directory.Exists(pathToCheck)) //make sure that the folder is the correct one by checking for guaranteed files like the ModulesInfo file
             {
+                Screen targetScreen = Screen.AllScreens[prefDisplayMenu.SelectedIndex];
+
                 chosenDisplay = prefDisplayMenu.SelectedIndex;
+                formSize = targetScreen.WorkingArea.Size;
                 statusEnabled = statReadToggle.Checked;
                 gamePath = gamePathTextbox.Text;
                 journalPath = journalPathTextbox.Text;
@@ -67,9 +71,11 @@ namespace ED_Hud_Extension
                 autoCombatSwitch = combatSwitchToggle.Checked;
                 autoShutDownEnabled = autoShutdownToggle.Checked;
 
-                Functions.saveSettings();
-                MessageBox.Show("Settings saved successfully! Application will now restart.", "Selection complete", MessageBoxButtons.OK);
-                Functions.RestartApplication();
+                if (Functions.saveSettings()) //save the settings
+                {
+                    Application.Restart();
+                }
+
             }
             else
             {
@@ -132,18 +138,18 @@ namespace ED_Hud_Extension
         private async void capiConnectButton_Click(object sender, EventArgs e)
         {
             //do capi stuff
-            OAuth2 oauth = await new OAuth2Request().AuthorizeAsync();
+            OAuth2 oauth = await new OAuth2Request().AuthorizeAsync(OAuth2.cts.Token);
             oauth.Save();
 
             var capi = new CAPI(oauth).GetProfile();
             File.WriteAllText("C:\\EDHE\\res\\capi\\profile.json", capi.ToString());
             capiStatusTag.Text = "Connected";
 
-            //player's cmdr name
-
             capiEnabled = true;
             capiDisconnectButton.Enabled = true;
             capiConnectButton.Enabled = false;
+
+            //pull capi data
         }
 
         private void capiDisconnectButton_Click(object sender, EventArgs e)

@@ -6,11 +6,6 @@ using ED_Hud_Extension;
 
 internal class Functions
 {
-    public Functions()
-	{
-        //i dunno why but it gets real mad if i put anything here so fuck it
-    }
-
     public static void loadSettings()
     {
         //check for the settings file, generate a new settings file w/ default values if it can't be located
@@ -41,7 +36,7 @@ internal class Functions
         {
             gamePath = loadedGamePath;
         }
-        else if (File.Exists(defaultJournalPath))//if it aint there, try the default path (in case the user has set some custom path that has been reset)
+        else if (File.Exists(defaultGamePath))//if it aint there, try the default path (in case the user has set some custom path that has been reset)
         {
             gamePath = defaultGamePath;
         }
@@ -51,12 +46,24 @@ internal class Functions
         }
 
         //load the user's settings
-        savedPrefDisplayIndex = Int32.Parse(doc.RootElement.GetProperty("Preferred Display").GetString());
-        statusEnabled = Boolean.Parse(doc.RootElement.GetProperty("Status Readout Enabled").GetString()); 
-        autoShutDownEnabled = Boolean.Parse(doc.RootElement.GetProperty("Auto Shut Down").GetString());
-        autoPanelSwitch = Boolean.Parse(doc.RootElement.GetProperty("Auto Switch Always").GetString());
-        autoCombatSwitch = Boolean.Parse(doc.RootElement.GetProperty("Auto Switch Combat Only").GetString());
-        capiEnabled = Boolean.Parse(doc.RootElement.GetProperty("cAPI Enabled").GetString());
+        try
+        {
+            savedPrefDisplayIndex = Int32.Parse(doc.RootElement.GetProperty("Preferred Display").GetString());
+            statusEnabled = Boolean.Parse(doc.RootElement.GetProperty("Status Readout Enabled").GetString());
+            autoShutDownEnabled = Boolean.Parse(doc.RootElement.GetProperty("Auto Shut Down").GetString());
+            autoPanelSwitch = Boolean.Parse(doc.RootElement.GetProperty("Auto Switch Always").GetString());
+            autoCombatSwitch = Boolean.Parse(doc.RootElement.GetProperty("Auto Switch Combat Only").GetString());
+            capiEnabled = Boolean.Parse(doc.RootElement.GetProperty("cAPI Enabled").GetString());
+
+            int sizeX = Int32.Parse(doc.RootElement.GetProperty("Size_X").GetString());
+            int sizeY = Int32.Parse(doc.RootElement.GetProperty("Size_Y").GetString());
+            formSize = new Size(sizeX, sizeY);
+        }
+        catch
+        {
+            generateSettings();
+            loadSettings();
+        }
 
         //make sure the form loads on the correct display
         Screen displayScreen = Screen.AllScreens[savedPrefDisplayIndex];
@@ -66,7 +73,7 @@ internal class Functions
         KeybindsHandler.retrieveKeyBinds();
 	}
 
-    public static void saveSettings()
+    public static bool saveSettings()
     {
         if (Directory.Exists(journalPath)) //make sure that the folder is the correct one by checking for guaranteed files like the ModulesInfo file
         {
@@ -77,19 +84,21 @@ internal class Functions
                     { "Journal Path", journalPath.ToString() },
                     { "Game Path", gamePath.ToString() },
                     { "Preferred Display", chosenDisplay.ToString() },
+                    { "Size_X", formSize.Width.ToString() },
+                    { "Size_Y", formSize.Height.ToString() },
                     { "cAPI Enabled", capiEnabled.ToString() },
                     { "Status Readout Enabled", statusEnabled.ToString() },
                     { "Auto Shut Down", autoShutDownEnabled.ToString() },
                     { "Auto Switch Always", autoPanelSwitch.ToString() },
-                    { "Auto Switch Combat Only", autoCombatSwitch.ToString() }
+                    { "Auto Switch Combat Only", autoCombatSwitch.ToString() },
 
                 };
 
             string json = JsonSerializer.Serialize(path, new JsonSerializerOptions { WriteIndented = true }); //json-ify that shit
             File.WriteAllText("C:\\EDHE\\settings.json", json); //create settings.json and write the data to it
-            MessageBox.Show("Settings saved successfully! Application will now restart.", "Selection complete", MessageBoxButtons.OK);
-            RestartApplication();
+            return true;
         }
+        else {  return false; } //something broke
     }
 
 	public static void generateSettings() //if the settings file doesn't exist, needs refreshed or is otherwise fuckered up
@@ -105,7 +114,7 @@ internal class Functions
         }
 
         //verify the saved game folder path
-        if (Directory.Exists(defaultGamePath))
+        if (File.Exists(defaultGamePath))
         {
             gamePath = defaultGamePath;
         }
@@ -121,8 +130,10 @@ internal class Functions
                     { "Journal Path", defaultJournalPath },
                     { "Game Path", defaultGamePath },
                     { "Preferred Display", "0" },
+                    { "Size_X", "1920"},
+                    { "Size_Y", "1080"},
                     { "cAPI Enabled", "False" },
-                    { "Status Readout Enabled", "True" },
+                    { "Status Readout Enabled", "False" },
                     { "Auto Shut Down", "False" },
                     { "Auto Switch Always", "False" },
                     { "Auto Switch Combat Only", "False" }
@@ -132,32 +143,29 @@ internal class Functions
         File.WriteAllText("C:\\EDHE\\settings.json", json); //create settings.json and write the data to it
     }
 
-	public static void simulateCombat() //to be removed at some point, this is just for debugging
-	{
-		
-	}
     public static void RestartApplication() //when a good ol 'Application.Restart();' call shits the bed, you pull out the Environment namespace big guns
     {
         //start a new instance with the same arguments
-        string args = string.Join(" ", Environment.GetCommandLineArgs().Skip(1));
+        /* string args = string.Join(" ", Environment.GetCommandLineArgs().Skip(1));
+        
         System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
         {
             FileName = Application.ExecutablePath,
             Arguments = args,
             UseShellExecute = true
-        });
+        });*/
 
         //forcefully exit the current instance
-        Environment.Exit(0);
+        Application.Restart(); //except for when Application.Restart() actually works?
     }
 
-    public static object eliteTier(object rank)
+    public static string eliteTier(object rank)
     {
         //grab the players rank, see if it's above 8. if it is, subtract 8 from that value to determine how many iterations of Elite the player is
         int total = 0;
         string tier = "";
         if ((int)rank > 8){ total = (int)rank - 8; }
-        else { return rank; } //if it doesn't need converted to Elite, just pass the rank right on back to the caller
+        else { return rank.ToString(); } //if it doesn't need converted to Elite, just pass the rank right on back to the caller
 
         if (total == 1) { tier = "Elite I"; }
         else if (total == 2) { tier = "Elite II"; }

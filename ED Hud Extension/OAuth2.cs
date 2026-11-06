@@ -1,13 +1,10 @@
-﻿using Microsoft.AspNetCore.Identity.Data;
-using System.Configuration;
+﻿using System.Configuration;
 using System.Diagnostics;
 using System.Net;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Text.Json.Nodes;
-using static System.Net.WebRequestMethods;
-using static System.Windows.Forms.AxHost;
 
 
 namespace ED_Hud_Extension
@@ -25,6 +22,8 @@ namespace ED_Hud_Extension
         private string RefreshToken;
         private string TokenType;
 
+        public static CancellationTokenSource cts = new CancellationTokenSource();
+
         public interface IOAuth2Request : IDisposable
         {
             string AuthURL { get; }
@@ -36,8 +35,9 @@ namespace ED_Hud_Extension
             private static readonly HttpClient Http = new();
             public OAuth2? OAuth { get; private set; }
 
-            public async Task<OAuth2> AuthorizeAsync(CancellationToken ct = default)
+            public async Task<OAuth2> AuthorizeAsync(CancellationToken ct)
             {
+                if (!Globals.capiEnabled) { cts.Cancel(); }
                 var codeVerifier = GetBase64Random(32);
                 var state = GetBase64Random(8);
                 var challenge = Base64URLEncode(SHA256(Encoding.ASCII.GetBytes(codeVerifier)));
@@ -85,14 +85,21 @@ namespace ED_Hud_Extension
                 {
                     //check the auth token validity before failing out
                     try
-                    {
+                    {   
+                        //if the refresh works, the above attempt failed for an expired auth token
+                        //if the refresh fails, something went wrong and the user needs to reauthorize manually
                         OAuth2 r = new OAuth2();
-                        r.Refresh();
+                        r.Refresh(); 
                     }
                     catch
                     {
+                        Globals.capiConnected = false;
                         throw new HttpRequestException($"Token request failed: {(int)resp.StatusCode} {body}"); //shit broke
                     }
+                }
+                else
+                {
+                    Globals.capiConnected = true;
                 }
 
                 var doc = JsonNode.Parse(body);
@@ -106,6 +113,7 @@ namespace ED_Hud_Extension
             }
         }
 
+        //a few encryption methods for security stuff. nothin fancy
         private static string Base64URLEncode(byte[] bytes)
         {
             return Convert.ToBase64String(bytes).Replace('+', '-').Replace('/', '_').TrimEnd('=');
@@ -146,6 +154,7 @@ namespace ED_Hud_Extension
 
         public async void Refresh()
         {
+            //attempt to ping the server for an updated auth token cos they're short-lived
             try
             {
                 var cert = LoadOrCreateCert(Globals.pfxPath);
@@ -156,6 +165,7 @@ namespace ED_Hud_Extension
 
                 var form = new FormUrlEncodedContent(new Dictionary<string, string>
                 {
+                    //grant type is different, and the payload is just the client id and refresh token. im not confident the URI is needed but it's here anyway
                     ["grant_type"] = "refresh_token",
                     ["client_id"] = ClientID,
                     ["refresh_token"] = RefreshToken,
@@ -176,14 +186,17 @@ namespace ED_Hud_Extension
                 };
 
                 System.IO.File.WriteAllText(Globals.tokenPath, tokensToSave.ToString());
+                Globals.capiConnected = true;
             }
             catch
             {
+                //if that fails, do nothing. the user will need to manually reauthorize
+                Globals.capiConnected = false;
                 return;
             }
         }
 
-        public void Save()
+        public void Save() //save the oauth2 token data
         {
             var tokensToSave = new JsonObject
             {
@@ -195,7 +208,7 @@ namespace ED_Hud_Extension
             System.IO.File.WriteAllText(Globals.tokenPath, tokensToSave.ToString());
         }
 
-        public HttpWebRequest CreateRequest(string url)
+        public HttpWebRequest CreateRequest(string url) //method to make a request to the capi for expediency
         {
             var request = (HttpWebRequest)WebRequest.Create(url);
             request.Headers[HttpRequestHeader.Authorization] = "Bearer " + AccessToken;
@@ -205,6 +218,7 @@ namespace ED_Hud_Extension
 
         static X509Certificate2 LoadOrCreateCert(string pfxPath)
         {
+            //gotta make some certs so fdev doesn't have an aneurysm about security. on the fucken localhost endpoint. woo.
             const string pfxPassword = "localhost-cert";
             const X509KeyStorageFlags flags =
                 X509KeyStorageFlags.UserKeySet |
@@ -220,7 +234,7 @@ namespace ED_Hud_Extension
                 }
                 catch (CryptographicException)
                 {
-                    // corrupt or written with different settings: fall through and regenerate
+                    //corrupt or written with different settings: fall through and regenerate
                 }
             }
 

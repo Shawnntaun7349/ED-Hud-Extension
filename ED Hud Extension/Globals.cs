@@ -7,9 +7,7 @@ public class Globals
 
     //background variables
     public static bool mainFormLoaded = false;
-    public static bool connected = false; //for online connection
-    public static bool waitingForJournal = true; //for local connection
-    public static int starYear = DateTime.UtcNow.Year + 1286;
+    public static bool activelyRunning = false;
     public static Point location; //for display methods
     public static DateTime startUpTime; //set at JournalWatcher startup, used to filter all but a few 'old' events in a given journal
     public static DateTime shutdownTime;
@@ -18,7 +16,7 @@ public class Globals
     // --------------------- settings variables ---------------------
     //files & paths
     public static string settingsPath = "C:\\EDHE\\Settings.json";
-    public static string defaultJournalPath = "C:\\Users\\" + Environment.GetEnvironmentVariable("USERPROFILE") + "\\Saved Games\\Frontier Developments\\Elite Dangerous";
+    public static string defaultJournalPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Saved Games\\Frontier Developments\\Elite Dangerous");
     public static string defaultGamePath = "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Elite Dangerous\\Products\\elite-dangerous-odyssey-64\\EliteDangerous64.exe";
     public static string defaultKeybindsPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Frontier Developments\\Elite Dangerous\\Options\\Bindings\\Custom.4.2.binds");
     public static string logPath = "C:\\EDHE\\log.txt";
@@ -33,14 +31,15 @@ public class Globals
 
     //user settings - data flow
     public static bool capiEnabled;
-    public static bool capiConnected;
+    public static bool capiConnected = false;
+    public static bool capiFailed = false;
     public static string pfxPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "ED_Hud_Extension\\localhost-cert.pfx");
     public static string tokenPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "ED_Hud_Extension\\access-token.json");
 
     //user settings - display
     public static int savedPrefDisplayIndex;
     public static int chosenDisplay;
-    public static int selectedIndex;
+    public static Size formSize;
 
     //user settings - audio
     public static bool mindYourOwnDamnBusiness;
@@ -185,7 +184,7 @@ public class Globals
     public static string pShipType;
     public static string pShipName;
     public static string pShipID;
-    public static double currentFuelLevel; //from the journal files
+    public static double currentFuelLevel; 
     public static double maxFuelLevel;
 
     //from status file

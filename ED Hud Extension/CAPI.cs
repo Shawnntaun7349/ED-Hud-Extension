@@ -4,11 +4,7 @@ namespace ED_Hud_Extension
 {
     public class CAPI
     {
-        private const string ProfileURL = "https://companion.orerve.net/profile";
-        private const string MarketURL = "https://companion.orerve.net/market";
-        private const string ShipyardURL = "https://companion.orerve.net/shipyard";
-        private const string JournalURL = "https://companion.orerve.net/journal";
-
+        private const string baseUrl = "https://companion.orerve.net/";
 
         public OAuth2 OAuth { get; private set; }
 
@@ -28,10 +24,10 @@ namespace ED_Hud_Extension
             }
         }
 
-        public JsonObject GetProfile() { return Get(ProfileURL); }
-        public JsonObject GetMarket() { return Get(MarketURL); }
-        public JsonObject GetShipyard() { return Get(ShipyardURL); }
-        public JsonObject GetJournal() { return Get(JournalURL); }
+        public JsonObject GetProfile() { return Get(baseUrl + "profile"); }
+        public JsonObject GetMarket() { return Get(baseUrl + "market"); }
+        public JsonObject GetShipyard() { return Get(baseUrl + "shipyard"); }
+        public JsonObject GetJournal() { return Get(baseUrl + "journal"); }
     }
 }
 
