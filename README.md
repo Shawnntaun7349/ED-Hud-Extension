@@ -4,7 +4,7 @@ A second-monitor program for Frontier Development's Elite: Dangerous.
 
 *Developed by Sean Roe*   
 
-Current Version : 0.2.3.1  
+Current Version : 0.2.3.2  
 
 **--- Planned Features ---**  
 - Expansion on Combat Panel to show more player data, such as Power Distributor levels, current shield status, etc.
@@ -13,6 +13,9 @@ Current Version : 0.2.3.1
 - [Tentatively] A Color changing mechanism of some kind to allow the user to customize the appearance of their UI [in EDHE, not in-game. EDHM-UI exists and is fantastic.] [https://bluemystical.github.io/edhm-api/]
 
 **--- Update Notes ---**  
+**Version 0.2.3.2**  
+Minor update to Body Detail View & Star Detail View panels. Adjustments for handling present vs missing data.
+
 **Version 0.2.3.1**  
 Hotfix for component load order issue causing crashes on startup in some instances.
 
