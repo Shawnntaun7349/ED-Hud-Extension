@@ -16,9 +16,9 @@ public class Globals
     // --------------------- settings variables ---------------------
     //files & paths
     public static string settingsPath = "C:\\EDHE\\Settings.json";
-    public static string defaultJournalPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Saved Games\\Frontier Developments\\Elite Dangerous");
-    public static string defaultGamePath = "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Elite Dangerous\\Products\\elite-dangerous-odyssey-64\\EliteDangerous64.exe";
-    public static string defaultKeybindsPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Frontier Developments\\Elite Dangerous\\Options\\Bindings\\Custom.4.2.binds");
+    public static string defaultJournalPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), @"Saved Games\Frontier Developments\Elite Dangerous");
+    public static string defaultGamePath = @"C:\Program Files (x86)\Steam\steamapps\common\Elite Dangerous\Products\elite-dangerous-odyssey-64\EliteDangerous64.exe";
+    public static string defaultKeybindsPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), @"Frontier Developments\Elite Dangerous\Options\Bindings\Custom.4.2.binds");
     public static string logPath = "C:\\EDHE\\log.txt";
     public static string journalPath;
     public static string gamePath;
@@ -40,6 +40,7 @@ public class Globals
     public static int savedPrefDisplayIndex;
     public static int chosenDisplay;
     public static Size formSize;
+    public static int beltListOffsetY = 610;
 
     //user settings - audio
     public static bool mindYourOwnDamnBusiness;

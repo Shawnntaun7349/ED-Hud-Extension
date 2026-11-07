@@ -1,4 +1,5 @@
 ﻿using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace ED_Hud_Extension
 {
@@ -26,7 +27,7 @@ namespace ED_Hud_Extension
             public double? id64 { get;set; }
             public double? bodyId { get;set; }
             public string? name { get;set; }
-            public List<Discovery>? discoveryInfo { get;set; } //discoverer: commander, DoD: DateTime
+            public Discovery? discovery { get;set; } //discoverer: commander, DoD: DateTime
             public string? type { get;set; }
             public string? subType { get;set; }
             public List<Parent>? parents { get;set; } 
@@ -44,45 +45,82 @@ namespace ED_Hud_Extension
             public float? orbitalPeriod { get;set; } 
             public float? rotationalPeriod { get;set; }
             public List<Belt>? belts { get;set; }
+            public List<Ring>? rings { get; set; }
             public bool? isLandable { get;set; } //for planets only
             public float? gravity { get;set; } //for planets only
             public float? radius { get;set; } //for planets only
             public float? surfacePressure { get;set; } //for planets only
             public string? volcanismType { get;set; } //for planets only
             public string? atmosphereType { get;set; } //for planets only
-            public Dictionary<string, float>? atmosphereComposition { get;set; } //element : % of composition
-            public Dictionary<string, float>? solidComposition { get;set; }//material : % of composition
+            public Atmosphere? atmosphereComposition { get;set; } //element : % of composition
+            public Composition? solidComposition { get;set; }//material : % of composition
+        }
+
+        public class Atmosphere
+        {
+            public double ammonia { get; set; }
+            public double argon { get; set; }
+
+            [JsonPropertyName("Carbon dioxide")]
+            public double carbonDioxide { get; set; }
+            public double helium { get; set; }
+            public double hydrogen { get; set; }
+            public double iron { get; set; }
+            public double methane { get; set; }
+            public double neon { get; set; }
+            public double nitrogen { get; set; }
+            public double oxygen { get; set; }
+            public double silicates { get; set; }
+
+            [JsonPropertyName("Sulphur dioxide")]
+            public double sulphurDioxide { get; set; }
+            public double water { get; set; }
+        }
+
+        public class Composition
+        {
+            public double rock { get; set; }
+            public double metal { get; set; }
+            public double ice { get; set; }
+        }
+
+        public class Ring
+        {
+            public string name { get; set; }
+            public string type { get; set; }
+            public long mass { get; set; }
+            public int innerRadius { get; set; }
+            public int outerRadius { get; set; }
         }
 
         public class Belt
         {
-            public List<object>? beltList { get;set; }
-            public Dictionary<string, float>? beltData {  get;set; }
+            public string name { get; set; }
+            public string type { get; set; }
+            public long mass { get; set; }
+            public int innerRadius { get; set; }
+            public int outerRadius { get; set; }
         }
 
         public class Discovery
         {
-            public string? cmdrName { get;set; }
-            public string? dod {  get;set; }
+            public string? commander { get;set; }
+            public string? date {  get;set; }
         }
 
         public class Parent
         {
             public List<object>? parentList { get;set; }
-            public Dictionary<string, int>? parentInfo {  get;set; }
         }
 
-        /* Font = Oxanium, Style = Bold, Size = 22.75pt, Initial Location = (0,0), Y offset per item = 36, X offset for subitems is 10, 
-         * default color is #C04000, selected color is #FFCC99
-         * 
-         * 
-        */
-        public static System.Threading.Timer waitTimer;
         public static Bodies bodies;
         public static SolarSystem system;
         public static Belt belts;
+        public static Ring rings;
         public static Parent parents;
         public static Discovery discovery;
+        public static Composition composition;
+        public static Atmosphere atmosphere;
 
         public void loadSystemData(Panel panel, string targetSystem)
         {
@@ -100,11 +138,15 @@ namespace ED_Hud_Extension
 
             string jsonText = File.ReadAllText("C:\\EDHE\\res\\systemdata.json");
             var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-            system = JsonSerializer.Deserialize<SolarSystem>(jsonText, options);
-            bodies = JsonSerializer.Deserialize<Bodies>(jsonText, options);
-            belts = JsonSerializer.Deserialize<Belt>(jsonText, options);
-            parents = JsonSerializer.Deserialize<Parent>(jsonText, options);
-            discovery = JsonSerializer.Deserialize<Discovery>(jsonText, options);
+            system = System.Text.Json.JsonSerializer.Deserialize<SolarSystem>(jsonText, options);
+            discovery = System.Text.Json.JsonSerializer.Deserialize<Discovery>(jsonText, options);
+            bodies = System.Text.Json.JsonSerializer.Deserialize<Bodies>(jsonText, options);
+            parents = System.Text.Json.JsonSerializer.Deserialize<Parent>(jsonText, options);
+            composition = System.Text.Json.JsonSerializer.Deserialize<Composition>(jsonText, options);
+
+            belts = System.Text.Json.JsonSerializer.Deserialize<Belt>(jsonText, options);
+            rings = System.Text.Json.JsonSerializer.Deserialize<Ring>(jsonText, options);
+            atmosphere = System.Text.Json.JsonSerializer.Deserialize<Atmosphere>(jsonText, options);
 
             int starCount = 0;
 

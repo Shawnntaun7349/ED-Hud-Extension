@@ -113,6 +113,22 @@ public class StatusReader
 		BreathableAtmosphere = 63356
     }
 
+    public static bool inMainMenu()
+    {
+        string path = Path.Combine(journalPath, "Status.json");
+        using JsonDocument doc = JsonDocument.Parse(File.ReadAllText(path));
+        int status = Int32.Parse(doc.RootElement.GetProperty("Flags").ToString());
+        if (status != 0)
+        {
+            doc.Dispose();
+            return false;
+        }
+        else
+        {
+            return true;
+        }
+    }
+
     public static void readStatus(string path, ShipFlag currentShip, OnFootFlag currentFoot)
     {
         statusReaderLive = true;
@@ -125,7 +141,7 @@ public class StatusReader
             DateTime statusTS = DateTime.Parse(timeStamp);
 
             int status = Int32.Parse(doc.RootElement.GetProperty("Flags").ToString());
-            if (status == 0) { doc.Dispose(); return; } //if the Flags vale uf ot the status file is 0, we're in the main menu or the game isnt running
+            if (status < 0) { doc.Dispose(); return; } //if the Flags vale uf ot the status file is 0, we're in the main menu or the game isnt running
             else
             {
                 Root? root = JsonSerializer.Deserialize<Root>(doc);
@@ -135,7 +151,7 @@ public class StatusReader
                 ShipFlag flag = (ShipFlag)root.Flags;
                 OnFootFlag flag2 = (OnFootFlag)root.Flags2;
 
-                if (flag2 == 0)
+                if (flag2 == 0 && flag != 0)
                 {
                     systemPips = root.Pips[0];
                     enginePips = root.Pips[1];

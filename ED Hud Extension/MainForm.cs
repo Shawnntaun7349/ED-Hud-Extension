@@ -3,12 +3,11 @@ using EliteJournalReader.Events;
 using System.Diagnostics;
 using System.Reflection;
 using static ED_Hud_Extension.DisplayHandler;
-using static ED_Hud_Extension.SystemData;
 using static ED_Hud_Extension.NavData;
+using static ED_Hud_Extension.SystemData;
 using static Functions;
 using static Globals;
 using static StatusReader;
-using Microsoft.AspNetCore.Mvc.Formatters;
 
 namespace ED_Hud_Extension
 {
@@ -18,6 +17,7 @@ namespace ED_Hud_Extension
         private static System.Threading.Timer localTimer;//multi-threading timers are a hassle 
         private static System.Threading.Timer scanTimer;
         private static System.Threading.Timer restartTimer;
+        private static System.Threading.Timer readTimer;
 
         //bits for the connection 'animation'
         private static System.Threading.Timer uplinkTimer;
@@ -54,22 +54,6 @@ namespace ED_Hud_Extension
             if (Process.GetProcessesByName("EliteDangerous64").Length > 0)
             {
                 return true;
-            }
-            else
-            {
-                return false;
-            }
-        }
-
-        public bool inMainMenu(ShipFlag flag)
-        {
-            if (flag.HasFlag(ShipFlag.None))
-            {
-                return true;
-            }
-            else if (flag.HasFlag(ShipFlag.InMainShip) || flag.HasFlag(ShipFlag.InFighter) || flag.HasFlag(ShipFlag.InSrv))
-            {
-                return false;
             }
             else
             {
@@ -132,8 +116,8 @@ namespace ED_Hud_Extension
 
             mainFormLoaded = true;
             if (statusEnabled) { statusLabel.Text = statBase + "initiating service"; }
-            loopTimer = new System.Threading.Timer(readTimerCallback, "Timer State", 500, 50); //start the loop for the status reader
             localTimer = new System.Threading.Timer(localCallbackMethod, "Timer State", 100, 250);
+            readTimer = new System.Threading.Timer(readTimerCallback, "Timer State", 50, 50);
 
             //1286 year offset
             locDTTag.Text = DateTime.Now.ToString("dddd, MMMM dd, yyyy \nHH:mm");
@@ -142,7 +126,7 @@ namespace ED_Hud_Extension
 
             verLabel.Text = "version " + Assembly.GetExecutingAssembly().GetName().Version.ToString();
 
-            if (!inMainMenu(_flag)) //if the game is already running when EDHE spins up, also if we're not in the main menu (status Flag1 reads 0 until player loads into game proper) 
+            if (!inMainMenu()) //if the game is already running when EDHE spins up, also if we're not in the main menu (status Flag1 reads 0 until player loads into game proper) 
             {
                 initiateWatcher();
                 currentJournal = true;
@@ -159,7 +143,6 @@ namespace ED_Hud_Extension
 
         // --------------------- methods for handling Journal Reader events ---------------------
         public JournalWatcher watcher = new JournalWatcher(journalPath);
-        public static System.Threading.Timer loopTimer;
         public static ShipFlag sf = new ShipFlag();
         public static OnFootFlag ff = new OnFootFlag();
 
@@ -601,7 +584,7 @@ namespace ED_Hud_Extension
                 if (autoShutDownEnabled && e.Timestamp > startUpTime)
                 {
                     Invoke(new Action(() => MessageBox.Show(this, "Elite Dangerous has shut down. EDHE will now shut down.", "Shutting Down", MessageBoxButtons.OK, MessageBoxIcon.Warning)));
-                    Application.Exit();
+                    System.Windows.Forms.Application.Exit();
                 }
                 else if (e.Timestamp > startUpTime)
                 {
@@ -867,6 +850,7 @@ namespace ED_Hud_Extension
             {
                 readStatus(Path.Combine(journalPath, "Status.json"), sf, ff);
                 statusReaderLive = true;
+                
             }
             catch (IOException)
             {
@@ -947,10 +931,10 @@ namespace ED_Hud_Extension
 
                         if (gameRunning()) //while we're here, check to see if the game is running
                         {
-                            if (!statusReaderLive) { loopTimer.Change(50, 50); } //start the reader if it isn't already up
+                            if (!statusReaderLive) { readTimer.Change(10, 50); } //start the reader if it isn't already up
 
                             initiateWatcher();
-                            loadCapiData();
+                            //loadCapiData();
 
                             Invoke(new Action(() => uplinkLabel.Text = "establishing uplink connection..."));
                             Invoke(new Action(() => uplinkDone.Visible = true));
@@ -973,15 +957,6 @@ namespace ED_Hud_Extension
         {
             if (mainFormLoaded) //sometimes the timers (this timer) load(s) before the form is properly displayed, so we gotta check
             {
-                if (!watcherLive) //start the watcher if it somehow slipped by
-                {
-                    initiateWatcher();
-                    if (!statusReaderLive)
-                    {
-                        loopTimer.Change(0, 50);
-                    }
-                }
-
                 if (animDots < 3) //runs if there are less than three dots in the animation string and the client's not ready
                 {
                     animClientText = animClientText + ".";
@@ -990,13 +965,13 @@ namespace ED_Hud_Extension
 
                     if (statusEnabled) { Invoke(new Action(() => statusLabel.Text = statBase + "client loaded, waiting for game start [anim 1]")); }
                 }
-                else if (inMainMenu(_flag)) //if we reach 3 dots we're still in the main menu
+                else if (animDots == 3 && inMainMenu()) //if we reach 3 dots we're still in the main menu
                 {
                     if (gameRunning()) //if the game is still running just reset the loop
                     {
-                        bool doubleCheck = inMainMenu(_flag);
+                        bool doubleCheck = inMainMenu();
 
-                        if (doubleCheck == true) { Invoke(new Action(() => clearInitPanel())); }
+                        if (doubleCheck == false) { Invoke(new Action(() => clearInitPanel())); }
 
                         animClientText = animClientTextBase;
                         Invoke(new Action(() => clientLabel.Text = animClientText));
@@ -1022,7 +997,7 @@ namespace ED_Hud_Extension
 
                     if (statusEnabled) { Invoke(new Action(() => statusLabel.Text = statBase + "client loaded, waiting for game start [anim 2]")); }
                 }
-                else if (!inMainMenu(_flag) && gameRunning()) //if we've reached 3 dots, the client is ready & we're not in the main menu
+                else if (!inMainMenu() && gameRunning()) //if we've reached 3 dots, the client is ready & we're not in the main menu
                 {
                     Invoke(new Action(() => clientLabel.Text = "waiting for client response..."));
                     Invoke(new Action(() => clientDone.Visible = true));
@@ -1134,8 +1109,8 @@ namespace ED_Hud_Extension
         private void combatButton_Click(object sender, EventArgs e)
         {
             arrangeCombatPanel(combatPanel, onFootPanel);
-            scanStageLabel.Location = new Point(((workingAreaPanel.Width / 2) - scanStageLabel.Width + 78) + 10, scanStageLabel.Location.Y);
-            scanStageTag.Location = new Point((workingAreaPanel.Width / 2) + 98, scanStageTag.Location.Y);
+            scanStageLabel.Location = new Point(((workingAreaPanel.Width / 2) - scanStageLabel.Width) + 118, scanStageLabel.Location.Y);
+            scanStageTag.Location = new Point((workingAreaPanel.Width / 2) + 108, scanStageTag.Location.Y);
             combatPanel.BringToFront();
             dividerPanel.BringToFront();
         }
@@ -1143,9 +1118,10 @@ namespace ED_Hud_Extension
         private void explorationButton_Click(object sender, EventArgs e)
         {
             arrangeExplorePanel(explorePanel); //196 apart
-            fsdLabel.Location = new Point(((workingAreaPanel.Width / 2) - fsdLabel.Width + 78) + 10, fsdLabel.Location.Y);
-            fsdTag.Location = new Point((workingAreaPanel.Width / 2) + 98, fsdTag.Location.Y);
+            fsdLabel.Location = new Point(((fsdLabel.Parent.Width / 2) - fsdLabel.Width) + 118, fsdLabel.Location.Y);
+            fsdTag.Location = new Point((fsdTag.Parent.Width / 2) + 108, fsdTag.Location.Y);
             selectBodyLabel.Location = new Point((detailHiderPanel.Width / 2) - (selectBodyLabel.Width / 2) + 28, selectBodyLabel.Location.Y);
+            beltDivPanel.Size = new Size(beltDivPanel.Parent.Width, beltDivPanel.Height);
             explorePanel.BringToFront();
             detailHiderPanel.BringToFront();
         }
@@ -1175,38 +1151,68 @@ namespace ED_Hud_Extension
 
         public void loadDetails(string bodyName, Bodies bodyList)
         {
+            clearDetails(starDetailView);
+            clearDetails(planetDetailView);
+
             if (system.bodies is not null)
             {
                 foreach (var body in system.bodies)
                 {
                     if (body.name == bodyName)
                     {
+                        if (body.belts == null) { beltCountTag.Text = "none"; }
+                        else if (body.belts.Count == 1){ beltCountTag.Text = "1 belt"; }
+                        else { beltCountTag.Text = body.belts.Count.ToString() + " belts"; }
+
+                        if (body.rings == null) { ringCountTag.Text = "none"; }
+                        else if (body.rings.Count == 1) { beltCountTag.Text = "1 ring"; }
+                        else { ringCountTag.Text = body.rings.Count.ToString() + " rings"; }
+
                         if (body.type == "Planet")
                         {
                             planetDetailView.BringToFront();
                             bodyNameTag.Text = body.name;
                             bodyTypeTag.Text = body.subType;
-                            if (body.discoveryInfo != null) { bodyDiscoveryTag.Text = body.discoveryInfo[0].cmdrName; } else { bodyDiscoveryTag.Text = "n/a"; }
-                            if (body.isLandable == true) { bodyLandableTag.Text = "Yes"; } else { bodyLandableTag.Text = "No"; }
-                            bodyGravityTag.Text = body.gravity.ToString() + " G";
-                            bodyMassTag.Text = body.earthMasses.ToString();
-                            bodyRadiusTag.Text = body.radius.ToString();
+                            if (body.discovery != null) { bodyDiscoveryTag.Text = body.discovery.commander; } else { bodyDiscoveryTag.Text = "n/a"; }
                             bodyTempTag.Text = body.surfaceTemperature.ToString() + " K";
-                            if (body.surfacePressure != null) { bodyPressureTag.Text = body.surfacePressure.ToString(); } else { bodyPressureTag.Text = "None"; }
-                            bodyVolcanismTag.Text = body.volcanismType;
-                            bodyAtmosphereTag.Text = body.atmosphereType;
+                            if (body.isLandable == true) { bodyLandableTag.Text = "Yes"; } else { bodyLandableTag.Text = "No"; } 
+                            bodyGravityTag.Text = body.gravity.ToString() + " G"; 
+                            bodyMassTag.Text = body.earthMasses.ToString(); 
+                            bodyRadiusTag.Text = body.radius.ToString(); 
+                            if (body.surfacePressure != null) { bodyPressureTag.Text = body.surfacePressure.ToString(); } else { bodyPressureTag.Text = "None"; } 
+                            bodyVolcanismTag.Text = body.volcanismType; 
+                            bodyAtmosphereTag.Text = body.atmosphereType; 
 
-                            decimal roundedOrbital = Math.Round((decimal)body.orbitalPeriod, 2);
-                            decimal roundedRotational = Math.Round((decimal)body.rotationalPeriod, 2);
+                            if (body.solidComposition != null)
+                            {
+                                rockTag.Text = string.Concat(body.solidComposition.rock.ToString(), " %");
+                                metalTag.Text = string.Concat(body.solidComposition.metal.ToString(), " %");
+                                iceTag.Text = string.Concat(body.solidComposition.ice.ToString(), " %");
+                            }
 
-                            bodyOrbitalTag.Text = roundedOrbital.ToString() + " Days";
-                            bodyRotationalTag.Text = roundedRotational.ToString() + " Days";
-                        }
+                            if (body.atmosphereComposition != null)
+                            {
+                                atmosphereCompHider.Visible = false;
+
+                                clearDetails(atmosphereCompPanel);
+                                generateCompList(body.atmosphereComposition, atmosphereCompPanel);
+                            }
+                            else
+                            {
+                                atmosphereCompHider.Visible = true;
+
+                                clearDetails(atmosphereCompPanel);
+                                atmosphereCompPanel.Refresh();
+                            }
+
+                            bodyOrbitalTag.Text = Math.Round((decimal)body.orbitalPeriod, 2).ToString() + " Days";
+                            bodyRotationalTag.Text = Math.Round((decimal)body.rotationalPeriod, 2).ToString() + " Days";
+                        } 
                         else if (body.type == "Star")
                         {
                             starDetailView.BringToFront();
                             starNameTag.Text = body.name;
-                            if (body.discoveryInfo != null) { bodyDiscoveryTag.Text = body.discoveryInfo[0].cmdrName; } else { bodyDiscoveryTag.Text = "n/a"; }
+                            if (body.discovery != null) { starDiscoverTag.Text = body.discovery.commander; } else { starDiscoverTag.Text = "n/a"; }
                             if (body.isMainStar == true) { mainStarTag.Text = "Yes"; } else { mainStarTag.Text = "No"; }
                             starClassTag.Text = body.subType;
                             starAgeTag.Text = body.age.ToString();
@@ -1217,13 +1223,698 @@ namespace ED_Hud_Extension
                             starSolarMassTag.Text = body.solarMasses.ToString();
                             starSolarRadiusTag.Text = body.solarRadius.ToString();
                             starTempTag.Text = body.surfaceTemperature.ToString() + " K"; ;
-                            if (body.orbitalPeriod != null) { starOrbitalTag.Text = body.orbitalPeriod.ToString(); } else { starOrbitalTag.Text = "n/a"; }
-                            starRotationalTag.Text = body.rotationalPeriod.ToString() + " Days";
+
+                            if (body.orbitalPeriod != null) { starOrbitalTag.Text = Math.Round((decimal)body.rotationalPeriod, 2).ToString(); } else { starOrbitalTag.Text = "n/a"; }
+                            starRotationalTag.Text = Math.Round((decimal)body.rotationalPeriod, 2).ToString() + " Days";
                         }
+
+                        if (body.belts != null) { generateBeltList(body.belts, starDetailView); }
+
+                        if (body.rings != null) { generateRingList(body.rings, planetDetailView); }
+
+                        //if (body.atmosphere != null) { generateAtmosphere(body.atmosphere, planetDetailView); }
                     }
                 }
             }
         }
+
+        public static void clearAtmospherePanel(Panel panel)
+        {
+            foreach (Label lbl in panel.Controls.OfType<Label>())
+            {
+                if (lbl.Tag != "permanent")
+                {
+                    lbl.Dispose();
+                }
+                panel.Refresh();
+            }
+        }
+
+        public static void generateCompList(Atmosphere atmosphere, Panel panel)
+        {
+            Point lblLoc = new Point(0, 45);
+            Point tagLoc = new Point(260, 45);
+            Size lblSize = new Size(255, 36);
+            Size tagSize = new Size(135, 36);
+
+            Font lblFont = new Font(oxaniumFont.Families[0], 22, FontStyle.Regular);
+            Font tagFont = new Font(oxaniumFont.Families[0], 22, FontStyle.Italic);
+
+            Color orange = ColorTranslator.FromHtml("#C04000");
+
+            if (atmosphere.ammonia != 0)
+            {
+                Label lbl = new Label();
+                Label tag = new Label();
+
+                lbl.Text = "Ammonia : ";
+                tag.Text = string.Concat(atmosphere.ammonia.ToString(), " %");
+
+                tag.Anchor = AnchorStyles.Right;
+                tag.TextAlign = ContentAlignment.TopRight;
+
+                lbl.Tag = "label";
+                tag.Tag = "tag";
+
+                lbl.ForeColor = orange;
+                tag.ForeColor = Color.White;
+
+                lbl.Font = lblFont;
+                tag.Font = tagFont;
+
+                lbl.Location = lblLoc;
+                tag.Location = tagLoc;
+
+                lbl.Size = lblSize;
+                tag.Size = tagSize;
+
+                panel.Controls.Add(lbl);
+                panel.Controls.Add(tag);
+
+                panel.Refresh();
+
+                lblLoc.Y += 40;
+                tagLoc.Y += 40;
+            }
+            if (atmosphere.argon != 0)
+            {
+                Label lbl = new Label();
+                Label tag = new Label();
+
+                lbl.Text = "Argon : ";
+                tag.Text = atmosphere.argon.ToString() + " %";
+
+                tag.Anchor = AnchorStyles.Right;
+                tag.TextAlign = ContentAlignment.TopRight;
+
+                lbl.Tag = "label";
+                tag.Tag = "tag";
+
+                lbl.ForeColor = orange;
+                tag.ForeColor = Color.White;
+
+                lbl.Font = lblFont;
+                tag.Font = tagFont;
+
+                lbl.Location = lblLoc;
+                tag.Location = tagLoc;
+
+                lbl.Size = lblSize;
+                tag.Size = tagSize;
+
+                panel.Controls.Add(lbl);
+                panel.Controls.Add(tag);
+
+                panel.Refresh();
+
+                lblLoc.Y += 40;
+                tagLoc.Y += 40;
+            }
+            if (atmosphere.carbonDioxide != 0)
+            {
+                Label lbl = new Label();
+                Label tag = new Label();
+
+                lbl.Text = "Carbon Dioxide : ";
+                tag.Text = atmosphere.carbonDioxide.ToString() + " %";
+
+                tag.Anchor = AnchorStyles.Right;
+                tag.TextAlign = ContentAlignment.TopRight;
+
+                lbl.Tag = "label";
+                tag.Tag = "tag";
+
+                lbl.ForeColor = orange;
+                tag.ForeColor = Color.White;
+
+                lbl.Font = lblFont;
+                tag.Font = tagFont;
+
+                lbl.Location = lblLoc;
+                tag.Location = tagLoc;
+
+                lbl.Size = lblSize;
+                tag.Size = tagSize;
+
+                panel.Controls.Add(lbl);
+                panel.Controls.Add(tag);
+
+                panel.Refresh();
+
+                lblLoc.Y += 40;
+                tagLoc.Y += 40;
+            }
+            if (atmosphere.helium != 0)
+            {
+                Label lbl = new Label();
+                Label tag = new Label();
+
+                lbl.Text = "Helium : ";
+                tag.Text = atmosphere.helium.ToString() + " %";
+
+                tag.Anchor = AnchorStyles.Right;
+                tag.TextAlign = ContentAlignment.TopRight;
+
+                lbl.Tag = "label";
+                tag.Tag = "tag";
+
+                lbl.ForeColor = orange;
+                tag.ForeColor = Color.White;
+
+                lbl.Font = lblFont;
+                tag.Font = tagFont;
+
+                lbl.Location = lblLoc;
+                tag.Location = tagLoc;
+
+                lbl.Size = lblSize;
+                tag.Size = tagSize;
+
+                panel.Controls.Add(lbl);
+                panel.Controls.Add(tag);
+
+                panel.Refresh();
+
+                lblLoc.Y += 40;
+                tagLoc.Y += 40;
+            }
+            if (atmosphere.hydrogen != 0)
+            {
+                Label lbl = new Label();
+                Label tag = new Label();
+
+                lbl.Text = "Hydrogen : ";
+                tag.Text = atmosphere.hydrogen.ToString() + " %";
+
+                tag.Anchor = AnchorStyles.Right;
+                tag.TextAlign = ContentAlignment.TopRight;
+
+                lbl.Tag = "label";
+                tag.Tag = "tag";
+
+                lbl.ForeColor = orange;
+                tag.ForeColor = Color.White;
+
+                lbl.Font = lblFont;
+                tag.Font = tagFont;
+
+                lbl.Location = lblLoc;
+                tag.Location = tagLoc;
+
+                lbl.Size = lblSize;
+                tag.Size = tagSize;
+
+                panel.Controls.Add(lbl);
+                panel.Controls.Add(tag);
+
+                panel.Refresh();
+
+                lblLoc.Y += 40;
+                tagLoc.Y += 40;
+            }
+            if (atmosphere.iron != 0)
+            {
+                Label lbl = new Label();
+                Label tag = new Label();
+
+                lbl.Text = "Iron : ";
+                tag.Text = atmosphere.iron.ToString() + " %";
+
+                tag.Anchor = AnchorStyles.Right;
+                tag.TextAlign = ContentAlignment.TopRight;
+
+                lbl.Tag = "label";
+                tag.Tag = "tag";
+
+                lbl.ForeColor = orange;
+                tag.ForeColor = Color.White;
+
+                lbl.Font = lblFont;
+                tag.Font = tagFont;
+
+                lbl.Location = lblLoc;
+                tag.Location = tagLoc;
+
+                lbl.Size = lblSize;
+                tag.Size = tagSize;
+
+                panel.Controls.Add(lbl);
+                panel.Controls.Add(tag);
+
+                panel.Refresh();
+
+                lblLoc.Y += 40;
+                tagLoc.Y += 40;
+            }
+            if (atmosphere.methane != 0)
+            {
+                Label lbl = new Label();
+                Label tag = new Label();
+
+                lbl.Text = "Methane : ";
+                tag.Text = atmosphere.methane.ToString() + " %";
+
+                tag.Anchor = AnchorStyles.Right;
+                tag.TextAlign = ContentAlignment.TopRight;
+
+                lbl.Tag = "label";
+                tag.Tag = "tag";
+
+                lbl.ForeColor = orange;
+                tag.ForeColor = Color.White;
+
+                lbl.Font = lblFont;
+                tag.Font = tagFont;
+
+                lbl.Location = lblLoc;
+                tag.Location = tagLoc;
+
+                lbl.Size = lblSize;
+                tag.Size = tagSize;
+
+                panel.Controls.Add(lbl);
+                panel.Controls.Add(tag);
+
+                panel.Refresh();
+
+                lblLoc.Y += 40;
+                tagLoc.Y += 40;
+            }
+            if (atmosphere.neon != 0)
+            {
+                Label lbl = new Label();
+                Label tag = new Label();
+
+                lbl.Text = "Neon : ";
+                tag.Text = atmosphere.neon.ToString() + " %";
+
+                tag.Anchor = AnchorStyles.Right;
+                tag.TextAlign = ContentAlignment.TopRight;
+
+                lbl.Tag = "label";
+                tag.Tag = "tag";
+
+                lbl.ForeColor = orange;
+                tag.ForeColor = Color.White;
+
+                lbl.Font = lblFont;
+                tag.Font = tagFont;
+
+                lbl.Location = lblLoc;
+                tag.Location = tagLoc;
+
+                lbl.Size = lblSize;
+                tag.Size = tagSize;
+
+                panel.Controls.Add(lbl);
+                panel.Controls.Add(tag);
+
+                panel.Refresh();
+
+                lblLoc.Y += 40;
+                tagLoc.Y += 40;
+            }
+            if (atmosphere.nitrogen != 0)
+            {
+                Label lbl = new Label();
+                Label tag = new Label();
+
+                lbl.Text = "Nitrogen : ";
+                tag.Text = atmosphere.nitrogen.ToString() + " %";
+
+                tag.Anchor = AnchorStyles.Right;
+                tag.TextAlign = ContentAlignment.TopRight;
+
+                lbl.Tag = "label";
+                tag.Tag = "tag";
+
+                lbl.ForeColor = orange;
+                tag.ForeColor = Color.White;
+
+                lbl.Font = lblFont;
+                tag.Font = tagFont;
+
+                lbl.Location = lblLoc;
+                tag.Location = tagLoc;
+
+                lbl.Size = lblSize;
+                tag.Size = tagSize;
+
+                panel.Controls.Add(lbl);
+                panel.Controls.Add(tag);
+
+                panel.Refresh();
+
+                lblLoc.Y += 40;
+                tagLoc.Y += 40;
+            }
+            if (atmosphere.oxygen != 0)
+            {
+                Label lbl = new Label();
+                Label tag = new Label();
+
+                lbl.Text = "Oxygen : ";
+                tag.Text = atmosphere.oxygen.ToString() + " %";
+
+                tag.Anchor = AnchorStyles.Right;
+                tag.TextAlign = ContentAlignment.TopRight;
+
+                lbl.Tag = "label";
+                tag.Tag = "tag";
+
+                lbl.ForeColor = orange;
+                tag.ForeColor = Color.White;
+
+                lbl.Font = lblFont;
+                tag.Font = tagFont;
+
+                lbl.Location = lblLoc;
+                tag.Location = tagLoc;
+
+                lbl.Size = lblSize;
+                tag.Size = tagSize;
+
+                panel.Controls.Add(lbl);
+                panel.Controls.Add(tag);
+
+                panel.Refresh();
+
+                lblLoc.Y += 40;
+                tagLoc.Y += 40;
+            }
+            if (atmosphere.silicates != 0)
+            {
+                Label lbl = new Label();
+                Label tag = new Label();
+
+                lbl.Text = "Silicates : ";
+                tag.Text = atmosphere.silicates.ToString() + " %";
+
+                tag.Anchor = AnchorStyles.Right;
+                tag.TextAlign = ContentAlignment.TopRight;
+
+                lbl.Tag = "label";
+                tag.Tag = "tag";
+
+                lbl.ForeColor = orange;
+                tag.ForeColor = Color.White;
+
+                lbl.Font = lblFont;
+                tag.Font = tagFont;
+
+                lbl.Location = lblLoc;
+                tag.Location = tagLoc;
+
+                lbl.Size = lblSize;
+                tag.Size = tagSize;
+
+                panel.Controls.Add(lbl);
+                panel.Controls.Add(tag);
+
+                panel.Refresh();
+
+                lblLoc.Y += 40;
+                tagLoc.Y += 40;
+            }
+            if (atmosphere.sulphurDioxide != 0)
+            {
+                Label lbl = new Label();
+                Label tag = new Label();
+
+                lbl.Text = "Sulphur Dioxide : ";
+                tag.Text = atmosphere.sulphurDioxide.ToString() + " %";
+
+                tag.Anchor = AnchorStyles.Right;
+                tag.TextAlign = ContentAlignment.TopRight;
+
+                lbl.Tag = "label";
+                tag.Tag = "tag";
+
+                lbl.ForeColor = orange;
+                tag.ForeColor = Color.White;
+
+                lbl.Font = lblFont;
+                tag.Font = tagFont;
+
+                lbl.Location = lblLoc;
+                tag.Location = tagLoc;
+
+                lbl.Size = lblSize;
+                tag.Size = tagSize;
+
+                panel.Controls.Add(lbl);
+                panel.Controls.Add(tag);
+
+                panel.Refresh();
+
+                lblLoc.Y += 40;
+                tagLoc.Y += 40;
+            }
+            if (atmosphere.water != 0)
+            {
+                Label lbl = new Label();
+                Label tag = new Label();
+
+                lbl.Text = "Water : ";
+                tag.Text = atmosphere.water.ToString() + " %";
+
+                tag.Anchor = AnchorStyles.Right;
+                tag.TextAlign = ContentAlignment.TopRight;
+
+                lbl.Tag = "label";
+                tag.Tag = "tag";
+
+                lbl.ForeColor = orange;
+                tag.ForeColor = Color.White;
+
+                lbl.Font = lblFont;
+                tag.Font = tagFont;
+
+                lbl.Location = lblLoc;
+                tag.Location = tagLoc;
+
+                lbl.Size = lblSize;
+                tag.Size = tagSize;
+
+                panel.Controls.Add(lbl);
+                panel.Controls.Add(tag);
+
+                panel.Refresh();
+
+                lblLoc.Y += 40;
+                tagLoc.Y += 40;
+            }
+
+            panel.Refresh();
+        }
+
+        public static void generateBeltList(List<Belt> belts, Panel starPanel)
+        {
+            Point labelLoc = new Point(0, 610);
+            Point tagLoc = new Point(303, 610);
+
+            foreach (Belt belt in belts)
+            {
+                List<Label> lblList = new List<Label>();
+
+                Label nameTag = new Label();
+                lblList.Add(nameTag);
+
+                Label typeTag = new Label();
+                lblList.Add(typeTag);
+
+                Label massTag = new Label();
+                lblList.Add(massTag);
+
+                Label radTag = new Label();
+                lblList.Add(radTag);
+
+                Label nameLabel = new Label();
+                lblList.Add(nameLabel);
+
+                Label typeLabel = new Label();
+                lblList.Add(typeLabel);
+
+                Label massLabel = new Label();
+                lblList.Add(massLabel);
+
+                Label radLabel = new Label();
+                lblList.Add(radLabel);
+
+
+                nameLabel.Text = "Name : ";
+                nameLabel.Tag = "label";
+                nameTag.Text = belt.name.ToString();
+                nameTag.Tag = "tag";
+
+                typeLabel.Text = "Type : ";
+                typeLabel.Tag = "label";
+                typeTag.Text = belt.type.ToString();
+                typeTag.Tag = "tag";
+
+                massLabel.Text = "Mass : ";
+                massLabel.Tag = "label";
+                massTag.Text = belt.mass.ToString("N0") + " tonnes";
+                massTag.Tag = "tag";
+
+                radLabel.Text = "Radius : ";
+                radLabel.Tag = "label";
+                radTag.Text = belt.innerRadius.ToString("N0") + " km";
+                radTag.Tag = "tag";
+
+                foreach (Label lbl in lblList)
+                {
+                    lbl.AutoSize = true;
+
+                    if (lbl.Tag == "label")
+                    {
+                        lbl.Font = new System.Drawing.Font(oxaniumFont.Families[0], 22, FontStyle.Regular);
+                        lbl.ForeColor = ColorTranslator.FromHtml("#C04000");
+                        lbl.Location = labelLoc;
+                        labelLoc.Y += 40;
+                    }
+
+                    if (lbl.Tag == "tag")
+                    {
+                        lbl.Font = new System.Drawing.Font(oxaniumFont.Families[0], 22, FontStyle.Italic);
+                        lbl.ForeColor = Color.White;
+                        lbl.Location = tagLoc;
+                        tagLoc.Y += 40;
+                    }
+
+                    starPanel.Controls.Add(lbl);
+                    starPanel.Refresh();
+                }
+
+                tagLoc.Y += 40;
+                labelLoc.Y += 40;
+            }
+        }
+        
+        public static void generateRingList(List<Ring> rings, Panel bodyViewPanel)
+        {
+            Point labelLoc = new Point(0, 570);
+            Point tagLoc = new Point(264, 570);
+
+            foreach (Ring ring in rings)
+            {
+                List<Label> lblList = new List<Label>();
+
+                Label nameTag = new Label();
+                lblList.Add(nameTag);
+
+                Label typeTag = new Label();
+                lblList.Add(typeTag);
+
+                Label massTag = new Label();
+                lblList.Add(massTag);
+
+                Label innerRadTag = new Label();
+                lblList.Add(innerRadTag);
+
+                Label outterRadTag = new Label();
+                lblList.Add(outterRadTag);
+
+                Label nameLabel = new Label();
+                lblList.Add(nameLabel);
+
+                Label typeLabel = new Label();
+                lblList.Add(typeLabel);
+
+                Label massLabel = new Label();
+                lblList.Add(massLabel);
+
+                Label innerRadLabel = new Label();
+                lblList.Add(innerRadLabel);
+
+                Label outterRadLabel = new Label();
+                lblList.Add(outterRadLabel);
+
+
+                nameLabel.Text = "Name : ";
+                nameLabel.Tag = "label";
+                nameTag.Text = ring.name.ToString();
+                nameTag.Tag = "tag";
+
+                typeLabel.Text = "Type : ";
+                typeLabel.Tag = "label";
+                typeTag.Text = ring.type.ToString();
+                typeTag.Tag = "tag";
+
+                massLabel.Text = "Mass : ";
+                massLabel.Tag = "label";
+                massTag.Text = ring.mass.ToString("N0") + " tonnes";
+                massTag.Tag = "tag";
+
+                innerRadLabel.Text = "Inner Radius : ";
+                innerRadLabel.Tag = "label";
+                innerRadTag.Text = ring.innerRadius.ToString("N0") + " km";
+                innerRadTag.Tag = "tag";
+
+                outterRadLabel.Text = "Outter Radius : ";
+                outterRadLabel.Tag = "label";
+                outterRadTag.Text = ring.outerRadius.ToString("N0") + " km";
+                outterRadTag.Tag = "tag";
+
+                foreach (Label lbl in lblList)
+                {
+                    lbl.AutoSize = true;
+                    //tagAutoSize = false; tagSize = 460, 36; tagAnchor = topRight; tagTextAlign = topRight
+                    if (lbl.Tag == "label")
+                    {
+                        lbl.Font = new System.Drawing.Font(oxaniumFont.Families[0], 22, FontStyle.Regular);
+                        lbl.ForeColor = ColorTranslator.FromHtml("#C04000");
+                        lbl.Location = labelLoc;
+                        labelLoc.Y += 40;
+                    }
+
+                    if (lbl.Tag == "tag")
+                    {
+                        lbl.AutoSize = false;
+                        lbl.Size = new Size(460, 36);
+                        lbl.TextAlign = ContentAlignment.TopRight;
+                        lbl.Font = new System.Drawing.Font(oxaniumFont.Families[0], 22, FontStyle.Italic);
+                        lbl.ForeColor = Color.White;
+                        lbl.Location = tagLoc;
+                        tagLoc.Y += 40;
+                    }
+
+                    bodyViewPanel.Controls.Add(lbl);
+                    bodyViewPanel.Refresh();
+                }
+
+                tagLoc.Y += 40;
+                labelLoc.Y += 40;
+            }
+        }
+
+        public static void clearDetails(Panel panel)
+        {
+            List<Label> lblList = new List<Label>();
+            foreach (Label lbl in panel.Controls.OfType<Label>())
+            {
+                if (lbl.Tag == "tag")
+                {
+                    lblList.Add(lbl);
+                }
+                else if (lbl.Tag == "label")
+                {
+                    lblList.Add(lbl);
+                }
+            }
+
+            int i = lblList.Count;
+            while (i != 0)
+            {
+                foreach (Label lbl in lblList)
+                {
+                    lbl.Dispose();
+                    i--;
+                }
+            }
+            panel.Refresh();
+        }
+
         public static async Task fetchStarData(string systemName, CancellationToken ct = default) //thank you EDSM
         {
             string url = "https://www.edsm.net/api-system-v1/bodies?systemName=" + systemName;
