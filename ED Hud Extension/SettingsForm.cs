@@ -73,7 +73,11 @@ namespace ED_Hud_Extension
 
                 if (Functions.saveSettings()) //save the settings
                 {
-                    Application.Restart();
+                    if (chosenDisplay != savedPrefDisplayIndex) { Functions.RestartApplication(); }
+                    else 
+                    {
+                        
+                    }
                 }
 
             }

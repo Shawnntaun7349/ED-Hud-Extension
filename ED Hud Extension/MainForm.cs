@@ -38,6 +38,7 @@ namespace ED_Hud_Extension
 
         public static string statBase = "Status : ";
 
+        public static bool detailPanelNormal;
         public static bool currentJournal = false; //is the game running? use the most recent journal
         public static bool newJournal = false; //is the game not running? wait for a new journal
         public static bool watcherLive = false; //has the watcher already been initialized? [don't do it twice things break]
@@ -147,6 +148,8 @@ namespace ED_Hud_Extension
 
         private void initiateWatcher()
         {
+            statusLabel.Visible = statusEnabled;
+
             watcherLive = true;
             watcher.Path = journalPath;
             if (statusEnabled) { Invoke(new Action(() => statusLabel.Text = statBase + "initiating journal watcher")); }
@@ -850,7 +853,7 @@ namespace ED_Hud_Extension
             {
                 readStatus(Path.Combine(journalPath, "Status.json"), sf, ff);
                 statusReaderLive = true;
-                
+
             }
             catch (IOException)
             {
@@ -872,12 +875,12 @@ namespace ED_Hud_Extension
 
             if (StatusTags.OnFoot) { Invoke(new Action(() => onFootPanel.Visible = true)); }
             if (!StatusTags.OnFoot) { Invoke(new Action(() => onFootPanel.Visible = false)); }
-            
+
             if (StatusTags.OnFoot) //load up the on foot stuff
             {
                 Invoke(new Action(() => healthBar.Value = pFootHealth));
                 Invoke(new Action(() => oxygenBar.Value = pFootOxygen));
-                
+
                 Invoke(new Action(() => healthpackKeyTag.Text = "Keybind [" + healthPackKey + "]"));
                 Invoke(new Action(() => energyCellKeyTag.Text = "Keybind [" + energyCellKey + "]"));
                 Invoke(new Action(() => fragGrenadeKeyTag.Text = "Keybind [" + fragGrenadeKey + "]"));
@@ -1120,8 +1123,13 @@ namespace ED_Hud_Extension
             fsdTag.Location = new Point((fsdTag.Parent.Width / 2) + 108, fsdTag.Location.Y);
             selectBodyLabel.Location = new Point((detailHiderPanel.Width / 2) - (selectBodyLabel.Width / 2) + 28, selectBodyLabel.Location.Y);
             beltDivPanel.Size = new Size(beltDivPanel.Parent.Width, beltDivPanel.Height);
+
+            detailChangeButton.Location = new Point((workingAreaPanel.Width - (planetDetailView.Width + detailChangeButton.Width + 5)), workingAreaPanel.Height - detailChangeButton.Height);
+
+            resetDetailView(planetDetailView, starDetailView);
             explorePanel.BringToFront();
             detailHiderPanel.BringToFront();
+            detailChangeButton.Visible = false;
         }
         private void stationButton_Click(object sender, EventArgs e)
         {
@@ -1159,7 +1167,7 @@ namespace ED_Hud_Extension
                     if (body.name == bodyName)
                     {
                         if (body.belts == null) { beltCountTag.Text = "none"; }
-                        else if (body.belts.Count == 1){ beltCountTag.Text = "1 belt"; }
+                        else if (body.belts.Count == 1) { beltCountTag.Text = "1 belt"; }
                         else { beltCountTag.Text = body.belts.Count.ToString() + " belts"; }
 
                         if (body.rings == null) { ringCountTag.Text = "none"; }
@@ -1168,18 +1176,20 @@ namespace ED_Hud_Extension
 
                         if (body.type == "Planet")
                         {
+                            detailChangeButton.Visible = true;
+
                             planetDetailView.BringToFront();
                             bodyNameTag.Text = body.name;
                             bodyTypeTag.Text = body.subType;
                             if (body.discovery != null) { bodyDiscoveryTag.Text = body.discovery.commander; } else { bodyDiscoveryTag.Text = "n/a"; }
                             bodyTempTag.Text = body.surfaceTemperature.ToString() + " K";
-                            if (body.isLandable == true) { bodyLandableTag.Text = "Yes"; } else { bodyLandableTag.Text = "No"; } 
-                            bodyGravityTag.Text = body.gravity.ToString() + " G"; 
-                            bodyMassTag.Text = body.earthMasses.ToString(); 
-                            bodyRadiusTag.Text = body.radius.ToString(); 
-                            if (body.surfacePressure != null) { bodyPressureTag.Text = body.surfacePressure.ToString(); } else { bodyPressureTag.Text = "None"; } 
-                            bodyVolcanismTag.Text = body.volcanismType; 
-                            bodyAtmosphereTag.Text = body.atmosphereType; 
+                            if (body.isLandable == true) { bodyLandableTag.Text = "Yes"; } else { bodyLandableTag.Text = "No"; }
+                            bodyGravityTag.Text = body.gravity.ToString() + " G";
+                            bodyMassTag.Text = body.earthMasses.ToString();
+                            bodyRadiusTag.Text = body.radius.ToString();
+                            if (body.surfacePressure != null) { bodyPressureTag.Text = body.surfacePressure.ToString(); } else { bodyPressureTag.Text = "None"; }
+                            bodyVolcanismTag.Text = body.volcanismType;
+                            bodyAtmosphereTag.Text = body.atmosphereType;
 
                             if (body.solidComposition != null)
                             {
@@ -1205,9 +1215,15 @@ namespace ED_Hud_Extension
 
                             bodyOrbitalTag.Text = Math.Round((decimal)body.orbitalPeriod, 2).ToString() + " Days";
                             bodyRotationalTag.Text = Math.Round((decimal)body.rotationalPeriod, 2).ToString() + " Days";
-                        } 
+                        }
                         else if (body.type == "Star")
                         {
+                            if (detailPanelNormal == false)
+                            {
+                                detailChangeButton.PerformClick();
+                            }
+                            detailChangeButton.Visible = false;
+
                             starDetailView.BringToFront();
                             starNameTag.Text = body.name;
                             if (body.discovery != null) { starDiscoverTag.Text = body.discovery.commander; } else { starDiscoverTag.Text = "n/a"; }
@@ -1226,9 +1242,11 @@ namespace ED_Hud_Extension
                             starRotationalTag.Text = Math.Round((decimal)body.rotationalPeriod, 2).ToString() + " Days";
                         }
 
-                        if (body.belts != null) { generateBeltList(body.belts, starDetailView); }
+                        if (body.belts != null) { generateBeltList(body.belts, starDetailView); noBeltsLabel.Visible = false; }
+                        else { noBeltsLabel.Visible = true; }
 
-                        if (body.rings != null) { generateRingList(body.rings, planetDetailView); }
+                        if (body.rings != null) { generateRingList(body.rings, planetDetailView); noRingsLabel.Visible = false; }
+                        else { noRingsLabel.Visible = true; }
 
                         //if (body.atmosphere != null) { generateAtmosphere(body.atmosphere, planetDetailView); }
                     }
@@ -1246,6 +1264,11 @@ namespace ED_Hud_Extension
                 }
                 panel.Refresh();
             }
+        }
+
+        public static void resetDetailView(Panel panel, Panel baseline)
+        {
+            detailPanelNormal = true;
         }
 
         public static void generateCompList(Atmosphere atmosphere, Panel panel)
@@ -1788,7 +1811,7 @@ namespace ED_Hud_Extension
                 labelLoc.Y += 40;
             }
         }
-        
+
         public static void generateRingList(List<Ring> rings, Panel bodyViewPanel)
         {
             Point labelLoc = new Point(0, 570);
@@ -2016,10 +2039,36 @@ namespace ED_Hud_Extension
 
                 await fetchStarData(systemName, token);
                 Invoke(new Action(() => homeSysTag.Text = pCurrentSystem));
+                if (!detailPanelNormal) { detailChangeButton.PerformClick(); }
             }
             catch (TaskCanceledException)
             {
                 //dont do anything, cos that's the whole ass point
+            }
+        }
+
+        private void detailChangeButton_Click(object sender, EventArgs e)
+        {
+            if (detailPanelNormal) //if the detail panel is in its normal, default position
+            {
+                //985 width
+                planetDetailView.Location = new Point(workingAreaPanel.Width - 985, 0);
+                planetDetailView.Size = new Size(workingAreaPanel.Width - planetDetailView.Location.X, workingAreaPanel.Height - 20);
+                exploreDivider.Location = new Point(workingAreaPanel.Width - 988, 0); //-985 + a 3pt offset 
+
+                detailChangeButton.Location = new Point(workingAreaPanel.Width - (995 + detailChangeButton.Width), detailChangeButton.Location.Y);
+                detailChangeButton.Text = ">>>";
+                detailPanelNormal = false;
+            }
+            else
+            {
+                planetDetailView.Location = starDetailView.Location;
+                planetDetailView.Size = starDetailView.Size;
+                exploreDivider.Location = new Point(starDetailView.Location.X - 3, 0);
+
+                detailChangeButton.Location = new Point(workingAreaPanel.Width - (starDetailView.Width + detailChangeButton.Width + 10), detailChangeButton.Location.Y);
+                detailChangeButton.Text = "<<<";
+                detailPanelNormal = true;
             }
         }
     }

@@ -158,8 +158,10 @@ namespace ED_Hud_Extension
             welcomeLabel = new Label();
             locDTLabel = new Label();
             explorePanel = new Panel();
+            detailChangeButton = new Button();
             expNextSystemTag = new Label();
             planetDetailView = new Panel();
+            noRingsLabel = new Label();
             atmosphereCompPanel = new Panel();
             panel1 = new Panel();
             atmosphereCompHider = new Label();
@@ -202,6 +204,7 @@ namespace ED_Hud_Extension
             planetNameLabel = new Label();
             planetGravityLabel = new Label();
             starDetailView = new Panel();
+            noBeltsLabel = new Label();
             beltCountTag = new Label();
             beltDivPanel = new Panel();
             starRotationalTag = new Label();
@@ -233,10 +236,10 @@ namespace ED_Hud_Extension
             starDiscoverLabel = new Label();
             starNameLabel = new Label();
             starScoopLabel = new Label();
-            exploreDivider = new Panel();
             detailHiderPanel = new Panel();
             selectBodyLabel = new Label();
             hiderPanelLabel1 = new Label();
+            exploreDivider = new Panel();
             expNextSystemLabel = new Label();
             expDestinationTag = new Label();
             expDestinationLabel = new Label();
@@ -1837,11 +1840,12 @@ namespace ED_Hud_Extension
             // explorePanel
             // 
             explorePanel.BackColor = Color.Black;
+            explorePanel.Controls.Add(detailChangeButton);
             explorePanel.Controls.Add(expNextSystemTag);
             explorePanel.Controls.Add(planetDetailView);
             explorePanel.Controls.Add(starDetailView);
-            explorePanel.Controls.Add(exploreDivider);
             explorePanel.Controls.Add(detailHiderPanel);
+            explorePanel.Controls.Add(exploreDivider);
             explorePanel.Controls.Add(expNextSystemLabel);
             explorePanel.Controls.Add(expDestinationTag);
             explorePanel.Controls.Add(expDestinationLabel);
@@ -1861,6 +1865,21 @@ namespace ED_Hud_Extension
             explorePanel.TabIndex = 63;
             explorePanel.Tag = "workingAreaPanel";
             // 
+            // detailChangeButton
+            // 
+            detailChangeButton.BackColor = SystemColors.ActiveCaptionText;
+            detailChangeButton.FlatStyle = FlatStyle.Popup;
+            detailChangeButton.Font = new Font("Oxanium ExtraBold", 14.25F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            detailChangeButton.ForeColor = Color.FromArgb(192, 64, 0);
+            detailChangeButton.Location = new Point(1090, 853);
+            detailChangeButton.Name = "detailChangeButton";
+            detailChangeButton.Size = new Size(55, 30);
+            detailChangeButton.TabIndex = 72;
+            detailChangeButton.Tag = "permenantButtons";
+            detailChangeButton.Text = "<<<";
+            detailChangeButton.UseVisualStyleBackColor = false;
+            detailChangeButton.Click += detailChangeButton_Click;
+            // 
             // expNextSystemTag
             // 
             expNextSystemTag.AutoSize = true;
@@ -1876,6 +1895,7 @@ namespace ED_Hud_Extension
             // 
             planetDetailView.AutoScroll = true;
             planetDetailView.BackColor = Color.Black;
+            planetDetailView.Controls.Add(noRingsLabel);
             planetDetailView.Controls.Add(atmosphereCompPanel);
             planetDetailView.Controls.Add(ringCountTag);
             planetDetailView.Controls.Add(ringDivPanel);
@@ -1908,11 +1928,26 @@ namespace ED_Hud_Extension
             planetDetailView.Controls.Add(planetNameLabel);
             planetDetailView.Controls.Add(planetGravityLabel);
             planetDetailView.ForeColor = SystemColors.Desktop;
-            planetDetailView.Location = new Point(1129, 0);
+            planetDetailView.Location = new Point(1156, 0);
             planetDetailView.Name = "planetDetailView";
-            planetDetailView.Size = new Size(668, 880);
+            planetDetailView.Size = new Size(637, 880);
             planetDetailView.TabIndex = 111;
             planetDetailView.Tag = "planetDetailList";
+            // 
+            // noRingsLabel
+            // 
+            noRingsLabel.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            noRingsLabel.Font = new Font("Oxanium", 21.75F);
+            noRingsLabel.ForeColor = SystemColors.Control;
+            noRingsLabel.Location = new Point(133, 605);
+            noRingsLabel.MaximumSize = new Size(332, 113);
+            noRingsLabel.Name = "noRingsLabel";
+            noRingsLabel.Size = new Size(332, 113);
+            noRingsLabel.TabIndex = 135;
+            noRingsLabel.Tag = "permanent";
+            noRingsLabel.Text = "No rings detected in orbit of currently selected body";
+            noRingsLabel.TextAlign = ContentAlignment.MiddleCenter;
+            noRingsLabel.Visible = false;
             // 
             // atmosphereCompPanel
             // 
@@ -2067,7 +2102,7 @@ namespace ED_Hud_Extension
             ringDivPanel.BackColor = Color.White;
             ringDivPanel.Location = new Point(0, 575);
             ringDivPanel.Name = "ringDivPanel";
-            ringDivPanel.Size = new Size(725, 2);
+            ringDivPanel.Size = new Size(585, 2);
             ringDivPanel.TabIndex = 133;
             // 
             // ringCountLabel
@@ -2378,7 +2413,9 @@ namespace ED_Hud_Extension
             // 
             // starDetailView
             // 
+            starDetailView.AutoScroll = true;
             starDetailView.BackColor = Color.Black;
+            starDetailView.Controls.Add(noBeltsLabel);
             starDetailView.Controls.Add(beltCountTag);
             starDetailView.Controls.Add(beltDivPanel);
             starDetailView.Controls.Add(starRotationalTag);
@@ -2411,11 +2448,27 @@ namespace ED_Hud_Extension
             starDetailView.Controls.Add(starNameLabel);
             starDetailView.Controls.Add(starScoopLabel);
             starDetailView.ForeColor = SystemColors.Desktop;
-            starDetailView.Location = new Point(1148, 0);
+            starDetailView.Location = new Point(1153, 0);
             starDetailView.Name = "starDetailView";
-            starDetailView.Size = new Size(649, 880);
+            starDetailView.Size = new Size(644, 880);
             starDetailView.TabIndex = 90;
             starDetailView.Tag = "planetDetailList";
+            // 
+            // noBeltsLabel
+            // 
+            noBeltsLabel.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            noBeltsLabel.AutoSize = true;
+            noBeltsLabel.Font = new Font("Oxanium", 21.75F);
+            noBeltsLabel.ForeColor = SystemColors.Control;
+            noBeltsLabel.Location = new Point(87, 640);
+            noBeltsLabel.MaximumSize = new Size(332, 113);
+            noBeltsLabel.Name = "noBeltsLabel";
+            noBeltsLabel.Size = new Size(288, 108);
+            noBeltsLabel.TabIndex = 129;
+            noBeltsLabel.Tag = "permanent";
+            noBeltsLabel.Text = "No belts detected in orbit of currently selected body";
+            noBeltsLabel.TextAlign = ContentAlignment.MiddleCenter;
+            noBeltsLabel.Visible = false;
             // 
             // beltCountTag
             // 
@@ -2756,14 +2809,6 @@ namespace ED_Hud_Extension
             starScoopLabel.Text = "Scoopable : ";
             starScoopLabel.TextAlign = ContentAlignment.TopRight;
             // 
-            // exploreDivider
-            // 
-            exploreDivider.BackColor = Color.White;
-            exploreDivider.Location = new Point(1121, 3);
-            exploreDivider.Name = "exploreDivider";
-            exploreDivider.Size = new Size(2, 880);
-            exploreDivider.TabIndex = 83;
-            // 
             // detailHiderPanel
             // 
             detailHiderPanel.Controls.Add(selectBodyLabel);
@@ -2798,6 +2843,14 @@ namespace ED_Hud_Extension
             hiderPanelLabel1.Size = new Size(377, 36);
             hiderPanelLabel1.TabIndex = 114;
             hiderPanelLabel1.Text = "Planetary Body Detail View";
+            // 
+            // exploreDivider
+            // 
+            exploreDivider.BackColor = Color.White;
+            exploreDivider.Location = new Point(1145, 3);
+            exploreDivider.Name = "exploreDivider";
+            exploreDivider.Size = new Size(2, 880);
+            exploreDivider.TabIndex = 83;
             // 
             // expNextSystemLabel
             // 
@@ -3430,5 +3483,8 @@ namespace ED_Hud_Extension
         private Panel atmosphereCompPanel;
         public Label atmosphereCompHider;
         public Panel panel1;
+        public Button detailChangeButton;
+        public Label noRingsLabel;
+        public Label noBeltsLabel;
     }
 }
