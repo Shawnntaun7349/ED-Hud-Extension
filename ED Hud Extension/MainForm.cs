@@ -117,7 +117,6 @@ namespace ED_Hud_Extension
             mainFormLoaded = true;
             if (statusEnabled) { statusLabel.Text = statBase + "initiating service"; }
             localTimer = new System.Threading.Timer(localCallbackMethod, "Timer State", 100, 250);
-            readTimer = new System.Threading.Timer(readTimerCallback, "Timer State", 50, 50);
 
             //1286 year offset
             locDTTag.Text = DateTime.Now.ToString("dddd, MMMM dd, yyyy \nHH:mm");
@@ -153,6 +152,7 @@ namespace ED_Hud_Extension
             if (statusEnabled) { Invoke(new Action(() => statusLabel.Text = statBase + "initiating journal watcher")); }
 
             watcher.StartWatching(); //start the watcher to monitor for events
+            readTimer = new System.Threading.Timer(readTimerCallback, "Timer State", 50, 50);
 
             // event subscriptions
             //starting up
@@ -931,8 +931,6 @@ namespace ED_Hud_Extension
 
                         if (gameRunning()) //while we're here, check to see if the game is running
                         {
-                            if (!statusReaderLive) { readTimer.Change(10, 50); } //start the reader if it isn't already up
-
                             initiateWatcher();
                             //loadCapiData();
 

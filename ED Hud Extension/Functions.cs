@@ -146,17 +146,17 @@ internal class Functions
     public static void RestartApplication() //when a good ol 'Application.Restart();' call shits the bed, you pull out the Environment namespace big guns
     {
         //start a new instance with the same arguments
-        /* string args = string.Join(" ", Environment.GetCommandLineArgs().Skip(1));
+        string args = string.Join(" ", Environment.GetCommandLineArgs().Skip(1));
         
         System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
         {
             FileName = Application.ExecutablePath,
             Arguments = args,
             UseShellExecute = true
-        });*/
+        });
 
         //forcefully exit the current instance
-        Application.Restart(); //except for when Application.Restart() actually works?
+        Application.Exit(); //except for when Application.Restart() actually works?
     }
 
     public static string eliteTier(object rank)
