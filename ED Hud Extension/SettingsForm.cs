@@ -1,5 +1,6 @@
 ﻿using static Globals;
 using static ED_Hud_Extension.OAuth2;
+using System.Diagnostics;
 
 namespace ED_Hud_Extension
 {
@@ -16,6 +17,7 @@ namespace ED_Hud_Extension
             prefDisplayMenu.SelectedIndex = savedPrefDisplayIndex;
             journalPathTextbox.Text = journalPath;
             gamePathTextbox.Text = gamePath;
+            skipAnimationToggle.Checked = skipInitAnims;
             statReadToggle.Checked = statusEnabled;
             autoSwitchToggle.Checked = autoPanelSwitch;
             combatSwitchToggle.Checked = autoCombatSwitch;
@@ -64,6 +66,7 @@ namespace ED_Hud_Extension
 
                 chosenDisplay = prefDisplayMenu.SelectedIndex;
                 formSize = targetScreen.WorkingArea.Size;
+                skipInitAnims = skipAnimationToggle.Checked;
                 statusEnabled = statReadToggle.Checked;
                 gamePath = gamePathTextbox.Text;
                 journalPath = journalPathTextbox.Text;
@@ -73,11 +76,18 @@ namespace ED_Hud_Extension
 
                 if (Functions.saveSettings()) //save the settings
                 {
-                    if (chosenDisplay != savedPrefDisplayIndex) { Functions.RestartApplication(); }
-                    else 
+                    ProcessThreadCollection threadsList = Process.GetCurrentProcess().Threads;
+
+                    foreach (ProcessThread thread in threadsList)
                     {
-                        
+                        thread.Dispose();
                     }
+
+                    Application.Restart();
+                }
+                else
+                {
+
                 }
 
             }
@@ -123,7 +133,7 @@ namespace ED_Hud_Extension
         private void restartButton_Click(object sender, EventArgs e)
         {
             DialogResult restart = MessageBox.Show("Are you sure you want to restart?", "Restart EDHE", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
-            if (restart == DialogResult.Yes) { Functions.RestartApplication(); }
+            if (restart == DialogResult.Yes) { Application.Restart(); }
         }
 
         private async void checkUpdateButton_Click(object sender, EventArgs e)

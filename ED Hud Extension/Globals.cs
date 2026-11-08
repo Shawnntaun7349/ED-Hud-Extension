@@ -28,6 +28,7 @@ public class Globals
     public static bool autoPanelSwitch;
     public static bool autoCombatSwitch;
     public static bool autoShutDownEnabled;
+    public static bool skipInitAnims;
 
     //user settings - data flow
     public static bool capiEnabled;

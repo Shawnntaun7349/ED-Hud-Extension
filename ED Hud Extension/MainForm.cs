@@ -2,6 +2,7 @@ using EliteJournalReader;
 using EliteJournalReader.Events;
 using System.Diagnostics;
 using System.Reflection;
+using System.Reflection.Metadata;
 using static ED_Hud_Extension.DisplayHandler;
 using static ED_Hud_Extension.NavData;
 using static ED_Hud_Extension.SystemData;
@@ -126,8 +127,8 @@ namespace ED_Hud_Extension
 
             verLabel.Text = "version " + Assembly.GetExecutingAssembly().GetName().Version.ToString();
 
-            if (!inMainMenu()) //if the game is already running when EDHE spins up, also if we're not in the main menu (status Flag1 reads 0 until player loads into game proper) 
-            {
+            if (!inMainMenu() || skipInitAnims) //if the game is already running when EDHE spins up & also if we're not in the main menu (status Flag1 reads 0 until player loads into game proper) 
+            {                                   //OR if the player has the init animations toggled off
                 initiateWatcher();
                 currentJournal = true;
                 if (statusEnabled) { statusLabel.Text = statBase + "mainform loaded, game is running"; }
@@ -1123,15 +1124,23 @@ namespace ED_Hud_Extension
             fsdTag.Location = new Point((fsdTag.Parent.Width / 2) + 108, fsdTag.Location.Y);
             selectBodyLabel.Location = new Point((detailHiderPanel.Width / 2) - (selectBodyLabel.Width / 2) + 28, selectBodyLabel.Location.Y);
             beltDivPanel.Size = new Size(beltDivPanel.Parent.Width, beltDivPanel.Height);
+            bodyListPanel.Location = new Point(0, 382);
+            bodyListPanel.Size = new Size(650, (workingAreaPanel.Height - 382));
 
-            detailChangeButton.Location = new Point((workingAreaPanel.Width - (planetDetailView.Width + detailChangeButton.Width + 5)), workingAreaPanel.Height - detailChangeButton.Height);
+            detailPanelNormal = true;
+            detailChangeButton.Location = new Point(workingAreaPanel.Width - (starDetailView.Width + detailChangeButton.Width + 15), (workingAreaPanel.Height - detailChangeButton.Height));
 
-            resetDetailView(planetDetailView, starDetailView);
+            foreach (Label lbl in bodyListPanel.Controls.OfType<Label>())
+            {
+                if (lbl.Tag == "listItem") { lbl.ForeColor = ColorTranslator.FromHtml("#C04000"); }
+            }
+
+            //resetDetailView(planetDetailView, starDetailView);
             explorePanel.BringToFront();
             detailHiderPanel.BringToFront();
             detailChangeButton.Visible = false;
         }
-        private void stationButton_Click(object sender, EventArgs e)
+        private void stationsButton_Click(object sender, EventArgs e)
         {
             stationsPanel.BringToFront();
             dividerPanel.BringToFront();
@@ -1196,6 +1205,11 @@ namespace ED_Hud_Extension
                                 rockTag.Text = string.Concat(body.solidComposition.rock.ToString(), " %");
                                 metalTag.Text = string.Concat(body.solidComposition.metal.ToString(), " %");
                                 iceTag.Text = string.Concat(body.solidComposition.ice.ToString(), " %");
+                                solidCompHider.Visible = false;
+                            }
+                            else
+                            {
+                                solidCompHider.Visible = true;
                             }
 
                             if (body.atmosphereComposition != null)
@@ -1247,8 +1261,6 @@ namespace ED_Hud_Extension
 
                         if (body.rings != null) { generateRingList(body.rings, planetDetailView); noRingsLabel.Visible = false; }
                         else { noRingsLabel.Visible = true; }
-
-                        //if (body.atmosphere != null) { generateAtmosphere(body.atmosphere, planetDetailView); }
                     }
                 }
             }
@@ -1814,8 +1826,8 @@ namespace ED_Hud_Extension
 
         public static void generateRingList(List<Ring> rings, Panel bodyViewPanel)
         {
-            Point labelLoc = new Point(0, 570);
-            Point tagLoc = new Point(264, 570);
+            Point labelLoc = new Point(0, 590);
+            Point tagLoc = new Point(264, 590);
 
             foreach (Ring ring in rings)
             {
@@ -1975,7 +1987,7 @@ namespace ED_Hud_Extension
         {
             if (bodyListPanel.Controls.Count != 0)
             {
-                foreach (Label lbl in bodyListPanel.Controls)
+                foreach (Label lbl in bodyListPanel.Controls.OfType<Label>())
                 {
                     Invoke(new Action(() => lbl.Dispose()));
                 }
@@ -2054,9 +2066,10 @@ namespace ED_Hud_Extension
                 //985 width
                 planetDetailView.Location = new Point(workingAreaPanel.Width - 985, 0);
                 planetDetailView.Size = new Size(workingAreaPanel.Width - planetDetailView.Location.X, workingAreaPanel.Height - 20);
-                exploreDivider.Location = new Point(workingAreaPanel.Width - 988, 0); //-985 + a 3pt offset 
+                exploreDivider.Location = new Point(workingAreaPanel.Width - 988, 0); //-985 + a 3pt offset for margins
+                compDivPanel.Width = (planetDetailView.Width - compDivPanel.Location.X);
 
-                detailChangeButton.Location = new Point(workingAreaPanel.Width - (995 + detailChangeButton.Width), detailChangeButton.Location.Y);
+                detailChangeButton.Location = new Point(workingAreaPanel.Width - (985 + detailChangeButton.Width + 15), detailChangeButton.Location.Y);
                 detailChangeButton.Text = ">>>";
                 detailPanelNormal = false;
             }
@@ -2066,10 +2079,21 @@ namespace ED_Hud_Extension
                 planetDetailView.Size = starDetailView.Size;
                 exploreDivider.Location = new Point(starDetailView.Location.X - 3, 0);
 
-                detailChangeButton.Location = new Point(workingAreaPanel.Width - (starDetailView.Width + detailChangeButton.Width + 10), detailChangeButton.Location.Y);
+                detailChangeButton.Location = new Point(workingAreaPanel.Width - (starDetailView.Width + detailChangeButton.Width + 15), detailChangeButton.Location.Y);
                 detailChangeButton.Text = "<<<";
                 detailPanelNormal = true;
             }
+        }
+
+        private CancellationTokenSource closingCts = new CancellationTokenSource();
+
+        private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            closingCts.Cancel();
+
+            if (statusReaderLive) { readTimer.Dispose(); }
+
+            if (watcherLive) { watcher.StopWatching(); }
         }
     }
 }

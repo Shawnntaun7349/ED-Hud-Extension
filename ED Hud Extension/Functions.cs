@@ -49,6 +49,7 @@ internal class Functions
         try
         {
             savedPrefDisplayIndex = Int32.Parse(doc.RootElement.GetProperty("Preferred Display").GetString());
+            skipInitAnims = Boolean.Parse(doc.RootElement.GetProperty("Skip Init Anims").GetString());
             statusEnabled = Boolean.Parse(doc.RootElement.GetProperty("Status Readout Enabled").GetString());
             autoShutDownEnabled = Boolean.Parse(doc.RootElement.GetProperty("Auto Shut Down").GetString());
             autoPanelSwitch = Boolean.Parse(doc.RootElement.GetProperty("Auto Switch Always").GetString());
@@ -84,6 +85,7 @@ internal class Functions
                     { "Journal Path", journalPath.ToString() },
                     { "Game Path", gamePath.ToString() },
                     { "Preferred Display", chosenDisplay.ToString() },
+                    { "Skip Init Anims", skipInitAnims.ToString() },
                     { "Size_X", formSize.Width.ToString() },
                     { "Size_Y", formSize.Height.ToString() },
                     { "cAPI Enabled", capiEnabled.ToString() },
@@ -130,8 +132,9 @@ internal class Functions
                     { "Journal Path", defaultJournalPath },
                     { "Game Path", defaultGamePath },
                     { "Preferred Display", "0" },
-                    { "Size_X", "1920"},
-                    { "Size_Y", "1080"},
+                    { "Skip Init Anims", "False" },
+                    { "Size_X", "1920" },
+                    { "Size_Y", "1080" },
                     { "cAPI Enabled", "False" },
                     { "Status Readout Enabled", "False" },
                     { "Auto Shut Down", "False" },

@@ -113,5 +113,46 @@ namespace ED_Hud_Extension
                 }
             }
         }
+
+        public static int requiredSize(Panel panel, string dimmension)
+        {
+            if (dimmension == "Height")
+            {
+                int height = 0;
+                int maxHeight = 0;
+
+                foreach (Control lbl in panel.Controls.OfType<Label>())
+                {
+                    height = lbl.Height + 4; //offset to consistent margins
+
+                    if (height > panel.Height)
+                    {
+                        maxHeight += 40;
+                    }
+                }
+
+                return maxHeight;
+            }
+
+            if (dimmension == "Width")
+            {
+                int width = 0;
+                int maxWidth = 0;
+
+                foreach (Control lbl in panel.Controls.OfType<Label>())
+                {
+                    width = lbl.Width + 5;
+
+                    if (width > panel.Width)
+                    {
+                        maxWidth += width;
+                    }
+                }
+
+                return maxWidth;
+            }
+
+            else return 0;
+        }
     }
 }

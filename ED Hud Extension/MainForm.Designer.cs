@@ -103,10 +103,6 @@ namespace ED_Hud_Extension
             ofSuitModsLabel = new Label();
             weaponOneLabel = new Label();
             ofSuitLabel = new Label();
-            settingsButton = new Button();
-            combatButton = new Button();
-            explorationButton = new Button();
-            homeButton = new Button();
             initPanel = new Panel();
             innerInitPanel = new Panel();
             enviroLabel = new Label();
@@ -120,9 +116,13 @@ namespace ED_Hud_Extension
             uplinkDone = new Label();
             initDone = new Label();
             controlsPanel = new TableLayoutPanel();
-            missionsButton = new Button();
-            exitButton = new Button();
-            stationButton = new Button();
+            stationsButton = new LabelButton();
+            missionsButton = new LabelButton();
+            combatButton = new LabelButton();
+            homeButton = new LabelButton();
+            settingsButton = new LabelButton();
+            explorationButton = new LabelButton();
+            exitButton = new LabelButton();
             homePanel = new Panel();
             homeARLabel = new Label();
             homeARTag = new Label();
@@ -158,12 +158,46 @@ namespace ED_Hud_Extension
             welcomeLabel = new Label();
             locDTLabel = new Label();
             explorePanel = new Panel();
-            detailChangeButton = new Button();
+            detailChangeButton = new LabelButton();
             expNextSystemTag = new Label();
+            starDetailView = new Panel();
+            noBeltsLabel = new Label();
+            beltCountTag = new Label();
+            beltDivPanel = new Panel();
+            starRotationalTag = new Label();
+            starOrbitalTag = new Label();
+            starTempTag = new Label();
+            starSolarRadiusTag = new Label();
+            starSolarMassTag = new Label();
+            starAbsoluteMagnitutdeTag = new Label();
+            starLuminosityTag = new Label();
+            starSpectralClassTag = new Label();
+            starAgeTag = new Label();
+            starClassTag = new Label();
+            mainStarTag = new Label();
+            starDiscoverTag = new Label();
+            starNameTag = new Label();
+            starScoopableTag = new Label();
+            starBeltsLabel = new Label();
+            starRotatePeriodLabel = new Label();
+            starOrbitPeriodLabel = new Label();
+            starSurfaceTempLabel = new Label();
+            starSolarRadLabel = new Label();
+            starSolarMassLabel = new Label();
+            starMagnitudeLabel = new Label();
+            starLuminosityLabel = new Label();
+            starSpecClassLabel = new Label();
+            starAgeLabel = new Label();
+            starClassLabel = new Label();
+            starMainStarLabel = new Label();
+            starDiscoverLabel = new Label();
+            starNameLabel = new Label();
+            starScoopLabel = new Label();
             planetDetailView = new Panel();
             noRingsLabel = new Label();
             atmosphereCompPanel = new Panel();
-            panel1 = new Panel();
+            solidCompHider = new Label();
+            compDivPanel = new Panel();
             atmosphereCompHider = new Label();
             atmosphereCompLabel = new Label();
             bodyCompLabel = new Label();
@@ -203,39 +237,6 @@ namespace ED_Hud_Extension
             bodyDiscoverLabel = new Label();
             planetNameLabel = new Label();
             planetGravityLabel = new Label();
-            starDetailView = new Panel();
-            noBeltsLabel = new Label();
-            beltCountTag = new Label();
-            beltDivPanel = new Panel();
-            starRotationalTag = new Label();
-            starOrbitalTag = new Label();
-            starTempTag = new Label();
-            starSolarRadiusTag = new Label();
-            starSolarMassTag = new Label();
-            starAbsoluteMagnitutdeTag = new Label();
-            starLuminosityTag = new Label();
-            starSpectralClassTag = new Label();
-            starAgeTag = new Label();
-            starClassTag = new Label();
-            mainStarTag = new Label();
-            starDiscoverTag = new Label();
-            starNameTag = new Label();
-            starScoopableTag = new Label();
-            starBeltsLabel = new Label();
-            starRotatePeriodLabel = new Label();
-            starOrbitPeriodLabel = new Label();
-            starSurfaceTempLabel = new Label();
-            starSolarRadLabel = new Label();
-            starSolarMassLabel = new Label();
-            starMagnitudeLabel = new Label();
-            starLuminosityLabel = new Label();
-            starSpecClassLabel = new Label();
-            starAgeLabel = new Label();
-            starClassLabel = new Label();
-            starMainStarLabel = new Label();
-            starDiscoverLabel = new Label();
-            starNameLabel = new Label();
-            starScoopLabel = new Label();
             detailHiderPanel = new Panel();
             selectBodyLabel = new Label();
             hiderPanelLabel1 = new Label();
@@ -276,9 +277,9 @@ namespace ED_Hud_Extension
             controlsPanel.SuspendLayout();
             homePanel.SuspendLayout();
             explorePanel.SuspendLayout();
+            starDetailView.SuspendLayout();
             planetDetailView.SuspendLayout();
             atmosphereCompPanel.SuspendLayout();
-            starDetailView.SuspendLayout();
             detailHiderPanel.SuspendLayout();
             bodyListPanel.SuspendLayout();
             statusPanel.SuspendLayout();
@@ -343,7 +344,7 @@ namespace ED_Hud_Extension
             // 
             combatSysAllegianceTag.AutoSize = true;
             combatSysAllegianceTag.Font = new Font("Oxanium", 26.25F, FontStyle.Bold | FontStyle.Italic);
-            combatSysAllegianceTag.ForeColor = SystemColors.Control;
+            combatSysAllegianceTag.ForeColor = Color.White;
             combatSysAllegianceTag.Location = new Point(390, 32);
             combatSysAllegianceTag.Name = "combatSysAllegianceTag";
             combatSysAllegianceTag.Size = new Size(272, 44);
@@ -366,7 +367,7 @@ namespace ED_Hud_Extension
             // 
             combatSysSecTag.AutoSize = true;
             combatSysSecTag.Font = new Font("Oxanium", 26.25F, FontStyle.Bold | FontStyle.Italic);
-            combatSysSecTag.ForeColor = SystemColors.Control;
+            combatSysSecTag.ForeColor = Color.White;
             combatSysSecTag.Location = new Point(390, 116);
             combatSysSecTag.Name = "combatSysSecTag";
             combatSysSecTag.Size = new Size(272, 44);
@@ -389,7 +390,7 @@ namespace ED_Hud_Extension
             // 
             combatSysGovTag.AutoSize = true;
             combatSysGovTag.Font = new Font("Oxanium", 26.25F, FontStyle.Bold | FontStyle.Italic);
-            combatSysGovTag.ForeColor = SystemColors.Control;
+            combatSysGovTag.ForeColor = Color.White;
             combatSysGovTag.Location = new Point(390, 73);
             combatSysGovTag.Name = "combatSysGovTag";
             combatSysGovTag.Size = new Size(272, 44);
@@ -401,7 +402,7 @@ namespace ED_Hud_Extension
             // 
             targetSSHTag.AutoSize = true;
             targetSSHTag.Font = new Font("Oxanium", 26.25F, FontStyle.Bold | FontStyle.Italic);
-            targetSSHTag.ForeColor = SystemColors.Control;
+            targetSSHTag.ForeColor = Color.White;
             targetSSHTag.Location = new Point(257, 612);
             targetSSHTag.Name = "targetSSHTag";
             targetSSHTag.Size = new Size(272, 44);
@@ -424,7 +425,7 @@ namespace ED_Hud_Extension
             // 
             targetSSTag.AutoSize = true;
             targetSSTag.Font = new Font("Oxanium", 26.25F, FontStyle.Bold | FontStyle.Italic);
-            targetSSTag.ForeColor = SystemColors.Control;
+            targetSSTag.ForeColor = Color.White;
             targetSSTag.Location = new Point(257, 568);
             targetSSTag.Name = "targetSSTag";
             targetSSTag.Size = new Size(272, 44);
@@ -467,7 +468,7 @@ namespace ED_Hud_Extension
             // 
             scanStageTag.AutoSize = true;
             scanStageTag.Font = new Font("Oxanium", 21.75F);
-            scanStageTag.ForeColor = SystemColors.Control;
+            scanStageTag.ForeColor = Color.White;
             scanStageTag.Location = new Point(887, 0);
             scanStageTag.Name = "scanStageTag";
             scanStageTag.Size = new Size(139, 36);
@@ -489,7 +490,7 @@ namespace ED_Hud_Extension
             // 
             targetShipTag.AutoSize = true;
             targetShipTag.Font = new Font("Oxanium", 26.25F, FontStyle.Bold | FontStyle.Italic);
-            targetShipTag.ForeColor = SystemColors.Control;
+            targetShipTag.ForeColor = Color.White;
             targetShipTag.Location = new Point(257, 433);
             targetShipTag.Name = "targetShipTag";
             targetShipTag.Size = new Size(272, 44);
@@ -501,7 +502,7 @@ namespace ED_Hud_Extension
             // 
             targetShieldTag.AutoSize = true;
             targetShieldTag.Font = new Font("Oxanium", 26.25F, FontStyle.Bold | FontStyle.Italic);
-            targetShieldTag.ForeColor = SystemColors.Control;
+            targetShieldTag.ForeColor = Color.White;
             targetShieldTag.Location = new Point(256, 477);
             targetShieldTag.Name = "targetShieldTag";
             targetShieldTag.Size = new Size(272, 44);
@@ -513,7 +514,7 @@ namespace ED_Hud_Extension
             // 
             targetHullTag.AutoSize = true;
             targetHullTag.Font = new Font("Oxanium", 26.25F, FontStyle.Bold | FontStyle.Italic);
-            targetHullTag.ForeColor = SystemColors.Control;
+            targetHullTag.ForeColor = Color.White;
             targetHullTag.Location = new Point(257, 524);
             targetHullTag.Name = "targetHullTag";
             targetHullTag.Size = new Size(272, 44);
@@ -525,7 +526,7 @@ namespace ED_Hud_Extension
             // 
             targetTag.AutoSize = true;
             targetTag.Font = new Font("Oxanium", 26.25F, FontStyle.Bold | FontStyle.Italic);
-            targetTag.ForeColor = SystemColors.Control;
+            targetTag.ForeColor = Color.White;
             targetTag.Location = new Point(257, 241);
             targetTag.Name = "targetTag";
             targetTag.Size = new Size(272, 44);
@@ -537,7 +538,7 @@ namespace ED_Hud_Extension
             // 
             targetRankTag.AutoSize = true;
             targetRankTag.Font = new Font("Oxanium", 26.25F, FontStyle.Bold | FontStyle.Italic);
-            targetRankTag.ForeColor = SystemColors.Control;
+            targetRankTag.ForeColor = Color.White;
             targetRankTag.Location = new Point(256, 287);
             targetRankTag.Name = "targetRankTag";
             targetRankTag.Size = new Size(272, 44);
@@ -549,7 +550,7 @@ namespace ED_Hud_Extension
             // 
             targetPowerTag.AutoSize = true;
             targetPowerTag.Font = new Font("Oxanium", 26.25F, FontStyle.Bold | FontStyle.Italic);
-            targetPowerTag.ForeColor = SystemColors.Control;
+            targetPowerTag.ForeColor = Color.White;
             targetPowerTag.Location = new Point(257, 700);
             targetPowerTag.Name = "targetPowerTag";
             targetPowerTag.Size = new Size(272, 44);
@@ -561,7 +562,7 @@ namespace ED_Hud_Extension
             // 
             targetFactionTag.AutoSize = true;
             targetFactionTag.Font = new Font("Oxanium", 26.25F, FontStyle.Bold | FontStyle.Italic);
-            targetFactionTag.ForeColor = SystemColors.Control;
+            targetFactionTag.ForeColor = Color.White;
             targetFactionTag.Location = new Point(256, 741);
             targetFactionTag.Name = "targetFactionTag";
             targetFactionTag.Size = new Size(272, 44);
@@ -573,7 +574,7 @@ namespace ED_Hud_Extension
             // 
             targetBountyTag.AutoSize = true;
             targetBountyTag.Font = new Font("Oxanium", 26.25F, FontStyle.Bold | FontStyle.Italic);
-            targetBountyTag.ForeColor = SystemColors.Control;
+            targetBountyTag.ForeColor = Color.White;
             targetBountyTag.Location = new Point(257, 785);
             targetBountyTag.Name = "targetBountyTag";
             targetBountyTag.Size = new Size(272, 44);
@@ -585,7 +586,7 @@ namespace ED_Hud_Extension
             // 
             targetLegalStatusTag.AutoSize = true;
             targetLegalStatusTag.Font = new Font("Oxanium", 26.25F, FontStyle.Bold | FontStyle.Italic);
-            targetLegalStatusTag.ForeColor = SystemColors.Control;
+            targetLegalStatusTag.ForeColor = Color.White;
             targetLegalStatusTag.Location = new Point(256, 331);
             targetLegalStatusTag.Name = "targetLegalStatusTag";
             targetLegalStatusTag.Size = new Size(272, 44);
@@ -1133,72 +1134,11 @@ namespace ED_Hud_Extension
             ofSuitLabel.TabIndex = 93;
             ofSuitLabel.Text = "Equipped Suit : ";
             // 
-            // settingsButton
-            // 
-            settingsButton.Anchor = AnchorStyles.Bottom;
-            settingsButton.BackColor = SystemColors.ActiveCaptionText;
-            settingsButton.FlatStyle = FlatStyle.Popup;
-            settingsButton.Font = new Font("Oxanium ExtraBold", 9F, FontStyle.Bold);
-            settingsButton.ForeColor = Color.FromArgb(192, 64, 0);
-            settingsButton.Location = new Point(3, 1027);
-            settingsButton.Name = "settingsButton";
-            settingsButton.Size = new Size(102, 22);
-            settingsButton.TabIndex = 24;
-            settingsButton.Tag = "permenantButtons";
-            settingsButton.Text = "Settings";
-            settingsButton.UseVisualStyleBackColor = false;
-            settingsButton.Click += settingsButton_Click;
-            // 
-            // combatButton
-            // 
-            combatButton.BackColor = SystemColors.ActiveCaptionText;
-            combatButton.FlatStyle = FlatStyle.Popup;
-            combatButton.Font = new Font("Oxanium ExtraBold", 9F, FontStyle.Bold);
-            combatButton.ForeColor = Color.FromArgb(192, 64, 0);
-            combatButton.Location = new Point(3, 31);
-            combatButton.Name = "combatButton";
-            combatButton.Size = new Size(102, 22);
-            combatButton.TabIndex = 25;
-            combatButton.Tag = "uiButtons";
-            combatButton.Text = "Combat";
-            combatButton.UseVisualStyleBackColor = false;
-            combatButton.Click += combatButton_Click;
-            // 
-            // explorationButton
-            // 
-            explorationButton.BackColor = SystemColors.ActiveCaptionText;
-            explorationButton.FlatStyle = FlatStyle.Popup;
-            explorationButton.Font = new Font("Oxanium ExtraBold", 9F, FontStyle.Bold);
-            explorationButton.ForeColor = Color.FromArgb(192, 64, 0);
-            explorationButton.Location = new Point(3, 59);
-            explorationButton.Name = "explorationButton";
-            explorationButton.Size = new Size(102, 22);
-            explorationButton.TabIndex = 26;
-            explorationButton.Tag = "uiButtons";
-            explorationButton.Text = "Exploration";
-            explorationButton.UseVisualStyleBackColor = false;
-            explorationButton.Click += explorationButton_Click;
-            // 
-            // homeButton
-            // 
-            homeButton.BackColor = SystemColors.ActiveCaptionText;
-            homeButton.FlatStyle = FlatStyle.Popup;
-            homeButton.Font = new Font("Oxanium ExtraBold", 9F, FontStyle.Bold);
-            homeButton.ForeColor = Color.FromArgb(192, 64, 0);
-            homeButton.Location = new Point(3, 3);
-            homeButton.Name = "homeButton";
-            homeButton.Size = new Size(102, 22);
-            homeButton.TabIndex = 27;
-            homeButton.Tag = "uiButtons";
-            homeButton.Text = "Home";
-            homeButton.UseVisualStyleBackColor = false;
-            homeButton.Click += homeButton_Click;
-            // 
             // initPanel
             // 
             initPanel.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             initPanel.AutoSize = true;
-            initPanel.BackColor = SystemColors.ActiveCaptionText;
+            initPanel.BackColor = Color.Black;
             initPanel.Controls.Add(innerInitPanel);
             initPanel.Location = new Point(0, 0);
             initPanel.Margin = new Padding(3, 3, 3, 60);
@@ -1361,13 +1301,13 @@ namespace ED_Hud_Extension
             controlsPanel.AutoSize = true;
             controlsPanel.ColumnCount = 1;
             controlsPanel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
-            controlsPanel.Controls.Add(homeButton, 0, 0);
+            controlsPanel.Controls.Add(stationsButton, 0, 4);
             controlsPanel.Controls.Add(missionsButton, 0, 3);
-            controlsPanel.Controls.Add(exitButton, 0, 7);
-            controlsPanel.Controls.Add(settingsButton, 0, 6);
             controlsPanel.Controls.Add(combatButton, 0, 1);
-            controlsPanel.Controls.Add(stationButton, 0, 4);
+            controlsPanel.Controls.Add(homeButton, 0, 0);
+            controlsPanel.Controls.Add(settingsButton, 0, 6);
             controlsPanel.Controls.Add(explorationButton, 0, 2);
+            controlsPanel.Controls.Add(exitButton, 0, 7);
             controlsPanel.Dock = DockStyle.Left;
             controlsPanel.Location = new Point(0, 0);
             controlsPanel.Name = "controlsPanel";
@@ -1383,55 +1323,93 @@ namespace ED_Hud_Extension
             controlsPanel.Size = new Size(108, 1080);
             controlsPanel.TabIndex = 76;
             // 
+            // stationsButton
+            // 
+            stationsButton.Font = new Font("Oxanium ExtraBold", 9F, FontStyle.Bold);
+            stationsButton.ForeColor = Color.FromArgb(192, 64, 0);
+            stationsButton.Location = new Point(3, 112);
+            stationsButton.Name = "stationsButton";
+            stationsButton.Size = new Size(102, 22);
+            stationsButton.TabIndex = 121;
+            stationsButton.Text = "Stations";
+            stationsButton.TextAlign = ContentAlignment.MiddleCenter;
+            stationsButton.Click += stationsButton_Click;
+            // 
             // missionsButton
             // 
-            missionsButton.BackColor = SystemColors.ActiveCaptionText;
-            missionsButton.FlatStyle = FlatStyle.Popup;
             missionsButton.Font = new Font("Oxanium ExtraBold", 9F, FontStyle.Bold);
             missionsButton.ForeColor = Color.FromArgb(192, 64, 0);
-            missionsButton.Location = new Point(3, 87);
+            missionsButton.Location = new Point(3, 84);
             missionsButton.Name = "missionsButton";
             missionsButton.Size = new Size(102, 22);
-            missionsButton.TabIndex = 71;
-            missionsButton.Tag = "uiButtons";
+            missionsButton.TabIndex = 120;
             missionsButton.Text = "Missions";
-            missionsButton.UseVisualStyleBackColor = false;
+            missionsButton.TextAlign = ContentAlignment.MiddleCenter;
             missionsButton.Click += missionsButton_Click;
+            // 
+            // combatButton
+            // 
+            combatButton.Font = new Font("Oxanium ExtraBold", 9F, FontStyle.Bold);
+            combatButton.ForeColor = Color.FromArgb(192, 64, 0);
+            combatButton.Location = new Point(3, 28);
+            combatButton.Name = "combatButton";
+            combatButton.Size = new Size(102, 22);
+            combatButton.TabIndex = 119;
+            combatButton.Text = "Combat";
+            combatButton.TextAlign = ContentAlignment.MiddleCenter;
+            combatButton.MouseClick += combatButton_Click;
+            // 
+            // homeButton
+            // 
+            homeButton.Font = new Font("Oxanium ExtraBold", 9F, FontStyle.Bold);
+            homeButton.ForeColor = Color.FromArgb(192, 64, 0);
+            homeButton.Location = new Point(3, 0);
+            homeButton.Name = "homeButton";
+            homeButton.Size = new Size(102, 22);
+            homeButton.TabIndex = 118;
+            homeButton.Text = "Home";
+            homeButton.TextAlign = ContentAlignment.MiddleCenter;
+            homeButton.MouseClick += homeButton_Click;
+            // 
+            // settingsButton
+            // 
+            settingsButton.Font = new Font("Oxanium ExtraBold", 9F, FontStyle.Bold);
+            settingsButton.ForeColor = Color.FromArgb(192, 64, 0);
+            settingsButton.Location = new Point(3, 1024);
+            settingsButton.Name = "settingsButton";
+            settingsButton.Size = new Size(102, 22);
+            settingsButton.TabIndex = 116;
+            settingsButton.Text = "Settings";
+            settingsButton.TextAlign = ContentAlignment.MiddleCenter;
+            settingsButton.MouseClick += settingsButton_Click;
+            // 
+            // explorationButton
+            // 
+            explorationButton.Font = new Font("Oxanium ExtraBold", 9F, FontStyle.Bold);
+            explorationButton.ForeColor = Color.FromArgb(192, 64, 0);
+            explorationButton.Location = new Point(3, 56);
+            explorationButton.Name = "explorationButton";
+            explorationButton.Size = new Size(102, 22);
+            explorationButton.TabIndex = 117;
+            explorationButton.Text = "Exploration";
+            explorationButton.TextAlign = ContentAlignment.MiddleCenter;
+            explorationButton.Click += explorationButton_Click;
             // 
             // exitButton
             // 
-            exitButton.Anchor = AnchorStyles.Bottom;
-            exitButton.BackColor = SystemColors.ActiveCaptionText;
-            exitButton.FlatStyle = FlatStyle.Popup;
             exitButton.Font = new Font("Oxanium ExtraBold", 9F, FontStyle.Bold);
             exitButton.ForeColor = Color.FromArgb(192, 64, 0);
-            exitButton.Location = new Point(3, 1055);
+            exitButton.Location = new Point(3, 1052);
             exitButton.Name = "exitButton";
             exitButton.Size = new Size(102, 22);
-            exitButton.TabIndex = 67;
-            exitButton.Tag = "permenantButtons";
+            exitButton.TabIndex = 117;
             exitButton.Text = "Terminate";
-            exitButton.UseVisualStyleBackColor = false;
-            exitButton.Click += exitButton_Click;
-            // 
-            // stationButton
-            // 
-            stationButton.BackColor = SystemColors.ActiveCaptionText;
-            stationButton.FlatStyle = FlatStyle.Popup;
-            stationButton.Font = new Font("Oxanium ExtraBold", 9F, FontStyle.Bold);
-            stationButton.ForeColor = Color.FromArgb(192, 64, 0);
-            stationButton.Location = new Point(3, 115);
-            stationButton.Name = "stationButton";
-            stationButton.Size = new Size(102, 22);
-            stationButton.TabIndex = 70;
-            stationButton.Tag = "uiButtons";
-            stationButton.Text = "Stationing";
-            stationButton.UseVisualStyleBackColor = false;
-            stationButton.Click += stationButton_Click;
+            exitButton.TextAlign = ContentAlignment.MiddleCenter;
+            exitButton.MouseClick += exitButton_Click;
             // 
             // homePanel
             // 
-            homePanel.BackColor = SystemColors.ActiveCaptionText;
+            homePanel.BackColor = Color.Black;
             homePanel.Controls.Add(homeARLabel);
             homePanel.Controls.Add(homeARTag);
             homePanel.Controls.Add(homeMRLabel);
@@ -1471,7 +1449,7 @@ namespace ED_Hud_Extension
             // 
             homeARLabel.AutoSize = true;
             homeARLabel.Font = new Font("Oxanium", 30F, FontStyle.Bold);
-            homeARLabel.ForeColor = SystemColors.Control;
+            homeARLabel.ForeColor = Color.White;
             homeARLabel.Location = new Point(1, 451);
             homeARLabel.Name = "homeARLabel";
             homeARLabel.Size = new Size(270, 50);
@@ -1493,7 +1471,7 @@ namespace ED_Hud_Extension
             // 
             homeMRLabel.AutoSize = true;
             homeMRLabel.Font = new Font("Oxanium", 30F, FontStyle.Bold);
-            homeMRLabel.ForeColor = SystemColors.Control;
+            homeMRLabel.ForeColor = Color.White;
             homeMRLabel.Location = new Point(1, 401);
             homeMRLabel.Name = "homeMRLabel";
             homeMRLabel.Size = new Size(361, 50);
@@ -1515,7 +1493,7 @@ namespace ED_Hud_Extension
             // 
             homeEXRLabel.AutoSize = true;
             homeEXRLabel.Font = new Font("Oxanium", 30F, FontStyle.Bold);
-            homeEXRLabel.ForeColor = SystemColors.Control;
+            homeEXRLabel.ForeColor = Color.White;
             homeEXRLabel.Location = new Point(1, 501);
             homeEXRLabel.Name = "homeEXRLabel";
             homeEXRLabel.Size = new Size(370, 50);
@@ -1537,7 +1515,7 @@ namespace ED_Hud_Extension
             // 
             homeERLabel.AutoSize = true;
             homeERLabel.Font = new Font("Oxanium", 30F, FontStyle.Bold);
-            homeERLabel.ForeColor = SystemColors.Control;
+            homeERLabel.ForeColor = Color.White;
             homeERLabel.Location = new Point(1, 601);
             homeERLabel.Name = "homeERLabel";
             homeERLabel.Size = new Size(378, 50);
@@ -1559,7 +1537,7 @@ namespace ED_Hud_Extension
             // 
             homeTRLabel.AutoSize = true;
             homeTRLabel.Font = new Font("Oxanium", 30F, FontStyle.Bold);
-            homeTRLabel.ForeColor = SystemColors.Control;
+            homeTRLabel.ForeColor = Color.White;
             homeTRLabel.Location = new Point(1, 551);
             homeTRLabel.Name = "homeTRLabel";
             homeTRLabel.Size = new Size(266, 50);
@@ -1581,7 +1559,7 @@ namespace ED_Hud_Extension
             // 
             homeLSLabel.AutoSize = true;
             homeLSLabel.Font = new Font("Oxanium", 30F, FontStyle.Bold);
-            homeLSLabel.ForeColor = SystemColors.Control;
+            homeLSLabel.ForeColor = Color.White;
             homeLSLabel.Location = new Point(1, 255);
             homeLSLabel.Name = "homeLSLabel";
             homeLSLabel.Size = new Size(289, 50);
@@ -1614,7 +1592,7 @@ namespace ED_Hud_Extension
             // 
             homeCRLabel.AutoSize = true;
             homeCRLabel.Font = new Font("Oxanium", 30F, FontStyle.Bold);
-            homeCRLabel.ForeColor = SystemColors.Control;
+            homeCRLabel.ForeColor = Color.White;
             homeCRLabel.Location = new Point(1, 355);
             homeCRLabel.Name = "homeCRLabel";
             homeCRLabel.Size = new Size(306, 50);
@@ -1636,7 +1614,7 @@ namespace ED_Hud_Extension
             // 
             creditBalanceLabel.AutoSize = true;
             creditBalanceLabel.Font = new Font("Oxanium", 30F, FontStyle.Bold);
-            creditBalanceLabel.ForeColor = SystemColors.Control;
+            creditBalanceLabel.ForeColor = Color.White;
             creditBalanceLabel.Location = new Point(1, 704);
             creditBalanceLabel.Name = "creditBalanceLabel";
             creditBalanceLabel.Size = new Size(329, 50);
@@ -1647,7 +1625,7 @@ namespace ED_Hud_Extension
             // 
             homeSysLabel.AutoSize = true;
             homeSysLabel.Font = new Font("Oxanium", 30F, FontStyle.Bold);
-            homeSysLabel.ForeColor = SystemColors.Control;
+            homeSysLabel.ForeColor = Color.White;
             homeSysLabel.Location = new Point(1, 205);
             homeSysLabel.Name = "homeSysLabel";
             homeSysLabel.Size = new Size(306, 50);
@@ -1680,7 +1658,7 @@ namespace ED_Hud_Extension
             // 
             homeLBLabel.AutoSize = true;
             homeLBLabel.Font = new Font("Oxanium", 30F, FontStyle.Bold);
-            homeLBLabel.ForeColor = SystemColors.Control;
+            homeLBLabel.ForeColor = Color.White;
             homeLBLabel.Location = new Point(1, 751);
             homeLBLabel.Name = "homeLBLabel";
             homeLBLabel.Size = new Size(305, 50);
@@ -1736,7 +1714,7 @@ namespace ED_Hud_Extension
             // 
             shipFuelLabel.AutoSize = true;
             shipFuelLabel.Font = new Font("Oxanium", 30F, FontStyle.Bold);
-            shipFuelLabel.ForeColor = SystemColors.Control;
+            shipFuelLabel.ForeColor = Color.White;
             shipFuelLabel.Location = new Point(1, 155);
             shipFuelLabel.Name = "shipFuelLabel";
             shipFuelLabel.Size = new Size(247, 50);
@@ -1747,7 +1725,7 @@ namespace ED_Hud_Extension
             // 
             curVesselIDLabel.AutoSize = true;
             curVesselIDLabel.Font = new Font("Oxanium", 30F, FontStyle.Bold);
-            curVesselIDLabel.ForeColor = SystemColors.Control;
+            curVesselIDLabel.ForeColor = Color.White;
             curVesselIDLabel.Location = new Point(1, 105);
             curVesselIDLabel.Name = "curVesselIDLabel";
             curVesselIDLabel.Size = new Size(93, 50);
@@ -1758,7 +1736,7 @@ namespace ED_Hud_Extension
             // 
             curVesselNameLabel.AutoSize = true;
             curVesselNameLabel.Font = new Font("Oxanium", 30F, FontStyle.Bold);
-            curVesselNameLabel.ForeColor = SystemColors.Control;
+            curVesselNameLabel.ForeColor = Color.White;
             curVesselNameLabel.Location = new Point(1, 55);
             curVesselNameLabel.Name = "curVesselNameLabel";
             curVesselNameLabel.Size = new Size(280, 50);
@@ -1770,7 +1748,7 @@ namespace ED_Hud_Extension
             // 
             vesselLabel.AutoSize = true;
             vesselLabel.Font = new Font("Oxanium", 30F, FontStyle.Bold);
-            vesselLabel.ForeColor = SystemColors.Control;
+            vesselLabel.ForeColor = Color.White;
             vesselLabel.Location = new Point(1, 1);
             vesselLabel.Name = "vesselLabel";
             vesselLabel.Size = new Size(331, 50);
@@ -1829,8 +1807,9 @@ namespace ED_Hud_Extension
             // locDTLabel
             // 
             locDTLabel.AutoSize = true;
+            locDTLabel.BackColor = Color.Black;
             locDTLabel.Font = new Font("Oxanium", 30F, FontStyle.Bold);
-            locDTLabel.ForeColor = SystemColors.Control;
+            locDTLabel.ForeColor = Color.White;
             locDTLabel.Location = new Point(3, 0);
             locDTLabel.Name = "locDTLabel";
             locDTLabel.Size = new Size(354, 43);
@@ -1842,8 +1821,8 @@ namespace ED_Hud_Extension
             explorePanel.BackColor = Color.Black;
             explorePanel.Controls.Add(detailChangeButton);
             explorePanel.Controls.Add(expNextSystemTag);
-            explorePanel.Controls.Add(planetDetailView);
             explorePanel.Controls.Add(starDetailView);
+            explorePanel.Controls.Add(planetDetailView);
             explorePanel.Controls.Add(detailHiderPanel);
             explorePanel.Controls.Add(exploreDivider);
             explorePanel.Controls.Add(expNextSystemLabel);
@@ -1867,29 +1846,436 @@ namespace ED_Hud_Extension
             // 
             // detailChangeButton
             // 
-            detailChangeButton.BackColor = SystemColors.ActiveCaptionText;
-            detailChangeButton.FlatStyle = FlatStyle.Popup;
             detailChangeButton.Font = new Font("Oxanium ExtraBold", 14.25F, FontStyle.Bold, GraphicsUnit.Point, 0);
             detailChangeButton.ForeColor = Color.FromArgb(192, 64, 0);
-            detailChangeButton.Location = new Point(1090, 853);
+            detailChangeButton.Location = new Point(1085, 850);
             detailChangeButton.Name = "detailChangeButton";
             detailChangeButton.Size = new Size(55, 30);
-            detailChangeButton.TabIndex = 72;
-            detailChangeButton.Tag = "permenantButtons";
+            detailChangeButton.TabIndex = 115;
             detailChangeButton.Text = "<<<";
-            detailChangeButton.UseVisualStyleBackColor = false;
-            detailChangeButton.Click += detailChangeButton_Click;
+            detailChangeButton.TextAlign = ContentAlignment.MiddleCenter;
+            detailChangeButton.MouseClick += detailChangeButton_Click;
             // 
             // expNextSystemTag
             // 
             expNextSystemTag.AutoSize = true;
             expNextSystemTag.Font = new Font("Oxanium", 30F, FontStyle.Bold | FontStyle.Italic);
-            expNextSystemTag.ForeColor = SystemColors.Control;
+            expNextSystemTag.ForeColor = Color.White;
             expNextSystemTag.Location = new Point(0, 180);
             expNextSystemTag.Name = "expNextSystemTag";
             expNextSystemTag.Size = new Size(117, 50);
             expNextSystemTag.TabIndex = 114;
             expNextSystemTag.Text = "none";
+            // 
+            // starDetailView
+            // 
+            starDetailView.AutoScroll = true;
+            starDetailView.BackColor = Color.Black;
+            starDetailView.Controls.Add(noBeltsLabel);
+            starDetailView.Controls.Add(beltCountTag);
+            starDetailView.Controls.Add(beltDivPanel);
+            starDetailView.Controls.Add(starRotationalTag);
+            starDetailView.Controls.Add(starOrbitalTag);
+            starDetailView.Controls.Add(starTempTag);
+            starDetailView.Controls.Add(starSolarRadiusTag);
+            starDetailView.Controls.Add(starSolarMassTag);
+            starDetailView.Controls.Add(starAbsoluteMagnitutdeTag);
+            starDetailView.Controls.Add(starLuminosityTag);
+            starDetailView.Controls.Add(starSpectralClassTag);
+            starDetailView.Controls.Add(starAgeTag);
+            starDetailView.Controls.Add(starClassTag);
+            starDetailView.Controls.Add(mainStarTag);
+            starDetailView.Controls.Add(starDiscoverTag);
+            starDetailView.Controls.Add(starNameTag);
+            starDetailView.Controls.Add(starScoopableTag);
+            starDetailView.Controls.Add(starBeltsLabel);
+            starDetailView.Controls.Add(starRotatePeriodLabel);
+            starDetailView.Controls.Add(starOrbitPeriodLabel);
+            starDetailView.Controls.Add(starSurfaceTempLabel);
+            starDetailView.Controls.Add(starSolarRadLabel);
+            starDetailView.Controls.Add(starSolarMassLabel);
+            starDetailView.Controls.Add(starMagnitudeLabel);
+            starDetailView.Controls.Add(starLuminosityLabel);
+            starDetailView.Controls.Add(starSpecClassLabel);
+            starDetailView.Controls.Add(starAgeLabel);
+            starDetailView.Controls.Add(starClassLabel);
+            starDetailView.Controls.Add(starMainStarLabel);
+            starDetailView.Controls.Add(starDiscoverLabel);
+            starDetailView.Controls.Add(starNameLabel);
+            starDetailView.Controls.Add(starScoopLabel);
+            starDetailView.ForeColor = SystemColors.Desktop;
+            starDetailView.Location = new Point(1150, 0);
+            starDetailView.Name = "starDetailView";
+            starDetailView.Size = new Size(649, 880);
+            starDetailView.TabIndex = 90;
+            starDetailView.Tag = "planetDetailList";
+            // 
+            // noBeltsLabel
+            // 
+            noBeltsLabel.Font = new Font("Oxanium", 21.75F);
+            noBeltsLabel.ForeColor = Color.White;
+            noBeltsLabel.Location = new Point(61, 636);
+            noBeltsLabel.Name = "noBeltsLabel";
+            noBeltsLabel.Size = new Size(350, 108);
+            noBeltsLabel.TabIndex = 129;
+            noBeltsLabel.Tag = "permanent";
+            noBeltsLabel.Text = "No belts detected in orbit of currently selected body";
+            noBeltsLabel.TextAlign = ContentAlignment.MiddleCenter;
+            noBeltsLabel.Visible = false;
+            // 
+            // beltCountTag
+            // 
+            beltCountTag.AutoSize = true;
+            beltCountTag.Font = new Font("Oxanium", 21.75F, FontStyle.Italic);
+            beltCountTag.ForeColor = Color.White;
+            beltCountTag.Location = new Point(303, 560);
+            beltCountTag.Name = "beltCountTag";
+            beltCountTag.Size = new Size(220, 36);
+            beltCountTag.TabIndex = 128;
+            beltCountTag.Text = "awaiting data...";
+            beltCountTag.TextAlign = ContentAlignment.TopRight;
+            // 
+            // beltDivPanel
+            // 
+            beltDivPanel.BackColor = Color.White;
+            beltDivPanel.Location = new Point(0, 605);
+            beltDivPanel.Name = "beltDivPanel";
+            beltDivPanel.Size = new Size(450, 2);
+            beltDivPanel.TabIndex = 83;
+            // 
+            // starRotationalTag
+            // 
+            starRotationalTag.AutoSize = true;
+            starRotationalTag.Font = new Font("Oxanium", 21.75F, FontStyle.Italic);
+            starRotationalTag.ForeColor = Color.White;
+            starRotationalTag.Location = new Point(303, 520);
+            starRotationalTag.Name = "starRotationalTag";
+            starRotationalTag.Size = new Size(220, 36);
+            starRotationalTag.TabIndex = 124;
+            starRotationalTag.Text = "awaiting data...";
+            starRotationalTag.TextAlign = ContentAlignment.TopRight;
+            // 
+            // starOrbitalTag
+            // 
+            starOrbitalTag.AutoSize = true;
+            starOrbitalTag.Font = new Font("Oxanium", 21.75F, FontStyle.Italic);
+            starOrbitalTag.ForeColor = Color.White;
+            starOrbitalTag.Location = new Point(303, 480);
+            starOrbitalTag.Name = "starOrbitalTag";
+            starOrbitalTag.Size = new Size(220, 36);
+            starOrbitalTag.TabIndex = 123;
+            starOrbitalTag.Text = "awaiting data...";
+            starOrbitalTag.TextAlign = ContentAlignment.TopRight;
+            // 
+            // starTempTag
+            // 
+            starTempTag.AutoSize = true;
+            starTempTag.Font = new Font("Oxanium", 21.75F, FontStyle.Italic);
+            starTempTag.ForeColor = Color.White;
+            starTempTag.Location = new Point(303, 440);
+            starTempTag.Name = "starTempTag";
+            starTempTag.Size = new Size(220, 36);
+            starTempTag.TabIndex = 122;
+            starTempTag.Text = "awaiting data...";
+            starTempTag.TextAlign = ContentAlignment.TopRight;
+            // 
+            // starSolarRadiusTag
+            // 
+            starSolarRadiusTag.AutoSize = true;
+            starSolarRadiusTag.Font = new Font("Oxanium", 21.75F, FontStyle.Italic);
+            starSolarRadiusTag.ForeColor = Color.White;
+            starSolarRadiusTag.Location = new Point(303, 400);
+            starSolarRadiusTag.Name = "starSolarRadiusTag";
+            starSolarRadiusTag.Size = new Size(220, 36);
+            starSolarRadiusTag.TabIndex = 121;
+            starSolarRadiusTag.Text = "awaiting data...";
+            starSolarRadiusTag.TextAlign = ContentAlignment.TopRight;
+            // 
+            // starSolarMassTag
+            // 
+            starSolarMassTag.AutoSize = true;
+            starSolarMassTag.Font = new Font("Oxanium", 21.75F, FontStyle.Italic);
+            starSolarMassTag.ForeColor = Color.White;
+            starSolarMassTag.Location = new Point(303, 360);
+            starSolarMassTag.Name = "starSolarMassTag";
+            starSolarMassTag.Size = new Size(220, 36);
+            starSolarMassTag.TabIndex = 120;
+            starSolarMassTag.Text = "awaiting data...";
+            starSolarMassTag.TextAlign = ContentAlignment.TopRight;
+            // 
+            // starAbsoluteMagnitutdeTag
+            // 
+            starAbsoluteMagnitutdeTag.AutoSize = true;
+            starAbsoluteMagnitutdeTag.Font = new Font("Oxanium", 21.75F, FontStyle.Italic);
+            starAbsoluteMagnitutdeTag.ForeColor = Color.White;
+            starAbsoluteMagnitutdeTag.Location = new Point(303, 320);
+            starAbsoluteMagnitutdeTag.Name = "starAbsoluteMagnitutdeTag";
+            starAbsoluteMagnitutdeTag.Size = new Size(220, 36);
+            starAbsoluteMagnitutdeTag.TabIndex = 119;
+            starAbsoluteMagnitutdeTag.Text = "awaiting data...";
+            starAbsoluteMagnitutdeTag.TextAlign = ContentAlignment.TopRight;
+            // 
+            // starLuminosityTag
+            // 
+            starLuminosityTag.AutoSize = true;
+            starLuminosityTag.Font = new Font("Oxanium", 21.75F, FontStyle.Italic);
+            starLuminosityTag.ForeColor = Color.White;
+            starLuminosityTag.Location = new Point(303, 280);
+            starLuminosityTag.Name = "starLuminosityTag";
+            starLuminosityTag.Size = new Size(220, 36);
+            starLuminosityTag.TabIndex = 118;
+            starLuminosityTag.Text = "awaiting data...";
+            starLuminosityTag.TextAlign = ContentAlignment.TopRight;
+            // 
+            // starSpectralClassTag
+            // 
+            starSpectralClassTag.AutoSize = true;
+            starSpectralClassTag.Font = new Font("Oxanium", 21.75F, FontStyle.Italic);
+            starSpectralClassTag.ForeColor = Color.White;
+            starSpectralClassTag.Location = new Point(303, 240);
+            starSpectralClassTag.Name = "starSpectralClassTag";
+            starSpectralClassTag.Size = new Size(220, 36);
+            starSpectralClassTag.TabIndex = 117;
+            starSpectralClassTag.Text = "awaiting data...";
+            starSpectralClassTag.TextAlign = ContentAlignment.TopRight;
+            // 
+            // starAgeTag
+            // 
+            starAgeTag.AutoSize = true;
+            starAgeTag.Font = new Font("Oxanium", 21.75F, FontStyle.Italic);
+            starAgeTag.ForeColor = Color.White;
+            starAgeTag.Location = new Point(303, 160);
+            starAgeTag.Name = "starAgeTag";
+            starAgeTag.Size = new Size(220, 36);
+            starAgeTag.TabIndex = 116;
+            starAgeTag.Text = "awaiting data...";
+            starAgeTag.TextAlign = ContentAlignment.TopRight;
+            // 
+            // starClassTag
+            // 
+            starClassTag.AutoSize = true;
+            starClassTag.Font = new Font("Oxanium", 21.75F, FontStyle.Italic);
+            starClassTag.ForeColor = Color.White;
+            starClassTag.Location = new Point(303, 120);
+            starClassTag.Name = "starClassTag";
+            starClassTag.Size = new Size(220, 36);
+            starClassTag.TabIndex = 115;
+            starClassTag.Text = "awaiting data...";
+            starClassTag.TextAlign = ContentAlignment.TopRight;
+            // 
+            // mainStarTag
+            // 
+            mainStarTag.AutoSize = true;
+            mainStarTag.Font = new Font("Oxanium", 21.75F, FontStyle.Italic);
+            mainStarTag.ForeColor = Color.White;
+            mainStarTag.Location = new Point(303, 80);
+            mainStarTag.Name = "mainStarTag";
+            mainStarTag.Size = new Size(220, 36);
+            mainStarTag.TabIndex = 114;
+            mainStarTag.Text = "awaiting data...";
+            mainStarTag.TextAlign = ContentAlignment.TopRight;
+            // 
+            // starDiscoverTag
+            // 
+            starDiscoverTag.AutoSize = true;
+            starDiscoverTag.Font = new Font("Oxanium", 21.75F, FontStyle.Italic);
+            starDiscoverTag.ForeColor = Color.White;
+            starDiscoverTag.Location = new Point(303, 40);
+            starDiscoverTag.Name = "starDiscoverTag";
+            starDiscoverTag.Size = new Size(220, 36);
+            starDiscoverTag.TabIndex = 113;
+            starDiscoverTag.Text = "awaiting data...";
+            starDiscoverTag.TextAlign = ContentAlignment.TopRight;
+            // 
+            // starNameTag
+            // 
+            starNameTag.AutoSize = true;
+            starNameTag.Font = new Font("Oxanium", 21.75F, FontStyle.Italic);
+            starNameTag.ForeColor = Color.White;
+            starNameTag.Location = new Point(303, 0);
+            starNameTag.Name = "starNameTag";
+            starNameTag.Size = new Size(220, 36);
+            starNameTag.TabIndex = 111;
+            starNameTag.Text = "awaiting data...";
+            starNameTag.TextAlign = ContentAlignment.TopRight;
+            // 
+            // starScoopableTag
+            // 
+            starScoopableTag.AutoSize = true;
+            starScoopableTag.Font = new Font("Oxanium", 21.75F, FontStyle.Italic);
+            starScoopableTag.ForeColor = Color.White;
+            starScoopableTag.Location = new Point(303, 200);
+            starScoopableTag.Name = "starScoopableTag";
+            starScoopableTag.Size = new Size(220, 36);
+            starScoopableTag.TabIndex = 112;
+            starScoopableTag.Text = "awaiting data...";
+            starScoopableTag.TextAlign = ContentAlignment.TopRight;
+            // 
+            // starBeltsLabel
+            // 
+            starBeltsLabel.AutoSize = true;
+            starBeltsLabel.Font = new Font("Oxanium", 21.75F);
+            starBeltsLabel.ForeColor = Color.FromArgb(192, 64, 0);
+            starBeltsLabel.Location = new Point(0, 560);
+            starBeltsLabel.Name = "starBeltsLabel";
+            starBeltsLabel.Size = new Size(127, 36);
+            starBeltsLabel.TabIndex = 110;
+            starBeltsLabel.Text = "Belt[s] : ";
+            // 
+            // starRotatePeriodLabel
+            // 
+            starRotatePeriodLabel.AutoSize = true;
+            starRotatePeriodLabel.Font = new Font("Oxanium", 21.75F);
+            starRotatePeriodLabel.ForeColor = Color.FromArgb(192, 64, 0);
+            starRotatePeriodLabel.Location = new Point(0, 520);
+            starRotatePeriodLabel.Name = "starRotatePeriodLabel";
+            starRotatePeriodLabel.Size = new Size(270, 36);
+            starRotatePeriodLabel.TabIndex = 109;
+            starRotatePeriodLabel.Text = "Rotational Period : ";
+            // 
+            // starOrbitPeriodLabel
+            // 
+            starOrbitPeriodLabel.AutoSize = true;
+            starOrbitPeriodLabel.Font = new Font("Oxanium", 21.75F);
+            starOrbitPeriodLabel.ForeColor = Color.FromArgb(192, 64, 0);
+            starOrbitPeriodLabel.Location = new Point(0, 480);
+            starOrbitPeriodLabel.Name = "starOrbitPeriodLabel";
+            starOrbitPeriodLabel.Size = new Size(221, 36);
+            starOrbitPeriodLabel.TabIndex = 108;
+            starOrbitPeriodLabel.Text = "Orbital Period : ";
+            // 
+            // starSurfaceTempLabel
+            // 
+            starSurfaceTempLabel.AutoSize = true;
+            starSurfaceTempLabel.Font = new Font("Oxanium", 21.75F);
+            starSurfaceTempLabel.ForeColor = Color.FromArgb(192, 64, 0);
+            starSurfaceTempLabel.Location = new Point(0, 440);
+            starSurfaceTempLabel.Name = "starSurfaceTempLabel";
+            starSurfaceTempLabel.Size = new Size(224, 36);
+            starSurfaceTempLabel.TabIndex = 107;
+            starSurfaceTempLabel.Text = "Surface Temp : ";
+            // 
+            // starSolarRadLabel
+            // 
+            starSolarRadLabel.AutoSize = true;
+            starSolarRadLabel.Font = new Font("Oxanium", 21.75F);
+            starSolarRadLabel.ForeColor = Color.FromArgb(192, 64, 0);
+            starSolarRadLabel.Location = new Point(0, 400);
+            starSolarRadLabel.Name = "starSolarRadLabel";
+            starSolarRadLabel.Size = new Size(204, 36);
+            starSolarRadLabel.TabIndex = 106;
+            starSolarRadLabel.Text = "Solar Radius : ";
+            // 
+            // starSolarMassLabel
+            // 
+            starSolarMassLabel.AutoSize = true;
+            starSolarMassLabel.Font = new Font("Oxanium", 21.75F);
+            starSolarMassLabel.ForeColor = Color.FromArgb(192, 64, 0);
+            starSolarMassLabel.Location = new Point(0, 360);
+            starSolarMassLabel.Name = "starSolarMassLabel";
+            starSolarMassLabel.Size = new Size(185, 36);
+            starSolarMassLabel.TabIndex = 105;
+            starSolarMassLabel.Text = "Solor Mass : ";
+            // 
+            // starMagnitudeLabel
+            // 
+            starMagnitudeLabel.AutoSize = true;
+            starMagnitudeLabel.Font = new Font("Oxanium", 21.75F);
+            starMagnitudeLabel.ForeColor = Color.FromArgb(192, 64, 0);
+            starMagnitudeLabel.Location = new Point(0, 320);
+            starMagnitudeLabel.Name = "starMagnitudeLabel";
+            starMagnitudeLabel.Size = new Size(308, 36);
+            starMagnitudeLabel.TabIndex = 104;
+            starMagnitudeLabel.Text = "Absolute Magnitude : ";
+            // 
+            // starLuminosityLabel
+            // 
+            starLuminosityLabel.AutoSize = true;
+            starLuminosityLabel.Font = new Font("Oxanium", 21.75F);
+            starLuminosityLabel.ForeColor = Color.FromArgb(192, 64, 0);
+            starLuminosityLabel.Location = new Point(0, 280);
+            starLuminosityLabel.Name = "starLuminosityLabel";
+            starLuminosityLabel.Size = new Size(184, 36);
+            starLuminosityLabel.TabIndex = 103;
+            starLuminosityLabel.Text = "Luminosity : ";
+            // 
+            // starSpecClassLabel
+            // 
+            starSpecClassLabel.AutoSize = true;
+            starSpecClassLabel.Font = new Font("Oxanium", 21.75F);
+            starSpecClassLabel.ForeColor = Color.FromArgb(192, 64, 0);
+            starSpecClassLabel.Location = new Point(0, 240);
+            starSpecClassLabel.Name = "starSpecClassLabel";
+            starSpecClassLabel.Size = new Size(228, 36);
+            starSpecClassLabel.TabIndex = 102;
+            starSpecClassLabel.Text = "Spectral Class : ";
+            // 
+            // starAgeLabel
+            // 
+            starAgeLabel.AutoSize = true;
+            starAgeLabel.Font = new Font("Oxanium", 21.75F);
+            starAgeLabel.ForeColor = Color.FromArgb(192, 64, 0);
+            starAgeLabel.Location = new Point(0, 160);
+            starAgeLabel.Name = "starAgeLabel";
+            starAgeLabel.Size = new Size(89, 36);
+            starAgeLabel.TabIndex = 101;
+            starAgeLabel.Text = "Age : ";
+            // 
+            // starClassLabel
+            // 
+            starClassLabel.AutoSize = true;
+            starClassLabel.Font = new Font("Oxanium", 21.75F);
+            starClassLabel.ForeColor = Color.FromArgb(192, 64, 0);
+            starClassLabel.Location = new Point(0, 120);
+            starClassLabel.Name = "starClassLabel";
+            starClassLabel.Size = new Size(109, 36);
+            starClassLabel.TabIndex = 100;
+            starClassLabel.Text = "Class : ";
+            // 
+            // starMainStarLabel
+            // 
+            starMainStarLabel.AutoSize = true;
+            starMainStarLabel.Font = new Font("Oxanium", 21.75F);
+            starMainStarLabel.ForeColor = Color.FromArgb(192, 64, 0);
+            starMainStarLabel.Location = new Point(0, 80);
+            starMainStarLabel.Name = "starMainStarLabel";
+            starMainStarLabel.Size = new Size(164, 36);
+            starMainStarLabel.TabIndex = 99;
+            starMainStarLabel.Text = "Main Star : ";
+            // 
+            // starDiscoverLabel
+            // 
+            starDiscoverLabel.AutoSize = true;
+            starDiscoverLabel.Font = new Font("Oxanium", 21.75F);
+            starDiscoverLabel.ForeColor = Color.FromArgb(192, 64, 0);
+            starDiscoverLabel.Location = new Point(0, 40);
+            starDiscoverLabel.Name = "starDiscoverLabel";
+            starDiscoverLabel.Size = new Size(229, 36);
+            starDiscoverLabel.TabIndex = 98;
+            starDiscoverLabel.Text = "Discovered By : ";
+            // 
+            // starNameLabel
+            // 
+            starNameLabel.AutoSize = true;
+            starNameLabel.Font = new Font("Oxanium", 21.75F);
+            starNameLabel.ForeColor = Color.FromArgb(192, 64, 0);
+            starNameLabel.Location = new Point(0, 0);
+            starNameLabel.Name = "starNameLabel";
+            starNameLabel.Size = new Size(92, 36);
+            starNameLabel.TabIndex = 96;
+            starNameLabel.Text = "Star : ";
+            // 
+            // starScoopLabel
+            // 
+            starScoopLabel.AutoSize = true;
+            starScoopLabel.Font = new Font("Oxanium", 21.75F);
+            starScoopLabel.ForeColor = Color.FromArgb(192, 64, 0);
+            starScoopLabel.Location = new Point(0, 200);
+            starScoopLabel.Name = "starScoopLabel";
+            starScoopLabel.Size = new Size(178, 36);
+            starScoopLabel.TabIndex = 97;
+            starScoopLabel.Text = "Scoopable : ";
+            starScoopLabel.TextAlign = ContentAlignment.TopRight;
             // 
             // planetDetailView
             // 
@@ -1928,21 +2314,19 @@ namespace ED_Hud_Extension
             planetDetailView.Controls.Add(planetNameLabel);
             planetDetailView.Controls.Add(planetGravityLabel);
             planetDetailView.ForeColor = SystemColors.Desktop;
-            planetDetailView.Location = new Point(1156, 0);
+            planetDetailView.Location = new Point(1150, 0);
             planetDetailView.Name = "planetDetailView";
-            planetDetailView.Size = new Size(637, 880);
+            planetDetailView.Size = new Size(645, 880);
             planetDetailView.TabIndex = 111;
             planetDetailView.Tag = "planetDetailList";
             // 
             // noRingsLabel
             // 
-            noRingsLabel.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             noRingsLabel.Font = new Font("Oxanium", 21.75F);
-            noRingsLabel.ForeColor = SystemColors.Control;
-            noRingsLabel.Location = new Point(133, 605);
-            noRingsLabel.MaximumSize = new Size(332, 113);
+            noRingsLabel.ForeColor = Color.White;
+            noRingsLabel.Location = new Point(174, 603);
             noRingsLabel.Name = "noRingsLabel";
-            noRingsLabel.Size = new Size(332, 113);
+            noRingsLabel.Size = new Size(278, 141);
             noRingsLabel.TabIndex = 135;
             noRingsLabel.Tag = "permanent";
             noRingsLabel.Text = "No rings detected in orbit of currently selected body";
@@ -1951,7 +2335,8 @@ namespace ED_Hud_Extension
             // 
             // atmosphereCompPanel
             // 
-            atmosphereCompPanel.Controls.Add(panel1);
+            atmosphereCompPanel.Controls.Add(solidCompHider);
+            atmosphereCompPanel.Controls.Add(compDivPanel);
             atmosphereCompPanel.Controls.Add(atmosphereCompHider);
             atmosphereCompPanel.Controls.Add(atmosphereCompLabel);
             atmosphereCompPanel.Controls.Add(bodyCompLabel);
@@ -1966,26 +2351,40 @@ namespace ED_Hud_Extension
             atmosphereCompPanel.Size = new Size(400, 580);
             atmosphereCompPanel.TabIndex = 136;
             // 
-            // panel1
+            // solidCompHider
             // 
-            panel1.BackColor = Color.White;
-            panel1.Location = new Point(0, 575);
-            panel1.Name = "panel1";
-            panel1.Size = new Size(400, 2);
-            panel1.TabIndex = 134;
+            solidCompHider.Anchor = AnchorStyles.None;
+            solidCompHider.Font = new Font("Oxanium", 21.75F);
+            solidCompHider.ForeColor = Color.White;
+            solidCompHider.Location = new Point(1, 287);
+            solidCompHider.Name = "solidCompHider";
+            solidCompHider.Size = new Size(395, 143);
+            solidCompHider.TabIndex = 137;
+            solidCompHider.Tag = "permanent";
+            solidCompHider.Text = "No solid composition detected in body scan";
+            solidCompHider.TextAlign = ContentAlignment.MiddleCenter;
+            solidCompHider.Visible = false;
+            // 
+            // compDivPanel
+            // 
+            compDivPanel.BackColor = Color.White;
+            compDivPanel.Location = new Point(0, 575);
+            compDivPanel.Name = "compDivPanel";
+            compDivPanel.Size = new Size(400, 2);
+            compDivPanel.TabIndex = 134;
             // 
             // atmosphereCompHider
             // 
             atmosphereCompHider.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             atmosphereCompHider.Font = new Font("Oxanium", 21.75F);
-            atmosphereCompHider.ForeColor = SystemColors.Control;
+            atmosphereCompHider.ForeColor = Color.White;
             atmosphereCompHider.Location = new Point(57, 67);
             atmosphereCompHider.MaximumSize = new Size(332, 113);
             atmosphereCompHider.Name = "atmosphereCompHider";
             atmosphereCompHider.Size = new Size(282, 113);
             atmosphereCompHider.TabIndex = 116;
             atmosphereCompHider.Tag = "permanent";
-            atmosphereCompHider.Text = "No atmosphere to scan for composition data";
+            atmosphereCompHider.Text = "No atmosphere detected in body scan";
             atmosphereCompHider.TextAlign = ContentAlignment.MiddleCenter;
             atmosphereCompHider.Visible = false;
             // 
@@ -2411,404 +2810,6 @@ namespace ED_Hud_Extension
             planetGravityLabel.Text = "Gravity : ";
             planetGravityLabel.TextAlign = ContentAlignment.TopRight;
             // 
-            // starDetailView
-            // 
-            starDetailView.AutoScroll = true;
-            starDetailView.BackColor = Color.Black;
-            starDetailView.Controls.Add(noBeltsLabel);
-            starDetailView.Controls.Add(beltCountTag);
-            starDetailView.Controls.Add(beltDivPanel);
-            starDetailView.Controls.Add(starRotationalTag);
-            starDetailView.Controls.Add(starOrbitalTag);
-            starDetailView.Controls.Add(starTempTag);
-            starDetailView.Controls.Add(starSolarRadiusTag);
-            starDetailView.Controls.Add(starSolarMassTag);
-            starDetailView.Controls.Add(starAbsoluteMagnitutdeTag);
-            starDetailView.Controls.Add(starLuminosityTag);
-            starDetailView.Controls.Add(starSpectralClassTag);
-            starDetailView.Controls.Add(starAgeTag);
-            starDetailView.Controls.Add(starClassTag);
-            starDetailView.Controls.Add(mainStarTag);
-            starDetailView.Controls.Add(starDiscoverTag);
-            starDetailView.Controls.Add(starNameTag);
-            starDetailView.Controls.Add(starScoopableTag);
-            starDetailView.Controls.Add(starBeltsLabel);
-            starDetailView.Controls.Add(starRotatePeriodLabel);
-            starDetailView.Controls.Add(starOrbitPeriodLabel);
-            starDetailView.Controls.Add(starSurfaceTempLabel);
-            starDetailView.Controls.Add(starSolarRadLabel);
-            starDetailView.Controls.Add(starSolarMassLabel);
-            starDetailView.Controls.Add(starMagnitudeLabel);
-            starDetailView.Controls.Add(starLuminosityLabel);
-            starDetailView.Controls.Add(starSpecClassLabel);
-            starDetailView.Controls.Add(starAgeLabel);
-            starDetailView.Controls.Add(starClassLabel);
-            starDetailView.Controls.Add(starMainStarLabel);
-            starDetailView.Controls.Add(starDiscoverLabel);
-            starDetailView.Controls.Add(starNameLabel);
-            starDetailView.Controls.Add(starScoopLabel);
-            starDetailView.ForeColor = SystemColors.Desktop;
-            starDetailView.Location = new Point(1153, 0);
-            starDetailView.Name = "starDetailView";
-            starDetailView.Size = new Size(644, 880);
-            starDetailView.TabIndex = 90;
-            starDetailView.Tag = "planetDetailList";
-            // 
-            // noBeltsLabel
-            // 
-            noBeltsLabel.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            noBeltsLabel.AutoSize = true;
-            noBeltsLabel.Font = new Font("Oxanium", 21.75F);
-            noBeltsLabel.ForeColor = SystemColors.Control;
-            noBeltsLabel.Location = new Point(87, 640);
-            noBeltsLabel.MaximumSize = new Size(332, 113);
-            noBeltsLabel.Name = "noBeltsLabel";
-            noBeltsLabel.Size = new Size(288, 108);
-            noBeltsLabel.TabIndex = 129;
-            noBeltsLabel.Tag = "permanent";
-            noBeltsLabel.Text = "No belts detected in orbit of currently selected body";
-            noBeltsLabel.TextAlign = ContentAlignment.MiddleCenter;
-            noBeltsLabel.Visible = false;
-            // 
-            // beltCountTag
-            // 
-            beltCountTag.AutoSize = true;
-            beltCountTag.Font = new Font("Oxanium", 21.75F, FontStyle.Italic);
-            beltCountTag.ForeColor = Color.White;
-            beltCountTag.Location = new Point(303, 560);
-            beltCountTag.Name = "beltCountTag";
-            beltCountTag.Size = new Size(220, 36);
-            beltCountTag.TabIndex = 128;
-            beltCountTag.Text = "awaiting data...";
-            // 
-            // beltDivPanel
-            // 
-            beltDivPanel.BackColor = Color.FromArgb(192, 64, 0);
-            beltDivPanel.Location = new Point(0, 605);
-            beltDivPanel.Name = "beltDivPanel";
-            beltDivPanel.Size = new Size(417, 2);
-            beltDivPanel.TabIndex = 83;
-            // 
-            // starRotationalTag
-            // 
-            starRotationalTag.AutoSize = true;
-            starRotationalTag.Font = new Font("Oxanium", 21.75F, FontStyle.Italic);
-            starRotationalTag.ForeColor = Color.White;
-            starRotationalTag.Location = new Point(303, 520);
-            starRotationalTag.Name = "starRotationalTag";
-            starRotationalTag.Size = new Size(220, 36);
-            starRotationalTag.TabIndex = 124;
-            starRotationalTag.Text = "awaiting data...";
-            // 
-            // starOrbitalTag
-            // 
-            starOrbitalTag.AutoSize = true;
-            starOrbitalTag.Font = new Font("Oxanium", 21.75F, FontStyle.Italic);
-            starOrbitalTag.ForeColor = Color.White;
-            starOrbitalTag.Location = new Point(303, 480);
-            starOrbitalTag.Name = "starOrbitalTag";
-            starOrbitalTag.Size = new Size(220, 36);
-            starOrbitalTag.TabIndex = 123;
-            starOrbitalTag.Text = "awaiting data...";
-            // 
-            // starTempTag
-            // 
-            starTempTag.AutoSize = true;
-            starTempTag.Font = new Font("Oxanium", 21.75F, FontStyle.Italic);
-            starTempTag.ForeColor = Color.White;
-            starTempTag.Location = new Point(303, 440);
-            starTempTag.Name = "starTempTag";
-            starTempTag.Size = new Size(220, 36);
-            starTempTag.TabIndex = 122;
-            starTempTag.Text = "awaiting data...";
-            // 
-            // starSolarRadiusTag
-            // 
-            starSolarRadiusTag.AutoSize = true;
-            starSolarRadiusTag.Font = new Font("Oxanium", 21.75F, FontStyle.Italic);
-            starSolarRadiusTag.ForeColor = Color.White;
-            starSolarRadiusTag.Location = new Point(303, 400);
-            starSolarRadiusTag.Name = "starSolarRadiusTag";
-            starSolarRadiusTag.Size = new Size(220, 36);
-            starSolarRadiusTag.TabIndex = 121;
-            starSolarRadiusTag.Text = "awaiting data...";
-            // 
-            // starSolarMassTag
-            // 
-            starSolarMassTag.AutoSize = true;
-            starSolarMassTag.Font = new Font("Oxanium", 21.75F, FontStyle.Italic);
-            starSolarMassTag.ForeColor = Color.White;
-            starSolarMassTag.Location = new Point(303, 360);
-            starSolarMassTag.Name = "starSolarMassTag";
-            starSolarMassTag.Size = new Size(220, 36);
-            starSolarMassTag.TabIndex = 120;
-            starSolarMassTag.Text = "awaiting data...";
-            // 
-            // starAbsoluteMagnitutdeTag
-            // 
-            starAbsoluteMagnitutdeTag.AutoSize = true;
-            starAbsoluteMagnitutdeTag.Font = new Font("Oxanium", 21.75F, FontStyle.Italic);
-            starAbsoluteMagnitutdeTag.ForeColor = Color.White;
-            starAbsoluteMagnitutdeTag.Location = new Point(303, 320);
-            starAbsoluteMagnitutdeTag.Name = "starAbsoluteMagnitutdeTag";
-            starAbsoluteMagnitutdeTag.Size = new Size(220, 36);
-            starAbsoluteMagnitutdeTag.TabIndex = 119;
-            starAbsoluteMagnitutdeTag.Text = "awaiting data...";
-            // 
-            // starLuminosityTag
-            // 
-            starLuminosityTag.AutoSize = true;
-            starLuminosityTag.Font = new Font("Oxanium", 21.75F, FontStyle.Italic);
-            starLuminosityTag.ForeColor = Color.White;
-            starLuminosityTag.Location = new Point(303, 280);
-            starLuminosityTag.Name = "starLuminosityTag";
-            starLuminosityTag.Size = new Size(220, 36);
-            starLuminosityTag.TabIndex = 118;
-            starLuminosityTag.Text = "awaiting data...";
-            // 
-            // starSpectralClassTag
-            // 
-            starSpectralClassTag.AutoSize = true;
-            starSpectralClassTag.Font = new Font("Oxanium", 21.75F, FontStyle.Italic);
-            starSpectralClassTag.ForeColor = Color.White;
-            starSpectralClassTag.Location = new Point(303, 240);
-            starSpectralClassTag.Name = "starSpectralClassTag";
-            starSpectralClassTag.Size = new Size(220, 36);
-            starSpectralClassTag.TabIndex = 117;
-            starSpectralClassTag.Text = "awaiting data...";
-            // 
-            // starAgeTag
-            // 
-            starAgeTag.AutoSize = true;
-            starAgeTag.Font = new Font("Oxanium", 21.75F, FontStyle.Italic);
-            starAgeTag.ForeColor = Color.White;
-            starAgeTag.Location = new Point(303, 160);
-            starAgeTag.Name = "starAgeTag";
-            starAgeTag.Size = new Size(220, 36);
-            starAgeTag.TabIndex = 116;
-            starAgeTag.Text = "awaiting data...";
-            // 
-            // starClassTag
-            // 
-            starClassTag.AutoSize = true;
-            starClassTag.Font = new Font("Oxanium", 21.75F, FontStyle.Italic);
-            starClassTag.ForeColor = Color.White;
-            starClassTag.Location = new Point(303, 120);
-            starClassTag.Name = "starClassTag";
-            starClassTag.Size = new Size(220, 36);
-            starClassTag.TabIndex = 115;
-            starClassTag.Text = "awaiting data...";
-            // 
-            // mainStarTag
-            // 
-            mainStarTag.AutoSize = true;
-            mainStarTag.Font = new Font("Oxanium", 21.75F, FontStyle.Italic);
-            mainStarTag.ForeColor = Color.White;
-            mainStarTag.Location = new Point(303, 80);
-            mainStarTag.Name = "mainStarTag";
-            mainStarTag.Size = new Size(220, 36);
-            mainStarTag.TabIndex = 114;
-            mainStarTag.Text = "awaiting data...";
-            // 
-            // starDiscoverTag
-            // 
-            starDiscoverTag.AutoSize = true;
-            starDiscoverTag.Font = new Font("Oxanium", 21.75F, FontStyle.Italic);
-            starDiscoverTag.ForeColor = Color.White;
-            starDiscoverTag.Location = new Point(303, 40);
-            starDiscoverTag.Name = "starDiscoverTag";
-            starDiscoverTag.Size = new Size(220, 36);
-            starDiscoverTag.TabIndex = 113;
-            starDiscoverTag.Text = "awaiting data...";
-            // 
-            // starNameTag
-            // 
-            starNameTag.AutoSize = true;
-            starNameTag.Font = new Font("Oxanium", 21.75F, FontStyle.Italic);
-            starNameTag.ForeColor = Color.White;
-            starNameTag.Location = new Point(303, 0);
-            starNameTag.Name = "starNameTag";
-            starNameTag.Size = new Size(220, 36);
-            starNameTag.TabIndex = 111;
-            starNameTag.Text = "awaiting data...";
-            // 
-            // starScoopableTag
-            // 
-            starScoopableTag.AutoSize = true;
-            starScoopableTag.Font = new Font("Oxanium", 21.75F, FontStyle.Italic);
-            starScoopableTag.ForeColor = Color.White;
-            starScoopableTag.Location = new Point(303, 200);
-            starScoopableTag.Name = "starScoopableTag";
-            starScoopableTag.Size = new Size(220, 36);
-            starScoopableTag.TabIndex = 112;
-            starScoopableTag.Text = "awaiting data...";
-            // 
-            // starBeltsLabel
-            // 
-            starBeltsLabel.AutoSize = true;
-            starBeltsLabel.Font = new Font("Oxanium", 21.75F);
-            starBeltsLabel.ForeColor = Color.FromArgb(192, 64, 0);
-            starBeltsLabel.Location = new Point(0, 560);
-            starBeltsLabel.Name = "starBeltsLabel";
-            starBeltsLabel.Size = new Size(127, 36);
-            starBeltsLabel.TabIndex = 110;
-            starBeltsLabel.Text = "Belt[s] : ";
-            // 
-            // starRotatePeriodLabel
-            // 
-            starRotatePeriodLabel.AutoSize = true;
-            starRotatePeriodLabel.Font = new Font("Oxanium", 21.75F);
-            starRotatePeriodLabel.ForeColor = Color.FromArgb(192, 64, 0);
-            starRotatePeriodLabel.Location = new Point(0, 520);
-            starRotatePeriodLabel.Name = "starRotatePeriodLabel";
-            starRotatePeriodLabel.Size = new Size(270, 36);
-            starRotatePeriodLabel.TabIndex = 109;
-            starRotatePeriodLabel.Text = "Rotational Period : ";
-            // 
-            // starOrbitPeriodLabel
-            // 
-            starOrbitPeriodLabel.AutoSize = true;
-            starOrbitPeriodLabel.Font = new Font("Oxanium", 21.75F);
-            starOrbitPeriodLabel.ForeColor = Color.FromArgb(192, 64, 0);
-            starOrbitPeriodLabel.Location = new Point(0, 480);
-            starOrbitPeriodLabel.Name = "starOrbitPeriodLabel";
-            starOrbitPeriodLabel.Size = new Size(221, 36);
-            starOrbitPeriodLabel.TabIndex = 108;
-            starOrbitPeriodLabel.Text = "Orbital Period : ";
-            // 
-            // starSurfaceTempLabel
-            // 
-            starSurfaceTempLabel.AutoSize = true;
-            starSurfaceTempLabel.Font = new Font("Oxanium", 21.75F);
-            starSurfaceTempLabel.ForeColor = Color.FromArgb(192, 64, 0);
-            starSurfaceTempLabel.Location = new Point(0, 440);
-            starSurfaceTempLabel.Name = "starSurfaceTempLabel";
-            starSurfaceTempLabel.Size = new Size(224, 36);
-            starSurfaceTempLabel.TabIndex = 107;
-            starSurfaceTempLabel.Text = "Surface Temp : ";
-            // 
-            // starSolarRadLabel
-            // 
-            starSolarRadLabel.AutoSize = true;
-            starSolarRadLabel.Font = new Font("Oxanium", 21.75F);
-            starSolarRadLabel.ForeColor = Color.FromArgb(192, 64, 0);
-            starSolarRadLabel.Location = new Point(0, 400);
-            starSolarRadLabel.Name = "starSolarRadLabel";
-            starSolarRadLabel.Size = new Size(204, 36);
-            starSolarRadLabel.TabIndex = 106;
-            starSolarRadLabel.Text = "Solar Radius : ";
-            // 
-            // starSolarMassLabel
-            // 
-            starSolarMassLabel.AutoSize = true;
-            starSolarMassLabel.Font = new Font("Oxanium", 21.75F);
-            starSolarMassLabel.ForeColor = Color.FromArgb(192, 64, 0);
-            starSolarMassLabel.Location = new Point(0, 360);
-            starSolarMassLabel.Name = "starSolarMassLabel";
-            starSolarMassLabel.Size = new Size(185, 36);
-            starSolarMassLabel.TabIndex = 105;
-            starSolarMassLabel.Text = "Solor Mass : ";
-            // 
-            // starMagnitudeLabel
-            // 
-            starMagnitudeLabel.AutoSize = true;
-            starMagnitudeLabel.Font = new Font("Oxanium", 21.75F);
-            starMagnitudeLabel.ForeColor = Color.FromArgb(192, 64, 0);
-            starMagnitudeLabel.Location = new Point(0, 320);
-            starMagnitudeLabel.Name = "starMagnitudeLabel";
-            starMagnitudeLabel.Size = new Size(308, 36);
-            starMagnitudeLabel.TabIndex = 104;
-            starMagnitudeLabel.Text = "Absolute Magnitude : ";
-            // 
-            // starLuminosityLabel
-            // 
-            starLuminosityLabel.AutoSize = true;
-            starLuminosityLabel.Font = new Font("Oxanium", 21.75F);
-            starLuminosityLabel.ForeColor = Color.FromArgb(192, 64, 0);
-            starLuminosityLabel.Location = new Point(0, 280);
-            starLuminosityLabel.Name = "starLuminosityLabel";
-            starLuminosityLabel.Size = new Size(184, 36);
-            starLuminosityLabel.TabIndex = 103;
-            starLuminosityLabel.Text = "Luminosity : ";
-            // 
-            // starSpecClassLabel
-            // 
-            starSpecClassLabel.AutoSize = true;
-            starSpecClassLabel.Font = new Font("Oxanium", 21.75F);
-            starSpecClassLabel.ForeColor = Color.FromArgb(192, 64, 0);
-            starSpecClassLabel.Location = new Point(0, 240);
-            starSpecClassLabel.Name = "starSpecClassLabel";
-            starSpecClassLabel.Size = new Size(228, 36);
-            starSpecClassLabel.TabIndex = 102;
-            starSpecClassLabel.Text = "Spectral Class : ";
-            // 
-            // starAgeLabel
-            // 
-            starAgeLabel.AutoSize = true;
-            starAgeLabel.Font = new Font("Oxanium", 21.75F);
-            starAgeLabel.ForeColor = Color.FromArgb(192, 64, 0);
-            starAgeLabel.Location = new Point(0, 160);
-            starAgeLabel.Name = "starAgeLabel";
-            starAgeLabel.Size = new Size(89, 36);
-            starAgeLabel.TabIndex = 101;
-            starAgeLabel.Text = "Age : ";
-            // 
-            // starClassLabel
-            // 
-            starClassLabel.AutoSize = true;
-            starClassLabel.Font = new Font("Oxanium", 21.75F);
-            starClassLabel.ForeColor = Color.FromArgb(192, 64, 0);
-            starClassLabel.Location = new Point(0, 120);
-            starClassLabel.Name = "starClassLabel";
-            starClassLabel.Size = new Size(109, 36);
-            starClassLabel.TabIndex = 100;
-            starClassLabel.Text = "Class : ";
-            // 
-            // starMainStarLabel
-            // 
-            starMainStarLabel.AutoSize = true;
-            starMainStarLabel.Font = new Font("Oxanium", 21.75F);
-            starMainStarLabel.ForeColor = Color.FromArgb(192, 64, 0);
-            starMainStarLabel.Location = new Point(0, 80);
-            starMainStarLabel.Name = "starMainStarLabel";
-            starMainStarLabel.Size = new Size(164, 36);
-            starMainStarLabel.TabIndex = 99;
-            starMainStarLabel.Text = "Main Star : ";
-            // 
-            // starDiscoverLabel
-            // 
-            starDiscoverLabel.AutoSize = true;
-            starDiscoverLabel.Font = new Font("Oxanium", 21.75F);
-            starDiscoverLabel.ForeColor = Color.FromArgb(192, 64, 0);
-            starDiscoverLabel.Location = new Point(0, 40);
-            starDiscoverLabel.Name = "starDiscoverLabel";
-            starDiscoverLabel.Size = new Size(229, 36);
-            starDiscoverLabel.TabIndex = 98;
-            starDiscoverLabel.Text = "Discovered By : ";
-            // 
-            // starNameLabel
-            // 
-            starNameLabel.AutoSize = true;
-            starNameLabel.Font = new Font("Oxanium", 21.75F);
-            starNameLabel.ForeColor = Color.FromArgb(192, 64, 0);
-            starNameLabel.Location = new Point(0, 0);
-            starNameLabel.Name = "starNameLabel";
-            starNameLabel.Size = new Size(92, 36);
-            starNameLabel.TabIndex = 96;
-            starNameLabel.Text = "Star : ";
-            // 
-            // starScoopLabel
-            // 
-            starScoopLabel.AutoSize = true;
-            starScoopLabel.Font = new Font("Oxanium", 21.75F);
-            starScoopLabel.ForeColor = Color.FromArgb(192, 64, 0);
-            starScoopLabel.Location = new Point(0, 200);
-            starScoopLabel.Name = "starScoopLabel";
-            starScoopLabel.Size = new Size(178, 36);
-            starScoopLabel.TabIndex = 97;
-            starScoopLabel.Text = "Scoopable : ";
-            starScoopLabel.TextAlign = ContentAlignment.TopRight;
-            // 
             // detailHiderPanel
             // 
             detailHiderPanel.Controls.Add(selectBodyLabel);
@@ -2823,7 +2824,7 @@ namespace ED_Hud_Extension
             // 
             selectBodyLabel.Anchor = AnchorStyles.Left | AnchorStyles.Right;
             selectBodyLabel.Font = new Font("Oxanium", 21.75F);
-            selectBodyLabel.ForeColor = SystemColors.Control;
+            selectBodyLabel.ForeColor = Color.White;
             selectBodyLabel.Location = new Point(181, 321);
             selectBodyLabel.MaximumSize = new Size(332, 113);
             selectBodyLabel.Name = "selectBodyLabel";
@@ -2847,7 +2848,7 @@ namespace ED_Hud_Extension
             // exploreDivider
             // 
             exploreDivider.BackColor = Color.White;
-            exploreDivider.Location = new Point(1145, 3);
+            exploreDivider.Location = new Point(1146, 3);
             exploreDivider.Name = "exploreDivider";
             exploreDivider.Size = new Size(2, 880);
             exploreDivider.TabIndex = 83;
@@ -2867,7 +2868,7 @@ namespace ED_Hud_Extension
             // 
             expDestinationTag.AutoSize = true;
             expDestinationTag.Font = new Font("Oxanium", 30F, FontStyle.Bold | FontStyle.Italic);
-            expDestinationTag.ForeColor = SystemColors.Control;
+            expDestinationTag.ForeColor = Color.White;
             expDestinationTag.Location = new Point(0, 50);
             expDestinationTag.Name = "expDestinationTag";
             expDestinationTag.Size = new Size(117, 50);
@@ -2919,7 +2920,7 @@ namespace ED_Hud_Extension
             // 
             starCountTag.AutoSize = true;
             starCountTag.Font = new Font("Oxanium", 21.75F, FontStyle.Italic);
-            starCountTag.ForeColor = SystemColors.Control;
+            starCountTag.ForeColor = Color.White;
             starCountTag.Location = new Point(123, 290);
             starCountTag.Name = "starCountTag";
             starCountTag.Size = new Size(91, 36);
@@ -2932,15 +2933,15 @@ namespace ED_Hud_Extension
             bodyListPanel.BackColor = Color.Black;
             bodyListPanel.Controls.Add(systemDataErrorLabel);
             bodyListPanel.ForeColor = SystemColors.Desktop;
-            bodyListPanel.Location = new Point(2, 382);
+            bodyListPanel.Location = new Point(0, 382);
             bodyListPanel.Name = "bodyListPanel";
-            bodyListPanel.Size = new Size(652, 501);
+            bodyListPanel.Size = new Size(652, 509);
             bodyListPanel.TabIndex = 89;
             // 
             // systemDataErrorLabel
             // 
             systemDataErrorLabel.Font = new Font("Oxanium", 21.75F);
-            systemDataErrorLabel.ForeColor = SystemColors.Control;
+            systemDataErrorLabel.ForeColor = Color.White;
             systemDataErrorLabel.Location = new Point(6, 12);
             systemDataErrorLabel.Name = "systemDataErrorLabel";
             systemDataErrorLabel.Size = new Size(485, 113);
@@ -2952,7 +2953,7 @@ namespace ED_Hud_Extension
             // 
             bodyCountTag.AutoSize = true;
             bodyCountTag.Font = new Font("Oxanium", 21.75F, FontStyle.Italic);
-            bodyCountTag.ForeColor = SystemColors.Control;
+            bodyCountTag.ForeColor = Color.White;
             bodyCountTag.Location = new Point(123, 326);
             bodyCountTag.Name = "bodyCountTag";
             bodyCountTag.Size = new Size(91, 36);
@@ -2963,7 +2964,7 @@ namespace ED_Hud_Extension
             // 
             fsdTag.AutoSize = true;
             fsdTag.Font = new Font("Oxanium", 21.75F, FontStyle.Italic);
-            fsdTag.ForeColor = SystemColors.Control;
+            fsdTag.ForeColor = Color.White;
             fsdTag.Location = new Point(996, 0);
             fsdTag.Name = "fsdTag";
             fsdTag.Size = new Size(91, 36);
@@ -2985,7 +2986,7 @@ namespace ED_Hud_Extension
             // 
             expCurrentSystemTag.AutoSize = true;
             expCurrentSystemTag.Font = new Font("Oxanium", 21.75F);
-            expCurrentSystemTag.ForeColor = SystemColors.Control;
+            expCurrentSystemTag.ForeColor = Color.White;
             expCurrentSystemTag.Location = new Point(252, 252);
             expCurrentSystemTag.Name = "expCurrentSystemTag";
             expCurrentSystemTag.Size = new Size(219, 36);
@@ -3135,7 +3136,7 @@ namespace ED_Hud_Extension
             // 
             starDTLabel.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             starDTLabel.Font = new Font("Oxanium", 30F, FontStyle.Bold);
-            starDTLabel.ForeColor = SystemColors.Control;
+            starDTLabel.ForeColor = Color.White;
             starDTLabel.Location = new Point(1477, 0);
             starDTLabel.Name = "starDTLabel";
             starDTLabel.Size = new Size(332, 43);
@@ -3199,7 +3200,7 @@ namespace ED_Hud_Extension
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            BackColor = SystemColors.ActiveCaptionText;
+            BackColor = Color.Black;
             ClientSize = new Size(1920, 1080);
             Controls.Add(workingAreaPanel);
             Controls.Add(constDisplayPanel);
@@ -3213,6 +3214,7 @@ namespace ED_Hud_Extension
             Name = "MainForm";
             StartPosition = FormStartPosition.Manual;
             Text = "E:D Hud Extension";
+            FormClosing += MainForm_FormClosing;
             Load += MainForm_Load;
             combatPanel.ResumeLayout(false);
             combatPanel.PerformLayout();
@@ -3225,12 +3227,12 @@ namespace ED_Hud_Extension
             homePanel.PerformLayout();
             explorePanel.ResumeLayout(false);
             explorePanel.PerformLayout();
+            starDetailView.ResumeLayout(false);
+            starDetailView.PerformLayout();
             planetDetailView.ResumeLayout(false);
             planetDetailView.PerformLayout();
             atmosphereCompPanel.ResumeLayout(false);
             atmosphereCompPanel.PerformLayout();
-            starDetailView.ResumeLayout(false);
-            starDetailView.PerformLayout();
             detailHiderPanel.ResumeLayout(false);
             detailHiderPanel.PerformLayout();
             bodyListPanel.ResumeLayout(false);
@@ -3258,7 +3260,6 @@ namespace ED_Hud_Extension
         public Label targetPowerLabel;
         public Label targetShieldsLabel;
         public Label targetNameLabel;
-        public Button settingsButton;
         public Panel initPanel;
         public Panel homePanel;
         public Label welcomeLabel;
@@ -3270,7 +3271,6 @@ namespace ED_Hud_Extension
         public Label locDTTag;
         public Label uplinkLabel;
         public Panel dividerPanel;
-        public Button exitButton;
         public EliteJournalReader.JournalWatcher journalWatcher;
         public Label curVesselNameLabel;
         public Label vesselLabel;
@@ -3454,11 +3454,6 @@ namespace ED_Hud_Extension
         public Panel stationsPanel;
         public Label label1;
         private Panel innerInitPanel;
-        private Button combatButton;
-        private Button explorationButton;
-        private Button homeButton;
-        private Button stationButton;
-        private Button missionsButton;
         private TableLayoutPanel controlsPanel;
         private TableLayoutPanel constDisplayPanel;
         public Label starTimeTag;
@@ -3482,9 +3477,18 @@ namespace ED_Hud_Extension
         private Label ringCountLabel;
         private Panel atmosphereCompPanel;
         public Label atmosphereCompHider;
-        public Panel panel1;
-        public Button detailChangeButton;
+        public Panel compDivPanel;
         public Label noRingsLabel;
         public Label noBeltsLabel;
+        public Label solidCompHider;
+        public LabelButton detailChangeButton;
+        public LabelButton settingsButton;
+        public LabelButton exitButton;
+        public LabelButton labelButton5;
+        public LabelButton stationsButton;
+        public LabelButton missionsButton;
+        public LabelButton combatButton;
+        public LabelButton explorationButton;
+        public LabelButton homeButton;
     }
 }

@@ -138,15 +138,15 @@ namespace ED_Hud_Extension
 
             string jsonText = File.ReadAllText("C:\\EDHE\\res\\systemdata.json");
             var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-            system = System.Text.Json.JsonSerializer.Deserialize<SolarSystem>(jsonText, options);
-            discovery = System.Text.Json.JsonSerializer.Deserialize<Discovery>(jsonText, options);
-            bodies = System.Text.Json.JsonSerializer.Deserialize<Bodies>(jsonText, options);
-            parents = System.Text.Json.JsonSerializer.Deserialize<Parent>(jsonText, options);
-            composition = System.Text.Json.JsonSerializer.Deserialize<Composition>(jsonText, options);
+            system = JsonSerializer.Deserialize<SolarSystem>(jsonText, options);
+            discovery = JsonSerializer.Deserialize<Discovery>(jsonText, options);
+            bodies = JsonSerializer.Deserialize<Bodies>(jsonText, options);
+            parents = JsonSerializer.Deserialize<Parent>(jsonText, options);
+            composition = JsonSerializer.Deserialize<Composition>(jsonText, options);
 
-            belts = System.Text.Json.JsonSerializer.Deserialize<Belt>(jsonText, options);
-            rings = System.Text.Json.JsonSerializer.Deserialize<Ring>(jsonText, options);
-            atmosphere = System.Text.Json.JsonSerializer.Deserialize<Atmosphere>(jsonText, options);
+            belts = JsonSerializer.Deserialize<Belt>(jsonText, options);
+            rings = JsonSerializer.Deserialize<Ring>(jsonText, options);
+            atmosphere = JsonSerializer.Deserialize<Atmosphere>(jsonText, options);
 
             int starCount = 0;
 
@@ -170,6 +170,8 @@ namespace ED_Hud_Extension
                 var form = ((Control)panel).FindForm();
                 form.BeginInvoke(new Action(() => ((MainForm)form).bodyCountTag.Text = system.bodyCount.ToString()));
                 form.BeginInvoke(new Action(() => ((MainForm)form).starCountTag.Text = starCount.ToString()));
+                
+                //panel.Size = new Size(panel.Width, (DisplayHandler.requiredSize(panel, "Height")));
 
                 panel.ResumeLayout(true);
                 panel.Refresh();
@@ -181,8 +183,11 @@ namespace ED_Hud_Extension
         {
             if (targetPanel.IsHandleCreated)
             {
+                targetPanel.SuspendLayout();
+
                 Label dynamicLabel = new Label();
                 dynamicLabel.Text = labelText;
+                dynamicLabel.Tag = "listItem";
                 dynamicLabel.AutoSize = true;
                 dynamicLabel.ForeColor = ColorTranslator.FromHtml("#C04000");
                 dynamicLabel.Font = new Font(Globals.oxaniumFont.Families[0], 23, FontStyle.Bold);
@@ -212,22 +217,29 @@ namespace ED_Hud_Extension
                     }
                 }
                 currentY += 40;
-
+                dynamicLabel.Anchor = AnchorStyles.Top;
                 targetPanel.Controls.Add(dynamicLabel);
-                targetPanel.Refresh();
+                dynamicLabel.CreateControl();
             }
+
+            targetPanel.ResumeLayout(true);
+
+            targetPanel.PerformLayout();
         }
 
         public static void planetListMouseEnter(object sender, EventArgs e)
         {
             Label lbl = (Label)sender;
             lbl.ForeColor = ColorTranslator.FromHtml("#FFCC99");
+            lbl.Cursor = Cursors.Hand; //this is just to emulate the LabelButton control used elsewhere, cos this is a shitload easier than using actual LabelButtons for readability issues
+            
         }
 
         public static void planetListMouseLeave(object sender, EventArgs e)
         {
             Label lbl = (Label)sender;
             lbl.ForeColor = ColorTranslator.FromHtml("#C04000");
+            lbl.Cursor = Cursors.Default;
         }
 
         public void planetListItemSelected(object sender, EventArgs e)
@@ -241,10 +253,11 @@ namespace ED_Hud_Extension
 
             Label lbl = (Label)sender;
             currentItem = lbl; //make this the new current item
-
-            lbl.ForeColor = ColorTranslator.FromHtml("#FFCC99"); //lock the color in, unsubscribe it from events
+            
+            //lock the color in, unsubscribe it from events
             lbl.MouseEnter -= planetListMouseEnter;
             lbl.MouseLeave -= planetListMouseLeave;
+            lbl.ForeColor = ColorTranslator.FromHtml("#FFCC99");
 
             //once all that's done, identify what body the user selected
 
