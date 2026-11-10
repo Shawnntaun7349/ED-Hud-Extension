@@ -1,6 +1,6 @@
 **Elite: Dangerous Hud Extension**  
 
-A second-monitor program for Frontier Development's Elite: Dangerous.  
+A second-monitor program for Frontier Development's *Elite: Dangerous*.  
 
 *Developed by Sean Roe*   
 
