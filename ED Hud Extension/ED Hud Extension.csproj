@@ -7,7 +7,7 @@
 		<Nullable>enable</Nullable>
 		<UseWindowsForms>true</UseWindowsForms>
 		<ImplicitUsings>enable</ImplicitUsings>
-		<AssemblyVersion>0.2.3.3</AssemblyVersion>
+		<AssemblyVersion>0.2.4.1</AssemblyVersion>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -43,10 +43,6 @@
 			<Generator>SettingsSingleFileGenerator</Generator>
 			<LastGenOutput>Settings.Designer.cs</LastGenOutput>
 		</None>
-	</ItemGroup>
-
-	<ItemGroup>
-		<Folder Include="lib\" />
 	</ItemGroup>
 
 	<ItemGroup>

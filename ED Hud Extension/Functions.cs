@@ -1,6 +1,7 @@
 ﻿using System.Text.RegularExpressions;
 using System.Text.Json;
 using static Globals;
+using static ED_Hud_Extension.StatisticsHandler;
 using ED_Hud_Extension;
 
 
@@ -46,21 +47,31 @@ internal class Functions
         }
 
         //load the user's settings
+        savedPrefDisplayIndex = Int32.Parse(doc.RootElement.GetProperty("Preferred Display").GetString());
+        skipInitAnims = Boolean.Parse(doc.RootElement.GetProperty("Skip Init Anims").GetString());
+        statusEnabled = Boolean.Parse(doc.RootElement.GetProperty("Status Readout Enabled").GetString());
+        autoShutDownEnabled = Boolean.Parse(doc.RootElement.GetProperty("Auto Shut Down").GetString());
+        autoPanelSwitch = Boolean.Parse(doc.RootElement.GetProperty("Auto Switch Always").GetString());
+        autoCombatSwitch = Boolean.Parse(doc.RootElement.GetProperty("Auto Switch Combat Only").GetString());
+        capiEnabled = Boolean.Parse(doc.RootElement.GetProperty("cAPI Enabled").GetString());
+
+        int sizeX = Int32.Parse(doc.RootElement.GetProperty("Size_X").GetString());
+        int sizeY = Int32.Parse(doc.RootElement.GetProperty("Size_Y").GetString());
+        formSize = new Size(sizeX, sizeY);
+
         try
         {
-            savedPrefDisplayIndex = Int32.Parse(doc.RootElement.GetProperty("Preferred Display").GetString());
-            skipInitAnims = Boolean.Parse(doc.RootElement.GetProperty("Skip Init Anims").GetString());
-            statusEnabled = Boolean.Parse(doc.RootElement.GetProperty("Status Readout Enabled").GetString());
-            autoShutDownEnabled = Boolean.Parse(doc.RootElement.GetProperty("Auto Shut Down").GetString());
-            autoPanelSwitch = Boolean.Parse(doc.RootElement.GetProperty("Auto Switch Always").GetString());
-            autoCombatSwitch = Boolean.Parse(doc.RootElement.GetProperty("Auto Switch Combat Only").GetString());
-            capiEnabled = Boolean.Parse(doc.RootElement.GetProperty("cAPI Enabled").GetString());
+            foreach (string key in currentSessionEnabled.Keys)
+            {
+                currentSessionEnabled[key] = doc.RootElement.GetProperty(key).GetBoolean();
+            }
 
-            int sizeX = Int32.Parse(doc.RootElement.GetProperty("Size_X").GetString());
-            int sizeY = Int32.Parse(doc.RootElement.GetProperty("Size_Y").GetString());
-            formSize = new Size(sizeX, sizeY);
+            foreach (string key in careerEnabled.Keys)
+            {
+                careerEnabled[key] = doc.RootElement.GetProperty(key).GetBoolean();
+            }
         }
-        catch
+        catch(KeyNotFoundException e)
         {
             generateSettings();
             loadSettings();
@@ -72,6 +83,8 @@ internal class Functions
 
         //grab the user's key binds
         KeybindsHandler.retrieveKeyBinds();
+
+        loadSession();
 	}
 
     public static bool saveSettings()
@@ -95,6 +108,16 @@ internal class Functions
                     { "Auto Switch Combat Only", autoCombatSwitch.ToString() },
 
                 };
+
+            foreach (string key in currentSessionEnabled.Keys)
+            {
+                path.Add(key, currentSessionEnabled[key]);
+            }
+
+            foreach (string key in careerEnabled.Keys)
+            {
+                path.Add(key, careerEnabled[key]);
+            }
 
             string json = JsonSerializer.Serialize(path, new JsonSerializerOptions { WriteIndented = true }); //json-ify that shit
             File.WriteAllText("C:\\EDHE\\settings.json", json); //create settings.json and write the data to it
@@ -139,8 +162,20 @@ internal class Functions
                     { "Status Readout Enabled", "False" },
                     { "Auto Shut Down", "False" },
                     { "Auto Switch Always", "False" },
-                    { "Auto Switch Combat Only", "False" }
+                    { "Auto Switch Combat Only", "False" },
+                    { "Session Number", "0" },
+                    { "Save Previous Session", "False" }
 				};
+
+        foreach (string key in currentSessionEnabled.Keys)
+        {
+            settings.Add(key, currentSessionEnabled[key]);
+        }
+
+        foreach (string key in careerEnabled.Keys)
+        {
+            settings.Add(key, careerEnabled[key]);
+        }
 
         string json = JsonSerializer.Serialize(settings, new JsonSerializerOptions { WriteIndented = true }); //json-ify that shit
         File.WriteAllText("C:\\EDHE\\settings.json", json); //create settings.json and write the data to it
@@ -243,6 +278,101 @@ internal class Functions
             {"orca", "Orca" },
             {"python", "Python" },
             {"vulture", "Vulture" },
+
+            //statistics data
+            {"careerBounties", "Total Bounties Claimed :"},
+            {"bountiesClaimed", "Total Bounties Claimed :"},
+
+            {"floatingBounties", "Floating Bounties :"},
+            {"floatingBountiesProfits", "Floating Bounty Profits :"},
+
+            {"careerBountyProfits", "Total Bounty Profits :"},
+            {"bountyProfits", "Total Bounty Profits :"},
+            
+            {"careerCombatBonds", "Total Combat Bonds Claimed :"},
+            {"combatBonds", "Total Combat Bonds Claimed :"},
+
+            {"floatingCombatBonds", "Floating Combat Bonds :"},
+            {"floatingCombatBondProfits", "Floating Combat Bond Profits :"},
+
+            {"careerCombatBondProfits", "Total Combat Bond Profits :"},
+            {"combatBondProfits", "Total Combat Bond Profits :"},
+            
+            {"careerAssassinations", "Assassinations :"},
+            {"assassinations", "Assassinations :"},
+            
+            {"onFootKills", "On Foot Kills :"},
+
+            {"shipKills", "Ship Kills :"},
+
+            {"totalKills", "Total Kills :"},
+
+            {"careerAssassinationProfits", "Total Assassination Profits :"},
+            {"assassinationProfits", "Total Assassination Profits :"},
+
+            {"careerHighestReward", "Highest Single Reward :"},
+            {"highestSingleReward", "Highest Single Reward :"},
+            
+            {"careerDropshipsBooked", "Dropships Booked :"},
+            {"dropshipsBooked", "Dropships Booked :"},
+
+            {"careerDropshipsTaken", "Dropships Taken :"},
+            {"dropshipsTaken", "Dropships Taken :"},
+            
+            {"careerDropshipsCancelled", "Dropships Cancelled :"},
+            {"dropshipsCancelled", "Dropships Cancelled :"},
+
+            {"careerSkimmersKilled", "Skimmers Destroyed :"},
+            {"skimmersKilled", "Skimmers Destroyed :"},
+            
+            {"careerSettlementsDefended", "Settlements Defended :"},
+            {"settlementsDefended", "Settlements Defended :"},
+            
+            {"careerSettlementsConquered", "Settlements Conquered :"},
+            {"settlementsConquered", "Settlements Conquered :"},
+            
+            {"careerOnFootVehiclesDestroyed", "Vehicles Destroyed On-Foot :"},
+            {"onFootVehiclesDestroyed", "Vehicles Destroyed On-Foot :"},
+            
+            {"careerOnFootShipsDestroyed", "Ships Destroyed On-Foot :"},
+            {"onFootShipsDestroyed", "Ships Destroyed On-Foot :"},
+
+            {"careerOnFootSkimmers", "Skimmers Destroyed On-Foot :"},
+            {"onFootSkimmersKilled", "Skimmers Destroyed On-Foot :"},
+            
+            {"careerOnFootScavengers", "Scavengers Killed On-Foot :"},
+            {"onFootScavsKilled", "Scavengers Killed On-Foot :"},
+
+            {"careerOnFootCombatBonds", "Total On-Foot Combat Bonds :"},
+            {"onFootCombatBonds", "Total On-Foot Combat Bonds :"},
+
+            {"floatingOnFootCombatBonds", "Floating On Foot Combat Bonds :"},
+            {"floatingOnFootCombatBondProfits", "Floating On Foot Combat Bond Profits :"},
+
+            {"careerOnFootCombatBondProfits", "Total On-Foot Combat Bond Profits :"},
+            {"onFootCombatBondProfits", "Total On-Foot Combat Bond Profits :"},
+
+            {"careerCZLow", "Conflict Zones Completed [Low-Intensity] :"},
+            {"careerCZMedium", "Conflict Zones Completed [Medium-Intensity] :"},
+            {"careerCZHigh", "Conflict Zones Completed [High-Intensity] :"},
+            
+            {"conflictZonesLow", "Conflict Zones Completed [Low-Intensity] :"},
+            {"conflictZonesMedium", "Conflict Zones Completed [Medium-Intensity] :"},
+            {"conflictZonesHigh", "Conflict Zones Completed [High-Intensity] :"},
+            
+            {"careerCZTotal", "Total Conflict Zones Completed :"},
+            {"conflictZonesTotal", "Total Conflict Zones Completed :"},
+            
+            {"careerCZWinsLow", "Conflict Zones Won [Low-Intensity] :"},
+            {"careerCZWinsMedium", "Conflict Zones Won [Medium-Intensity] :"},
+            {"careerCZWinsHigh", "Conflict Zones Won [High-Intensity] :"},
+            
+            {"conflictZonesLowWins", "Conflict Zones Won [Low-Intensity] :"},
+            {"conflictZonesMediumWins", "Conflict Zones Won Medium-Intensity] :"},
+            {"conflictZonesHighWins", "Conflict Zones Won [High-Intensity] :"},
+            
+            {"careerCZWinsTotal", "Total Conflict Zones Won :"},
+            {"conflictZonesWinsTotal", "Total Conflict Zones Won :"},
         };
 
     public static string convertName(string inputName)

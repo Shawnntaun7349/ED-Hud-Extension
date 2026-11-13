@@ -126,13 +126,7 @@ namespace ED_Hud_Extension
         {
             panel.SuspendLayout();
 
-            while (panel.Controls.Count > 0)
-            {
-                foreach (Control control in panel.Controls)
-                {
-                    control.Dispose();
-                }
-            }
+            panel.Controls.Clear();
 
             currentY = 0;
 
@@ -170,8 +164,6 @@ namespace ED_Hud_Extension
                 var form = ((Control)panel).FindForm();
                 form.BeginInvoke(new Action(() => ((MainForm)form).bodyCountTag.Text = system.bodyCount.ToString()));
                 form.BeginInvoke(new Action(() => ((MainForm)form).starCountTag.Text = starCount.ToString()));
-                
-                //panel.Size = new Size(panel.Width, (DisplayHandler.requiredSize(panel, "Height")));
 
                 panel.ResumeLayout(true);
                 panel.Refresh();
@@ -185,6 +177,9 @@ namespace ED_Hud_Extension
             {
                 targetPanel.SuspendLayout();
 
+                //using the Label control instead of the LabelButton because it's easier to emmulate the LabelButton w/ a Label
+                //than it is to override the overrides in the LabelButton to get the list to work the way i want it to
+
                 Label dynamicLabel = new Label();
                 dynamicLabel.Text = labelText;
                 dynamicLabel.Tag = "listItem";
@@ -194,6 +189,8 @@ namespace ED_Hud_Extension
                 dynamicLabel.MouseEnter += planetListMouseEnter;
                 dynamicLabel.MouseLeave += planetListMouseLeave;
                 dynamicLabel.MouseClick += planetListItemSelected;
+                dynamicLabel.MouseUp += planetListMouseUp;
+                dynamicLabel.MouseDown += planetListMouseDown;
                 int offsetX = 25;
 
                 foreach (var body in system.bodies)
@@ -216,7 +213,7 @@ namespace ED_Hud_Extension
                         }
                     }
                 }
-                currentY += 40;
+                currentY += 42;
                 dynamicLabel.Anchor = AnchorStyles.Top;
                 targetPanel.Controls.Add(dynamicLabel);
                 dynamicLabel.CreateControl();
@@ -231,7 +228,7 @@ namespace ED_Hud_Extension
         {
             Label lbl = (Label)sender;
             lbl.ForeColor = ColorTranslator.FromHtml("#FFCC99");
-            lbl.Cursor = Cursors.Hand; //this is just to emulate the LabelButton control used elsewhere, cos this is a shitload easier than using actual LabelButtons for readability issues
+            lbl.Cursor = Cursors.Hand; 
             
         }
 
@@ -242,22 +239,33 @@ namespace ED_Hud_Extension
             lbl.Cursor = Cursors.Default;
         }
 
+        public static void planetListMouseUp(object sender, EventArgs e)
+        {
+            Label lbl = (Label)sender;
+            lbl.ForeColor = ColorTranslator.FromHtml("#FFCC99");
+        }
+
+        public static void planetListMouseDown(object sender, EventArgs e)
+        {
+            Label lbl = (Label)sender;
+            lbl.ForeColor = Color.White;
+        }
+
         public void planetListItemSelected(object sender, EventArgs e)
         {
+            Label lbl = (Label)sender;
+            lbl.MouseLeave -= planetListMouseLeave;
+
             if (currentItem != null) //set the last item's color back to normal, resubcribe it to the mouse events
             { 
                 currentItem.ForeColor = ColorTranslator.FromHtml("#C04000");
-                currentItem.MouseEnter += planetListMouseEnter;
                 currentItem.MouseLeave += planetListMouseLeave;
             }
 
-            Label lbl = (Label)sender;
             currentItem = lbl; //make this the new current item
             
             //lock the color in, unsubscribe it from events
-            lbl.MouseEnter -= planetListMouseEnter;
             lbl.MouseLeave -= planetListMouseLeave;
-            lbl.ForeColor = ColorTranslator.FromHtml("#FFCC99");
 
             //once all that's done, identify what body the user selected
 

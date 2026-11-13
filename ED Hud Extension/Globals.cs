@@ -1,4 +1,5 @@
-﻿using System.Drawing.Text;
+﻿using ED_Hud_Extension;
+using System.Drawing.Text;
 
 public class Globals
 {
@@ -7,11 +8,11 @@ public class Globals
 
     //background variables
     public static bool mainFormLoaded = false;
-    public static bool activelyRunning = false;
     public static Point location; //for display methods
     public static DateTime startUpTime; //set at JournalWatcher startup, used to filter all but a few 'old' events in a given journal
-    public static DateTime shutdownTime;
     public static string gameMode;
+    public static bool settingsLoaded;
+    public static bool savePreviousSession = false;
 
     // --------------------- settings variables ---------------------
     //files & paths
@@ -19,9 +20,9 @@ public class Globals
     public static string defaultJournalPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), @"Saved Games\Frontier Developments\Elite Dangerous");
     public static string defaultGamePath = @"C:\Program Files (x86)\Steam\steamapps\common\Elite Dangerous\Products\elite-dangerous-odyssey-64\EliteDangerous64.exe";
     public static string defaultKeybindsPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), @"Frontier Developments\Elite Dangerous\Options\Bindings\Custom.4.2.binds");
-    public static string logPath = "C:\\EDHE\\log.txt";
     public static string journalPath;
     public static string gamePath;
+    public static bool playerOnFoot;
 
     //user settings - interface
     public static bool statusEnabled;
@@ -38,10 +39,20 @@ public class Globals
     public static string tokenPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "ED_Hud_Extension\\access-token.json");
 
     //user settings - display
+    public static string currentPanel = "Home";
+    public static string currentCombatRecord = "Career";
+    public static string combatDetailsState = "Extended";
     public static int savedPrefDisplayIndex;
-    public static int chosenDisplay;
+    public static string chosenDisplay;
+    public static string currentDisplay;
     public static Size formSize;
-    public static int beltListOffsetY = 610;
+    public static bool panelLocked = false;
+    public static bool onCurrentSessionPanel = true;
+    public static int careerRecordItems = 0;
+    public static int currentSessionItems;
+
+    public static Size baseDetailPanelSize;
+    public static Point baseDetailPanelLocation;
 
     //user settings - audio
     public static bool mindYourOwnDamnBusiness;
@@ -154,6 +165,21 @@ public class Globals
     //combat stuff
     public static bool pUnderAttack;
     public static string attackerTarget;
+    public static List<string> npcOFRanks = new List<string>
+    {
+        "Administrator",
+        "Commando",
+        "Enforcer",
+        "Pilot",
+        "Scientist",
+        "Scout",
+        "Sharpshooter",
+        "Striker",
+        "Worker"
+    };
+
+    public static int sessionShipKills;
+    public static int sessionNpcKills;
 
     //target variables
     public static bool targetLocked;

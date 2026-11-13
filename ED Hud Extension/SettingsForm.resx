@@ -117,4 +117,11 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="label1.Text" xml:space="preserve">
+    <value>To change items listed in the Combat panel, open the Settings page. It will automatically open to the relevant tab, at which point you can select which statistics you do or do not want to see listed. Individually selected items will appear and disappear immedaitely, but due to how Winwos handles rendering events, the Toggle All button will often need to be accompanied by the Apply button in order to correctly update the list. The Apply button will also save the selected items to your settings for persistence beyond the program shutting down or restarting. 
+</value>
+  </data>
+  <data name="panelLockExplanation.Text" xml:space="preserve">
+    <value>To Lock a specific panel in view to prevent contextual auto-switching from pulling you into a panel you don't want to look at, you can right-click the panel you want to lock in place. The panel's button will remain highlighted after the mouse leaves, indicating the lock. To unlock, left or right-click on any panel button. Left or right-clicking on the locked panel will cause it to reset, left-clicking on any *other* panel will cause the current panel to unlock, and the view to switch to the selected panel. Right-clicking on any other panel button will cause the view to switch, the previous panel to unlock, and the newly selected panel to lock in it's place. The lock does not prevent you from selecting other panels, it just prevents the automatic switch from giving you a headache.</value>
+  </data>
 </root>

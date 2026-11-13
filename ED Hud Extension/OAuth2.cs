@@ -85,11 +85,10 @@ namespace ED_Hud_Extension
                 {
                     //check the auth token validity before failing out
                     try
-                    {   
+                    {
                         //if the refresh works, the above attempt failed for an expired auth token
                         //if the refresh fails, something went wrong and the user needs to reauthorize manually
-                        OAuth2 r = new OAuth2();
-                        r.Refresh(); 
+                        Load().Refresh();
                     }
                     catch
                     {
@@ -137,7 +136,7 @@ namespace ED_Hud_Extension
         {
             try
             {
-                var doc = JsonNode.Parse(System.IO.File.ReadAllText(Globals.tokenPath));
+                var doc = JsonNode.Parse(File.ReadAllText(Globals.tokenPath));
 
                 return new OAuth2
                 {

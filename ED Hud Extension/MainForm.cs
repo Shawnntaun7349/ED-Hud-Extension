@@ -2,10 +2,10 @@ using EliteJournalReader;
 using EliteJournalReader.Events;
 using System.Diagnostics;
 using System.Reflection;
-using System.Reflection.Metadata;
 using static ED_Hud_Extension.DisplayHandler;
 using static ED_Hud_Extension.NavData;
 using static ED_Hud_Extension.SystemData;
+using static ED_Hud_Extension.StatisticsHandler;
 using static Functions;
 using static Globals;
 using static StatusReader;
@@ -19,6 +19,7 @@ namespace ED_Hud_Extension
         private static System.Threading.Timer scanTimer;
         private static System.Threading.Timer restartTimer;
         private static System.Threading.Timer readTimer;
+        private static System.Threading.Timer sessionTimer;
 
         //bits for the connection 'animation'
         private static System.Threading.Timer uplinkTimer;
@@ -27,8 +28,8 @@ namespace ED_Hud_Extension
         public static string animUplinkTextBase = "establishing uplink connection.";
         string animClientText = "waiting for client response.";
         public static string animClientTextBase = "waiting for client response.";
-        public static string scanText = "scanning";
-        public static string scanTextBase = "scanning";
+        public static string scanText = "scanning.";
+        public static string scanTextBase = "scanning.";
         public static int animDots = 1;
         public static int conDots = 1;
         public static int steps = 1;
@@ -49,6 +50,12 @@ namespace ED_Hud_Extension
         public static ShipFlag _flag = new ShipFlag();
         public SystemData systemData = new SystemData();
         private readonly UpdateService updateService = new UpdateService(new UpdateService.GitHubUpdateChecker());
+
+        //mouse button eventargs set to tell the program 'the user definitely just clicked on that button' to save some headaches
+        private MouseEventArgs m = new MouseEventArgs(MouseButtons.Left, 1, 0, 0, 0);
+
+        public int baseWidth = 0;
+        public bool starDetailViewNormal = true;
 
 
         public bool gameRunning()
@@ -84,13 +91,14 @@ namespace ED_Hud_Extension
                     capiConnected = false;
                     return;
                 }
-            }
+            }//644, 754
 
             if (statusEnabled) { statusLabel.Visible = true; }
 
             StartPosition = FormStartPosition.Manual;
             Location = location; //this is thisForm.Location property being set to the Globals.location value
             Size = formSize;
+            //statusPanel.Location = new Point((this.Width - (statusPanel.Width + 5)), (this.Height - 35));
 
             uplinkTimer = new System.Threading.Timer(animCallbackMethod, "Timer State", 500, 1000);
             clientTimer = new System.Threading.Timer(clientCallbackMethod, "Timer State", Timeout.Infinite, Timeout.Infinite);
@@ -104,6 +112,12 @@ namespace ED_Hud_Extension
 
         }
 
+        public static void prepForShutdown()
+        {
+            if (statusReaderLive) { readTimer.Dispose(); }
+            localTimer.Dispose();
+        }
+
         private void MainForm_Load(object sender, EventArgs e)
         {
             _ = updateService.CheckForUpdatesAsync(silent: true);
@@ -115,6 +129,8 @@ namespace ED_Hud_Extension
             setWorkingArea(workingAreaPanel);
             workingAreaPanel.Visible = false;
             initPanel.BringToFront();
+
+            sessionTimer = new System.Threading.Timer(sessionUpdateCallbackMethod, "Timer State", 60000, 300000);
 
             mainFormLoaded = true;
             if (statusEnabled) { statusLabel.Text = statBase + "initiating service"; }
@@ -156,13 +172,14 @@ namespace ED_Hud_Extension
             if (statusEnabled) { Invoke(new Action(() => statusLabel.Text = statBase + "initiating journal watcher")); }
 
             watcher.StartWatching(); //start the watcher to monitor for events
-            readTimer = new System.Threading.Timer(readTimerCallback, "Timer State", 50, 50);
+            readTimer = new System.Threading.Timer(readTimerCallback, "Timer State", 50, 100);
 
             // event subscriptions
             //starting up
             startUpTime = DateTime.UtcNow;
             watcher.GetEvent<NewJournalFileEvent>().Fired += newJournalMethod;
             watcher.GetEvent<LoadGameEvent>().Fired += loadInitialData;
+            watcher.GetEvent<StatisticsEvent>().Fired += statisticsEvent;
             watcher.GetEvent<RankEvent>().Fired += rankEvent;
             watcher.GetEvent<ProgressEvent>().Fired += progressEvent;
             watcher.GetEvent<ReputationEvent>().Fired += repEvent;
@@ -205,6 +222,14 @@ namespace ED_Hud_Extension
             watcher.GetEvent<LoadoutEvent>().Fired += loadoutEvent;
             watcher.GetEvent<EmbarkEvent>().Fired += embarkEvent;
             watcher.GetEvent<DisembarkEvent>().Fired += disembarkEvent;
+
+            //combat events
+            watcher.GetEvent<BountyEvent>().Fired += bountyEvent;
+            watcher.GetEvent<RedeemVoucherEvent>().Fired += redeemVoucherEvent;
+            watcher.GetEvent<FactionKillBondEvent>().Fired += factionKillBondEvent;
+
+            //station events
+            watcher.GetEvent<DockedEvent>().Fired += dockedEvent;
         }
 
         //journal events
@@ -246,6 +271,7 @@ namespace ED_Hud_Extension
 
             if (StatusTags.OnFoot)
             {
+                playerOnFoot = true;
                 Invoke(new Action(() => curVesselTag.Text = "-embark to reestablish vessel uplink-"));
                 Invoke(new Action(() => curVesselNameTag.Text = "-waiting for embarkation-"));
                 Invoke(new Action(() => curVesselIDTag.Text = "-waiting for embarkation-"));
@@ -253,6 +279,7 @@ namespace ED_Hud_Extension
             }
             else
             {
+                playerOnFoot = false;
                 if (e.Ship_Localised != null)
                 {
                     Invoke(new Action(() => curVesselTag.Text = e.Ship_Localised.ToString()));
@@ -273,6 +300,45 @@ namespace ED_Hud_Extension
 
                 Invoke(new Action(() => fetchNavRoute(expCurrentSystemTag, expDestinationTag, this)));
             }
+        }
+
+        private void statisticsEvent(object? sender, StatisticsEvent.StatisticsEventArgs e)
+        {
+            //grab the player's current career statistics
+            //combat stats
+            careerStatistics["careerBounties"] = e.Combat.Bounties_Claimed;
+            careerStatistics["careerBountyProfits"] = e.Combat.Bounty_Hunting_Profit;
+            careerStatistics["careerCombatBonds"] = e.Combat.Combat_Bonds;
+            careerStatistics["careerCombatBondProfits"] = e.Combat.Combat_Bond_Profits;
+            careerStatistics["careerAssassinations"] = e.Combat.Assassinations;
+            careerStatistics["careerAssassinationProfits"] = e.Combat.Assassination_Profits;
+            careerStatistics["careerHighestReward"] = e.Combat.Highest_Single_Reward;
+            careerStatistics["careerSkimmersKilled"] = e.Combat.Skimmers_Killed;
+
+            careerStatistics["careerOnFootCombatBonds"] = e.Combat.OnFoot_Combat_Bonds;
+            careerStatistics["careerOnFootCombatBondProfits"] = e.Combat.OnFoot_Combat_Bonds_Profits;
+            careerStatistics["careerOnFootVehiclesDestroyed"] = e.Combat.OnFoot_Vehicles_Destroyed;
+            careerStatistics["careerOnFootShipsDestroyed"] = e.Combat.OnFoot_Ships_Destroyed;
+            careerStatistics["careerOnFootScavengers"] = e.Combat.OnFoot_Scavs_killed;
+            careerStatistics["careerOnFootSkimmers"] = e.Combat.OnFoot_Skimmers_Killed;
+
+            careerStatistics["careerDropshipsBooked"] = e.Combat.Dropships_Booked;
+            careerStatistics["careerDropshipsTaken"] = e.Combat.Dropships_Taken;
+            careerStatistics["careerDropshipsCancelled"] = e.Combat.Dropships_Cancelled;
+
+            careerStatistics["careerCZHigh"] = e.Combat.ConflictZone_High;
+            careerStatistics["careerCZMedium"] = e.Combat.ConflictZone_Medium;
+            careerStatistics["careerCZLow"] = e.Combat.ConflictZone_Low;
+            careerStatistics["careerCZTotal"] = e.Combat.ConfictZone_Total;
+            careerStatistics["careerCZWinsHigh"] = e.Combat.ConflictZone_High_Wins;
+            careerStatistics["careerCZWinsMedium"] = e.Combat.ConflictZone_Medium_Wins;
+            careerStatistics["careerCZWinsLow"] = e.Combat.ConflictZone_Low_Wins;
+            careerStatistics["careerCZWinsTotal"] = e.Combat.ConflictZone_Total_Wins;
+
+            careerStatistics["careerSettlementsDefended"] = e.Combat.Settlement_Defended;
+            careerStatistics["careerSettlementsConquered"] = e.Combat.Settlement_Conquered;
+
+            Invoke(new Action(() => updateStatistics()));
         }
 
         private void rankEvent(object? sender, RankEvent.RankEventArgs e) //fires on startup
@@ -362,11 +428,17 @@ namespace ED_Hud_Extension
 
         }
 
+        private void dockedEvent(object? sender, DockedEvent.DockedEventArgs e)
+        {
+            
+        }
+
         private void underAttackEvent(object? sender, UnderAttackEvent.UnderAttackEventArgs e) //take a fucken guess what this one's for
         {
-            attackerTarget = e.Target.ToString();
-            pUnderAttack = true;
-            if (autoPanelSwitch || autoCombatSwitch) { combatPanel.BringToFront(); }
+            if ((autoPanelSwitch || autoCombatSwitch) && !panelLocked)
+            {
+                Invoke(new Action(() => combatButton_Click(this, m)));
+            }
         }
 
         private void scanEvent(object? sender, ScanEvent.ScanEventArgs e) //for when a player scans an astral body
@@ -374,18 +446,105 @@ namespace ED_Hud_Extension
 
         }
 
+        private void bountyEvent(object? sender, BountyEvent.BountyEventArgs e)
+        {
+            currentStatistics["floatingBounties"] += 1;
+            currentStatistics["floatingBountiesProfits"] += e.TotalReward;
+            if (playerOnFoot)
+            {
+                currentStatistics["onFootKills"]++;
+                currentStatistics["totalKills"]++;
+            }
+            else
+            {
+                currentStatistics["shipKills"]++;
+                currentStatistics["totalKills"]++;
+            }
+
+            updateStatistics();
+        }
+
+        private void factionKillBondEvent(object? sender, FactionKillBondEvent.FactionKillBondEventArgs e) //combat bonds
+        {
+            if (playerOnFoot) //if the player is on foot when this fires, it's an on-foot cb
+            {
+                currentStatistics["onFootCombatBonds"] += 1;
+                currentStatistics["onFootCombatBondProfits"] += e.Reward;
+                currentStatistics["onFootKills"]++;
+                currentStatistics["totalKills"]++;
+            }
+            else //if they're not, it's not
+            {
+                currentStatistics["combatBonds"] += 1;
+                currentStatistics["combatBondProfits"] += e.Reward;
+                currentStatistics["shipKills"]++;
+                currentStatistics["totalKills"]++;
+            }
+
+            updateStatistics();
+        }
+
+        private void redeemVoucherEvent(object? sender, RedeemVoucherEvent.RedeemVoucherEventArgs e)
+        {
+            if (e.Type == "Bounty")
+            {
+                long floatingBounties = currentStatistics["floatingBounties"];
+                currentStatistics["floatingBounties"] = 0;
+                currentStatistics["bountiesClaimed"] += floatingBounties;
+                currentStatistics["floatingBountiesProfits"] -= e.Amount;
+                currentStatistics["bountyProfits"] += e.Amount;
+            }
+
+            if (e.Type == "CombatBond")
+            {
+                if (playerOnFoot) //for on foot bonds, cos they're turned in on-foot
+                {
+                    long floatingBonds = currentStatistics["floatingOnFootCombatBonds"];
+                    currentStatistics["onFootCombatBonds"] -= floatingBonds;
+                    currentStatistics["floatingOnFootCombatBondProfits"] -= e.Amount;
+                    currentStatistics["onFootCombatBondProfits"] += e.Amount;
+                    currentStatistics["floatingBonds"] = 0; //it's not perfect but its fine for now
+                }
+                else
+                {
+                    currentStatistics["floatingCombatBondProfits"] -= e.Amount;
+                    currentStatistics["combatBondProfits"] += e.Amount;
+                    long floatingBonds = currentStatistics["combatBonds"];
+                    currentStatistics["floatingCombatBonds"] = 0;
+                    currentStatistics["combatBonds"] -= floatingBonds;
+                }
+            }
+
+            updateStatistics();
+        }
+
+        private bool currentlyScanning;
+        private bool alreadyStarted = false;
+
         private void shipTargetedEvent(object? sender, ShipTargetedEvent.ShipTargetedEventArgs e) //for when the player scans a ship
         {
             if (e.Timestamp > startUpTime) //if this event fired *after* the current journal reader fired up
             {
+                if ((autoPanelSwitch || autoCombatSwitch) && !panelLocked)
+                {
+                    Invoke(new Action(() => combatButton_Click(this, m)));
+                }
+
                 if (statusEnabled) { Invoke(new Action(() => statusLabel.Text = "scanning target")); }
 
                 scanLevel = e.ScanStage;
-                animDots = 1;
-                scanTimer = new System.Threading.Timer(scanCallbackMethod, "Timer State", 0, 500);
+                Invoke(new Action(() => scanStageTag.Text = "scanning."));
+                
+                if (!alreadyStarted)
+                {
+                    scanTimer.Change(0, 500);
+                    alreadyStarted = true;
+                    animDots = 1;
+                }
 
                 if (e.TargetLocked)
                 {
+                    currentlyScanning = true;
                     targetLocked = true; Invoke(new Action(() => targetDataLabel.Text = "Target Data [Current]"));
 
                     //clear out the old data
@@ -410,15 +569,18 @@ namespace ED_Hud_Extension
                 else
                 {
                     scanLevel = e.ScanStage;
+                    currentlyScanning = false;
                     targetLocked = false;
                     scanDone = false;
-                    scanTimer.Dispose();
+                    alreadyStarted = false;
+                    scanTimer.Change(0, Timeout.Infinite);
+                    animDots = 1;
                     Invoke(new Action(() => targetDataLabel.Text = "Target Data [Previous]"));
-                    Invoke(new Action(() => scanStageTag.Text = "no target"));
                 }
 
                 if (scanLevel >= 1)
                 {
+                    currentlyScanning = true;
                     scanLevel = e.ScanStage;
                     pTargeting = true;
                     targetName = e.PilotName_Localised;
@@ -431,6 +593,7 @@ namespace ED_Hud_Extension
                 }
                 if (scanLevel >= 2)
                 {
+                    currentlyScanning = true;
                     scanLevel = e.ScanStage;
                     targetShield = e.ShieldHealth;
                     targetHull = e.HullHealth;
@@ -442,9 +605,11 @@ namespace ED_Hud_Extension
                 }
                 if (scanLevel >= 3)
                 {
+                    currentlyScanning = true;
                     scanLevel = e.ScanStage;
                     scanDone = true;
-                    scanTimer.Dispose();
+                    scanTimer.Change(0, Timeout.Infinite);
+                    animDots = 1;
                     targetFaction = e.Faction;
                     targetPower = e.Power;
 
@@ -532,6 +697,10 @@ namespace ED_Hud_Extension
                     Invoke(new Action(() => expNextSystemTag.Text = e.Name));
                     Invoke(new Action(() => expDestinationTag.Text = e.Name));
                 }
+                if (autoPanelSwitch && !panelLocked)
+                {
+                    explorationButton_Click(this, m);
+                }
             }
             else { /*ignore the event as it occured before edhe started*/ }
         }
@@ -588,7 +757,8 @@ namespace ED_Hud_Extension
                 if (autoShutDownEnabled && e.Timestamp > startUpTime)
                 {
                     Invoke(new Action(() => MessageBox.Show(this, "Elite Dangerous has shut down. EDHE will now shut down.", "Shutting Down", MessageBoxButtons.OK, MessageBoxIcon.Warning)));
-                    System.Windows.Forms.Application.Exit();
+                    prepForShutdown();
+                    Application.Exit();
                 }
                 else if (e.Timestamp > startUpTime)
                 {
@@ -843,50 +1013,97 @@ namespace ED_Hud_Extension
         //timer methods
         private void localCallbackMethod(object state)
         {
-            Invoke(new Action(() => locDTTag.Text = DateTime.Now.ToString("dddd, MMMM dd, yyyy \nHH:mm")));
-            Invoke(new Action(() => starDateTag.Text = DateTime.UtcNow.ToString("dddd, MMMM dd,") + " " + ((int)DateTime.UtcNow.Year + 1286).ToString()));
-            Invoke(new Action(() => starTimeTag.Text = DateTime.UtcNow.ToString("HH:mm")));
+            try
+            {
+                if (this.IsHandleCreated)
+                {
+                    Invoke(new Action(() => locDTTag.Text = DateTime.Now.ToString("dddd, MMMM dd, yyyy \nHH:mm")));
+                    Invoke(new Action(() => starDateTag.Text = DateTime.UtcNow.ToString("dddd, MMMM dd,") + " " + ((int)DateTime.UtcNow.Year + 1286).ToString()));
+                    Invoke(new Action(() => starTimeTag.Text = DateTime.UtcNow.ToString("HH:mm")));
+                    Invoke(new Action(() => statusPanel.BringToFront()));
+                }
+            }
+            catch
+            {
+                //do nothing
+            }
         }
 
         public void readTimerCallback(object? sender) //update status information
         {
-            try
+            if (this.IsHandleCreated)
             {
-                readStatus(Path.Combine(journalPath, "Status.json"), sf, ff);
-                statusReaderLive = true;
-
-            }
-            catch (IOException)
-            {
-                System.Windows.Forms.Timer waitTimer = new System.Windows.Forms.Timer();
-                waitTimer.Interval = 25;
-                waitTimer.Tick += (s, args) =>
+                try
                 {
-                    waitTimer.Stop();
-                    readStatus(Path.Combine(journalPath, "Status.json"), sf, ff);
-                };
-                waitTimer.Start();
-            }
+                    try
+                    {
+                        readStatus(Path.Combine(journalPath, "Status.json"), sf, ff);
+                        statusReaderLive = true;
 
-            if (StatusTags.FsdCooldown) { Invoke(new Action(() => fsdTag.Text = "cooling down")); }
-            else if (StatusTags.FsdCharging) { Invoke(new Action(() => fsdTag.Text = "charging")); }
-            else if (StatusTags.FsdMassLocked) { Invoke(new Action(() => fsdTag.Text = "mass locked")); }
-            else if (StatusTags.FsdJump) { Invoke(new Action(() => fsdTag.Text = "jumping")); }
-            else { Invoke(new Action(() => fsdTag.Text = "ready")); }
+                    }
+                    catch (IOException)
+                    {
+                        System.Windows.Forms.Timer waitTimer = new System.Windows.Forms.Timer();
+                        waitTimer.Interval = 25;
+                        waitTimer.Tick += (s, args) =>
+                        {
+                            waitTimer.Stop();
+                            readStatus(Path.Combine(journalPath, "Status.json"), sf, ff);
+                        };
+                        waitTimer.Start();
+                    }
 
-            if (StatusTags.OnFoot) { Invoke(new Action(() => onFootPanel.Visible = true)); }
-            if (!StatusTags.OnFoot) { Invoke(new Action(() => onFootPanel.Visible = false)); }
+                    if (this.IsHandleCreated)
+                    {
+                        try
+                        {
+                            if (StatusTags.FsdCooldown) { Invoke(new Action(() => fsdTag.Text = "cooling down")); }
+                            else if (StatusTags.FsdCharging) { Invoke(new Action(() => fsdTag.Text = "charging")); }
+                            else if (StatusTags.FsdMassLocked) { Invoke(new Action(() => fsdTag.Text = "mass locked")); }
+                            else if (StatusTags.FsdJump) { Invoke(new Action(() => fsdTag.Text = "jumping")); }
+                            else { Invoke(new Action(() => fsdTag.Text = "ready")); }
 
-            if (StatusTags.OnFoot) //load up the on foot stuff
-            {
-                Invoke(new Action(() => healthBar.Value = pFootHealth));
-                Invoke(new Action(() => oxygenBar.Value = pFootOxygen));
+                            if (StatusTags.OnFoot) 
+                            { 
+                                Invoke(new Action(() => onFootPanel.Visible = true));
+                                Invoke(new Action(() => combatDetailsChangeButton.Visible = true));
+                            }
+                            if (!StatusTags.OnFoot) 
+                            { 
+                                Invoke(new Action(() => onFootPanel.Visible = false));
+                                Invoke(new Action(() => combatDetailsChangeButton.Visible = true));
+                            }
 
-                Invoke(new Action(() => healthpackKeyTag.Text = "Keybind [" + healthPackKey + "]"));
-                Invoke(new Action(() => energyCellKeyTag.Text = "Keybind [" + energyCellKey + "]"));
-                Invoke(new Action(() => fragGrenadeKeyTag.Text = "Keybind [" + fragGrenadeKey + "]"));
-                Invoke(new Action(() => empKeyTag.Text = "Keybind [" + empKey + "]"));
-                Invoke(new Action(() => shieldProjectorKeyTag.Text = "Keybind [" + shieldProjectorKey + "]"));
+                            if (StatusTags.HardpointsDeployed)
+                            {
+                                if ((autoPanelSwitch || autoCombatSwitch) && !panelLocked)
+                                {
+                                    Invoke(new Action(() => combatButton_Click(this, m)));
+                                }
+                            }
+
+                            if (StatusTags.OnFoot) //load up the on foot stuff
+                            {
+                                Invoke(new Action(() => healthBar.Value = pFootHealth));
+                                Invoke(new Action(() => oxygenBar.Value = pFootOxygen));
+
+                                Invoke(new Action(() => healthpackKeyTag.Text = "Keybind [" + healthPackKey + "]"));
+                                Invoke(new Action(() => energyCellKeyTag.Text = "Keybind [" + energyCellKey + "]"));
+                                Invoke(new Action(() => fragGrenadeKeyTag.Text = "Keybind [" + fragGrenadeKey + "]"));
+                                Invoke(new Action(() => empKeyTag.Text = "Keybind [" + empKey + "]"));
+                                Invoke(new Action(() => shieldProjectorKeyTag.Text = "Keybind [" + shieldProjectorKey + "]"));
+                            }
+                        }
+                        catch
+                        {
+                            //do nothing
+                        }
+                    }
+                }
+                catch
+                {
+
+                }
             }
         }
 
@@ -953,6 +1170,11 @@ namespace ED_Hud_Extension
                     }
                 }
             }
+        }
+
+        private void sessionUpdateCallbackMethod(object state)
+        {
+            saveSession();
         }
 
         private void clientCallbackMethod(object state) //[waiting for client response...] timer
@@ -1031,25 +1253,28 @@ namespace ED_Hud_Extension
         //TODO : fix this for a [scanning...] anim while scanning a target
         private void scanCallbackMethod(object sender)
         {
-            if (scanDone) //if the scan is done fuck off
+            if (targetLocked && !scanDone)
             {
-                scanTimer.Dispose();
-                return;
-            }
-            else
-            {
-                if (animDots < 3)
+                if (animDots < 3 && currentlyScanning && scanStageTag.Text.Length < 11)
                 {
-                    scanText = scanText + ".";
+                    scanText += ".";
                     Invoke(new Action(() => scanStageTag.Text = scanText));
                     animDots++;
                 }
-                else
+                else if ((animDots == 3 && currentlyScanning) || scanStageTag.Text.Length >= 11)
                 {
                     scanText = scanTextBase;
                     Invoke(new Action(() => scanStageTag.Text = scanText));
                     animDots = 1;
                 }
+            }
+            else if (scanDone)
+            {
+                Invoke(new Action(() => scanStageTag.Text = "Target Locked"));
+            }
+            else
+            {
+                Invoke(new Action(() => scanStageTag.Text = "no target"));
             }
         }
 
@@ -1065,6 +1290,8 @@ namespace ED_Hud_Extension
             dividerPanel.BringToFront();
             dividerPanel.Visible = true;
             constDisplayPanel.BringToFront();
+            statusPanel.Visible = false;
+            //statusPanel.BringToFront();
 
             foreach (Control c in Controls)
             {
@@ -1077,19 +1304,20 @@ namespace ED_Hud_Extension
             if (statusEnabled) { Invoke(new Action(() => statusLabel.Text = statBase + "session started, parsing journal")); }
         }
 
-        // button methods
-
-        private void restartSessionButton_Click(object sender, EventArgs e) //used to manually reset the player's session if it doesn't reset automatically
+        public void refreshSettings(object? sender, EventArgs e)
         {
-            Invoke(new Action(() => MessageBox.Show(this, "EDHE will now restart.", "Restart Initiated", MessageBoxButtons.OK, MessageBoxIcon.Warning)));
-            //Invoke(new Action(() => uplinkLowTag.Visible = true));
-            //Invoke(new Action(() => uplinkHighTag.Visible = false));
+            updateStatistics();
+            statusPanel.Visible = false;
         }
+
+        // button methods
 
         private void settingsButton_Click(object sender, EventArgs e) //opens the settings menu
         {
             SettingsForm sf = new SettingsForm();
             sf.Show(this);
+
+            sf.SettingsUpdated += refreshSettings;
         }
 
         private void exitButton_Click(object sender, EventArgs e)
@@ -1097,59 +1325,69 @@ namespace ED_Hud_Extension
             DialogResult exitBox = MessageBox.Show("Are you sure?", "Terminate Connection", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
             if (exitBox == DialogResult.Yes)
             {
+                savePreviousSession = false;
+                saveSession();
+
                 localTimer.Dispose(); //not strictly necessary but if you exit via button in the IDE build this will ocasionally throw an error
-                Environment.Exit(0);
+                prepForShutdown();
+                Thread.Sleep(500);
+                Application.Exit();
             }
         }
 
-        private void homeButton_Click(object sender, EventArgs e)
+        private void homeButton_Click(object sender, MouseEventArgs e)
         {
             homePanel.BringToFront();
             dividerPanel.BringToFront();
+            statusPanel.BringToFront();
+
+            currentPanel = "Home";
+
+            checkLocks(homeButton, e);
         }
 
-        private void combatButton_Click(object sender, EventArgs e)
-        {
-            arrangeCombatPanel(combatPanel, onFootPanel);
-            scanStageLabel.Location = new Point(((workingAreaPanel.Width / 2) - scanStageLabel.Width) + 118, scanStageLabel.Location.Y);
-            scanStageTag.Location = new Point((workingAreaPanel.Width / 2) + 108, scanStageTag.Location.Y);
-            combatPanel.BringToFront();
-            dividerPanel.BringToFront();
-        }
-
-        private void explorationButton_Click(object sender, EventArgs e)
-        {
-            arrangeExplorePanel(explorePanel); //196 apart
-            fsdLabel.Location = new Point(((fsdLabel.Parent.Width / 2) - fsdLabel.Width) + 118, fsdLabel.Location.Y);
-            fsdTag.Location = new Point((fsdTag.Parent.Width / 2) + 108, fsdTag.Location.Y);
-            selectBodyLabel.Location = new Point((detailHiderPanel.Width / 2) - (selectBodyLabel.Width / 2) + 28, selectBodyLabel.Location.Y);
-            beltDivPanel.Size = new Size(beltDivPanel.Parent.Width, beltDivPanel.Height);
-            bodyListPanel.Location = new Point(0, 382);
-            bodyListPanel.Size = new Size(650, (workingAreaPanel.Height - 382));
-
-            detailPanelNormal = true;
-            detailChangeButton.Location = new Point(workingAreaPanel.Width - (starDetailView.Width + detailChangeButton.Width + 15), (workingAreaPanel.Height - detailChangeButton.Height));
-
-            foreach (Label lbl in bodyListPanel.Controls.OfType<Label>())
-            {
-                if (lbl.Tag == "listItem") { lbl.ForeColor = ColorTranslator.FromHtml("#C04000"); }
-            }
-
-            //resetDetailView(planetDetailView, starDetailView);
-            explorePanel.BringToFront();
-            detailHiderPanel.BringToFront();
-            detailChangeButton.Visible = false;
-        }
-        private void stationsButton_Click(object sender, EventArgs e)
+        private void stationsButton_Click(object sender, MouseEventArgs e)
         {
             stationsPanel.BringToFront();
             dividerPanel.BringToFront();
+            statusPanel.BringToFront();
+
+            currentPanel = "Stations";
+
+            checkLocks(stationsButton, e);
         }
 
-        private void missionsButton_Click(object sender, EventArgs e)
+        private void missionsButton_Click(object sender, MouseEventArgs e)
         {
+            missionLogPanel.Location = new Point(0, 0);
+            missionLogPanel.Size = new Size((workingAreaPanel.Width / 3), workingAreaPanel.Height);
+
+            missionDetailsPanel.Size = new Size(((workingAreaPanel.Width / 3) * 2), workingAreaPanel.Height);
+            missionDetailsPanel.Location = new Point((workingAreaPanel.Width - missionDetailsPanel.Width), 0);
+
             missionsPanel.BringToFront();
             dividerPanel.BringToFront();
+            statusPanel.BringToFront();
+
+            currentPanel = "Missions";
+
+            checkLocks(missionsButton, e);
+        }
+
+        private void checkLocks(LabelButton lbl, MouseEventArgs e)
+        {
+            int i = 0;
+            foreach (LabelButton label in controlsPanel.Controls.OfType<LabelButton>())
+            {
+                if (label.Name != lbl.Name)
+                {
+                    label.ResetLock();
+                    label.UpdateVisualState();
+                }
+                if (label.isLocked) { i++; }
+            }
+            if (i == 0) { panelLocked = false; }
+            else { panelLocked = true; }
         }
 
         //background functions
@@ -1162,6 +1400,46 @@ namespace ED_Hud_Extension
                 restartTimer.Change(0, Timeout.Infinite);
             }
             else return;
+        }
+
+        // Exploration Panel stuff --------------------------------------------------------------
+
+        private void explorationButton_Click(object sender, MouseEventArgs e)
+        {
+            arrangeExplorePanel(explorePanel); //196 apart
+            fsdLabel.Location = new Point(((fsdLabel.Parent.Width / 2) - fsdLabel.Width) + 118, fsdLabel.Location.Y);
+            fsdTag.Location = new Point((fsdTag.Parent.Width / 2) + 108, fsdTag.Location.Y);
+            selectBodyLabel.Location = new Point((detailHiderPanel.Width / 2) - (selectBodyLabel.Width / 2) + 28, selectBodyLabel.Location.Y);
+            beltDivPanel.Size = new Size(starDetailView.Width, beltDivPanel.Height);
+            bodyListPanel.Location = new Point(0, 382);
+            bodyListPanel.Size = new Size(650, (workingAreaPanel.Height - 382));
+
+            if (!detailPanelNormal) { detailChangeButton.PerformClick(); }
+            if (!starDetailViewNormal) { starDetailChangeButton.PerformClick(); }
+
+            detailPanelNormal = true;
+            starDetailViewNormal = true;
+            detailChangeButton.Location = new Point(workingAreaPanel.Width - (starDetailView.Width + detailChangeButton.Width + 15), (workingAreaPanel.Height - detailChangeButton.Height));
+            starDetailChangeButton.Location = detailChangeButton.Location;
+
+            foreach (Label lbl in bodyListPanel.Controls.OfType<Label>())
+            {
+                if (lbl.Tag == "listItem") { lbl.ForeColor = ColorTranslator.FromHtml("#C04000"); }
+                lbl.MouseLeave += planetListMouseLeave;
+            }
+
+            baseDetailPanelSize = detailHiderPanel.Size;
+            baseDetailPanelLocation = detailHiderPanel.Location;
+
+            explorePanel.BringToFront();
+            detailHiderPanel.BringToFront();
+            statusPanel.BringToFront();
+            detailChangeButton.Visible = false;
+            starDetailChangeButton.Visible = false;
+
+            currentPanel = "Exploration";
+
+            checkLocks(explorationButton, e);
         }
 
         public void loadDetails(string bodyName, Bodies bodyList)
@@ -1185,7 +1463,20 @@ namespace ED_Hud_Extension
 
                         if (body.type == "Planet")
                         {
+                            starDetailView.Location = new Point(((workingAreaPanel.Width * 2) / 3) + 5, 0);
+                            starDetailView.Width = (workingAreaPanel.Width - starDetailView.Location.X);
+                            exploreDivider.Location = new Point(planetDetailView.Location.X - 3, 0);
+                            beltDivPanel.Width = starDetailView.Width;
+
+                            starDetailChangeButton.Text = "<<<";
+                            starDetailChangeButton.Location = new Point(workingAreaPanel.Width - (starDetailView.Width + starDetailChangeButton.Width + 15), starDetailChangeButton.Location.Y);
+
+                            starDetailViewNormal = true;
+                            starDetailChangeButton.Visible = false;
+                            starDetailChangeButton.SendToBack();
+
                             detailChangeButton.Visible = true;
+                            detailChangeButton.BringToFront();
 
                             planetDetailView.BringToFront();
                             bodyNameTag.Text = body.name;
@@ -1232,11 +1523,15 @@ namespace ED_Hud_Extension
                         }
                         else if (body.type == "Star")
                         {
-                            if (detailPanelNormal == false)
-                            {
-                                detailChangeButton.PerformClick();
-                            }
+                            planetDetailView.Location = baseDetailPanelLocation;
+                            planetDetailView.Size = baseDetailPanelSize;
+                            exploreDivider.Location = new Point(baseDetailPanelLocation.X - 3, 0);
+
+                            detailChangeButton.Location = new Point(workingAreaPanel.Width - (baseDetailPanelSize.Width + detailChangeButton.Width + 15), detailChangeButton.Location.Y);
+                            detailChangeButton.Text = "<<<";
+                            detailPanelNormal = true;
                             detailChangeButton.Visible = false;
+                            detailChangeButton.SendToBack();
 
                             starDetailView.BringToFront();
                             starNameTag.Text = body.name;
@@ -1254,6 +1549,23 @@ namespace ED_Hud_Extension
 
                             if (body.orbitalPeriod != null) { starOrbitalTag.Text = Math.Round((decimal)body.rotationalPeriod, 2).ToString(); } else { starOrbitalTag.Text = "n/a"; }
                             starRotationalTag.Text = Math.Round((decimal)body.rotationalPeriod, 2).ToString() + " Days";
+
+                            if (starDetailViewNormal)
+                            {
+                                if (starDetailView.HorizontalScroll.Visible)
+                                {
+                                    starDetailChangeButton.Visible = true;
+                                    baseWidth = starDetailView.Width;
+                                }
+                                else
+                                {
+                                    starDetailChangeButton.Visible = false;
+                                }
+                            }
+                            else
+                            {
+                                starDetailChangeButton.Visible = true;
+                            }
                         }
 
                         if (body.belts != null) { generateBeltList(body.belts, starDetailView); noBeltsLabel.Visible = false; }
@@ -1276,11 +1588,6 @@ namespace ED_Hud_Extension
                 }
                 panel.Refresh();
             }
-        }
-
-        public static void resetDetailView(Panel panel, Panel baseline)
-        {
-            detailPanelNormal = true;
         }
 
         public static void generateCompList(Atmosphere atmosphere, Panel panel)
@@ -1948,51 +2255,6 @@ namespace ED_Hud_Extension
             panel.Refresh();
         }
 
-        public static async Task fetchStarData(string systemName, CancellationToken ct = default) //thank you EDSM
-        {
-            string url = "https://www.edsm.net/api-system-v1/bodies?systemName=" + systemName;
-            using var request = new HttpRequestMessage(HttpMethod.Get, url);
-            request.Headers.ConnectionClose = true;
-            using var response = await _client.SendAsync(request, ct).ConfigureAwait(false);
-            response.EnsureSuccessStatusCode();
-
-            try
-            {
-                string json = await response.Content.ReadAsStringAsync(ct).ConfigureAwait(false);
-                await File.WriteAllTextAsync("C:\\EDHE\\res\\systemdata.json", json, ct).ConfigureAwait(false);
-            }
-            catch (IOException)
-            {
-                System.Windows.Forms.Timer waitTimer = new System.Windows.Forms.Timer();
-                waitTimer.Interval = 50;
-                waitTimer.Tick += (s, args) =>
-                {
-                    waitTimer.Stop();
-                    fetchStarData(url, ct);
-                };
-                waitTimer.Start();
-            }
-        }
-
-        private static readonly HttpClient _client = new HttpClient(new SocketsHttpHandler
-        {
-            PooledConnectionLifetime = TimeSpan.FromMinutes(2),
-            PooledConnectionIdleTimeout = TimeSpan.FromSeconds(30),
-        })
-        {
-            Timeout = TimeSpan.FromSeconds(30)
-        };
-
-        public void clearBodyList()
-        {
-            if (bodyListPanel.Controls.Count != 0)
-            {
-                foreach (Label lbl in bodyListPanel.Controls.OfType<Label>())
-                {
-                    Invoke(new Action(() => lbl.Dispose()));
-                }
-            }
-        }
         private async void updateLocationData(string system)
         {
             if (InvokeRequired)
@@ -2036,6 +2298,17 @@ namespace ED_Hud_Extension
 
         }
 
+        public void clearBodyList()
+        {
+            if (bodyListPanel.Controls.Count != 0)
+            {
+                foreach (Label lbl in bodyListPanel.Controls.OfType<Label>())
+                {
+                    Invoke(new Action(() => lbl.Dispose()));
+                }
+            }
+        }
+
         //a good ol debounce setup so we don't accidentally flood EDSM with 700 GET requests in 0.3 seconds
         //i say again: thank you, EDSM
         private static CancellationTokenSource systemQueryCts;
@@ -2059,6 +2332,41 @@ namespace ED_Hud_Extension
             }
         }
 
+        public static async Task fetchStarData(string systemName, CancellationToken ct = default) //thank you EDSM
+        {
+            string url = "https://www.edsm.net/api-system-v1/bodies?systemName=" + systemName;
+            using var request = new HttpRequestMessage(HttpMethod.Get, url);
+            request.Headers.ConnectionClose = true;
+            using var response = await _client.SendAsync(request, ct).ConfigureAwait(false);
+            response.EnsureSuccessStatusCode();
+
+            try
+            {
+                string json = await response.Content.ReadAsStringAsync(ct).ConfigureAwait(false);
+                await File.WriteAllTextAsync("C:\\EDHE\\res\\systemdata.json", json, ct).ConfigureAwait(false);
+            }
+            catch (IOException)
+            {
+                System.Windows.Forms.Timer waitTimer = new System.Windows.Forms.Timer();
+                waitTimer.Interval = 50;
+                waitTimer.Tick += (s, args) =>
+                {
+                    waitTimer.Stop();
+                    fetchStarData(url, ct);
+                };
+                waitTimer.Start();
+            }
+        }
+
+        private static readonly HttpClient _client = new HttpClient(new SocketsHttpHandler
+        {
+            PooledConnectionLifetime = TimeSpan.FromMinutes(2),
+            PooledConnectionIdleTimeout = TimeSpan.FromSeconds(30),
+        })
+        {
+            Timeout = TimeSpan.FromSeconds(30)
+        };
+
         private void detailChangeButton_Click(object sender, EventArgs e)
         {
             if (detailPanelNormal) //if the detail panel is in its normal, default position
@@ -2072,28 +2380,296 @@ namespace ED_Hud_Extension
                 detailChangeButton.Location = new Point(workingAreaPanel.Width - (985 + detailChangeButton.Width + 15), detailChangeButton.Location.Y);
                 detailChangeButton.Text = ">>>";
                 detailPanelNormal = false;
+
+                starDetailChangeButton.Visible = false;
+
             }
             else
             {
-                planetDetailView.Location = starDetailView.Location;
-                planetDetailView.Size = starDetailView.Size;
-                exploreDivider.Location = new Point(starDetailView.Location.X - 3, 0);
+                planetDetailView.Location = baseDetailPanelLocation;
+                planetDetailView.Size = baseDetailPanelSize;
+                exploreDivider.Location = new Point(baseDetailPanelLocation.X - 3, 0);
 
-                detailChangeButton.Location = new Point(workingAreaPanel.Width - (starDetailView.Width + detailChangeButton.Width + 15), detailChangeButton.Location.Y);
+                detailChangeButton.Location = new Point(workingAreaPanel.Width - (baseDetailPanelSize.Width + detailChangeButton.Width + 15), detailChangeButton.Location.Y);
                 detailChangeButton.Text = "<<<";
                 detailPanelNormal = true;
             }
         }
-
-        private CancellationTokenSource closingCts = new CancellationTokenSource();
-
-        private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
+        private void starDetailChangeButton_Click(object sender, EventArgs e)
         {
-            closingCts.Cancel();
+            if (starDetailViewNormal)
+            {
+                int widestLabel = 0;
 
-            if (statusReaderLive) { readTimer.Dispose(); }
+                foreach (Label lbl in starDetailView.Controls.OfType<Label>())
+                {
+                    if (lbl.Width > widestLabel)
+                    {
+                        widestLabel = lbl.Width;
+                    }
+                    else continue;
+                }
 
-            if (watcherLive) { watcher.StopWatching(); }
+                int fullWidth = starMagnitudeLabel.Width + widestLabel;
+                starDetailView.Width = fullWidth;
+                starDetailView.Location = new Point((workingAreaPanel.Width - (fullWidth - 10)), starDetailView.Location.Y);
+                exploreDivider.Location = new Point(workingAreaPanel.Width - (fullWidth + 3), starDetailView.Location.Y); //panel width + a 3pt offset for margins
+                beltDivPanel.Width = starDetailView.Width;
+
+                starDetailChangeButton.Text = ">>>";
+                starDetailChangeButton.Location = new Point(workingAreaPanel.Width - ((fullWidth + 10) + detailChangeButton.Width + 15), detailChangeButton.Location.Y);
+
+                starDetailViewNormal = false;
+
+                detailChangeButton.Visible = false;
+            }
+            else
+            {
+                starDetailView.Location = new Point(((workingAreaPanel.Width * 2) / 3) + 5, starDetailView.Location.Y);
+                starDetailView.Width = (workingAreaPanel.Width - starDetailView.Location.X);
+                exploreDivider.Location = new Point(starDetailView.Location.X - 3, 0);
+                beltDivPanel.Width = starDetailView.Width;
+
+                starDetailChangeButton.Text = "<<<";
+                starDetailChangeButton.Location = new Point(workingAreaPanel.Width - (starDetailView.Width + starDetailChangeButton.Width + 15), starDetailChangeButton.Location.Y);
+
+                starDetailViewNormal = true;
+            }
+        }
+
+        // ---------------------------------------------------------------------------------------------------------------------
+        private void combatButton_Click(object sender, MouseEventArgs e)
+        {
+            arrangeCombatPanel(combatPanel, onFootPanel);
+
+            scanStageLabel.Location = new Point(((workingAreaPanel.Width / 2) - scanStageLabel.Width) + 118, scanStageLabel.Location.Y);
+            scanStageTag.Location = new Point((workingAreaPanel.Width / 2) + 108, scanStageTag.Location.Y);
+            scanStageTag.TextAlign = ContentAlignment.TopLeft;
+
+            //handle the scan target : [status] label changes as needed
+            int x = scanStageTag.Location.X + scanStageTag.Width + 15; //left-hand margin point of the scan stage tag
+            if (combatDetailsPanel.Location.X <= x) //if the details panel overhangs the scan stage tag
+            {
+                scanStageLabel.Location = new Point(((formSize.Width / 2) - (scanStageLabel.Width / 2) + 20), scanStageLabel.Location.Y);
+                scanStageTag.Location = new Point(((formSize.Width / 2) - (scanStageTag.Width / 2) + 20), scanStageLabel.Location.Y + 40);
+                scanStageTag.TextAlign = ContentAlignment.TopCenter;
+            }
+
+            combatDetailsPanel.Location = new Point(((workingAreaPanel.Width - 690) + 5), 0);
+            combatDetailsPanel.Size = new Size(690, workingAreaPanel.Height - 32);
+            combatDivPanel.Height = combatDetailsPanel.Height;
+            detailsFilterMinder.Width = (combatDetailsPanel.Width - 2);
+            detailsFilterMinder.Location = new Point(2, 200);
+
+            careerPanel.Size = new Size(combatDetailsPanel.Width, combatDetailsPanel.Height - 140);
+            currentSessionPanel.Size = new Size(combatDetailsPanel.Width, combatDetailsPanel.Height - 140);
+
+            combatDetailsChangeButton.Text = ">>>";
+            combatDetailsChangeButton.Location = new Point(combatDetailsPanel.Location.X - 55, workingAreaPanel.Height - 32);
+
+            Invoke(new Action(() => updateStatistics()));
+
+            combatPanel.BringToFront();
+            dividerPanel.BringToFront();
+            statusPanel.BringToFront();
+            careerPanel.BringToFront();
+            careerPanelLabelPanel.BringToFront();
+            onCurrentSessionPanel = false;
+
+            currentPanel = "Combat";
+
+            checkLocks(combatButton, e);
+
+            if (careerPanel.Controls.Count <= 0)
+            {
+                detailsFilterMinder.BringToFront();
+                detailsFilterMinder.Visible = true;
+            }
+            else
+            {
+                careerPanel.BringToFront();
+                detailsFilterMinder.Visible = false;
+            }
+        }
+        private void currentSessionButton_Click(object sender, EventArgs e)
+        {
+            currentSessionPanel.BringToFront();
+            currentSessionsLabelPanel.BringToFront();
+            currentCombatRecord = "Current Session";
+            if (currentSessionPanel.Controls.Count <= 0)
+            {
+                detailsFilterMinder.BringToFront();
+                detailsFilterMinder.Visible = true;
+            }
+        }
+
+        private void careerRecordButton_Click(object sender, EventArgs e)
+        {
+            careerPanel.BringToFront();
+            careerPanelLabelPanel.BringToFront();
+            currentCombatRecord = "Career";
+            if (careerPanel.Controls.Count <= 0)
+            {
+                detailsFilterMinder.BringToFront();
+                detailsFilterMinder.Visible = true;
+            }
+        }
+
+        public void updateStatistics()
+        {
+            //career panel control
+            careerPanel.SuspendLayout();
+
+            if (careerPanel.Controls.Count > 0)
+            {
+                careerRecordItems = careerPanel.Controls.Count;
+                foreach (Label lbl in careerPanel.Controls.OfType<Label>())
+                {
+                    if (lbl.Tag == "listItem")
+                    {
+                        lbl.Visible = false;
+                        lbl.Dispose();
+                    }
+                }
+                careerPanel.Controls.Clear();
+                careerRecordItems = 0;
+            }//644, 40 
+
+            generateStatisticsList();
+
+            int y = 0;
+
+            foreach (var key in careerStatisticsDisplay.Keys)
+            {
+                Label item = new Label();
+                item.Text = convertName(key);
+                item.Tag = "listItem";
+                item.AutoSize = true;
+                item.ForeColor = ColorTranslator.FromHtml("#C04000");
+                item.Font = new Font(oxaniumFont.Families[0], 23, FontStyle.Regular);
+                item.Anchor = AnchorStyles.Top | AnchorStyles.Left;
+                item.Location = new Point(0, y);
+
+                y += 40;
+
+                Label value = new Label();
+                value.Text = String.Format("{0:N0}", careerStatisticsDisplay[key]);
+                if (currencyValues.Contains(key)) { value.Text += "  CR"; }
+                value.Tag = "listItem";
+                value.AutoSize = true;
+                value.ForeColor = Color.White;
+                value.Font = new Font(oxaniumFont.Families[0], 23, FontStyle.Regular);
+                value.Anchor = AnchorStyles.Top | AnchorStyles.Left;
+                value.Location = new Point(0, y);
+
+
+                careerPanel.Controls.Add(item);
+                careerPanel.Controls.Add(value);
+                item.CreateControl();
+                value.CreateControl();
+                y += 40;
+            }
+
+            careerPanel.ResumeLayout();
+
+            //current session panel control
+
+            currentSessionPanel.SuspendLayout();
+
+            if (currentSessionPanel.Controls.Count > 0)
+            {
+                currentSessionItems = currentSessionPanel.Controls.Count;
+                foreach (Label lbl in currentSessionPanel.Controls.OfType<Label>())
+                {
+                    if (lbl.Tag == "listItem")
+                    {
+                        lbl.Visible = false;
+                        lbl.Dispose();
+                    }
+                }
+                currentSessionItems = 0;
+            }
+
+            currentSessionPanel.Controls.Clear();
+
+            int cY = 0;
+
+            foreach (var key in currentStatisticsDisplay.Keys)
+            {
+                Label item = new Label();
+                item.Text = convertName(key);
+                item.Tag = "listItem";
+                item.AutoSize = true;
+                item.ForeColor = ColorTranslator.FromHtml("#C04000");
+                item.Font = new Font(oxaniumFont.Families[0], 23, FontStyle.Regular);
+                item.Anchor = AnchorStyles.Top | AnchorStyles.Left;
+                item.Location = new Point(0, cY);
+
+                cY += 40;
+
+                Label value = new Label();
+                value.Text = String.Format("{0:N0}", currentStatisticsDisplay[key]);
+                if (currencyValues.Contains(key)) { value.Text += "  CR"; }
+                value.Tag = "listItem";
+                value.AutoSize = true;
+                value.ForeColor = Color.White;
+                value.Font = new Font(oxaniumFont.Families[0], 23, FontStyle.Regular);
+                value.Anchor = AnchorStyles.Top | AnchorStyles.Left;
+                value.Location = new Point(0, cY);
+
+
+                currentSessionPanel.Controls.Add(item);
+                currentSessionPanel.Controls.Add(value);
+                item.CreateControl();
+                value.CreateControl();
+                cY += 40;
+            }
+
+            currentSessionPanel.ResumeLayout();
+
+            if (currentCombatRecord == "Career")
+            {
+                if (careerStatisticsDisplay.Count > 0) { detailsFilterMinder.Visible = false; detailsFilterMinder.BringToFront(); }
+                else { detailsFilterMinder.Visible = true; }
+            }
+            else if (currentCombatRecord == "Current Session")
+            {
+                if (currentStatisticsDisplay.Count > 0) { detailsFilterMinder.Visible = false; }
+                else { detailsFilterMinder.Visible = true; detailsFilterMinder.BringToFront(); }
+            }
+
+        }
+
+        private void combatDetailsChangeButton_Click(object sender, EventArgs e)
+        {
+            //handle the button and panel changes
+            if (combatDetailsChangeButton.Text == ">>>") //if the panel is expanded
+            {
+                combatDetailsPanel.Visible = false;
+                combatDetailsChangeButton.Location = new Point(workingAreaPanel.Width - 55, workingAreaPanel.Height - 60); //55 x 30
+                combatDetailsChangeButton.BringToFront();
+                combatDetailsChangeButton.Text = "<<<";
+                scanStageLabel.Location = new Point(((workingAreaPanel.Width / 2) - scanStageLabel.Width) + 118, scanStageLabel.Location.Y);
+                scanStageTag.Location = new Point((workingAreaPanel.Width / 2) + 108, scanStageLabel.Location.Y);
+                scanStageTag.TextAlign = ContentAlignment.TopLeft;
+            }
+            else if (combatDetailsChangeButton.Text == "<<<") //if the panel is hidden
+            {
+                combatDetailsPanel.Visible = true;
+                combatDetailsChangeButton.Location = new Point(combatDetailsPanel.Location.X - 55, workingAreaPanel.Height - 60);
+                combatDetailsChangeButton.BringToFront();
+                combatDetailsChangeButton.Text = ">>>";
+                //handle the scan target : [status] label changes as needed
+                int x = scanStageTag.Location.X + scanStageTag.Width + 15; //left-hand margin point of the scan stage tag
+                if (combatDetailsPanel.Location.X <= x) //if the details panel overhangs the scan stage tag
+                {
+                    scanStageLabel.Location = new Point(((formSize.Width / 2) - (scanStageLabel.Width / 2) + 20), scanStageLabel.Location.Y); 
+                    scanStageTag.Location = new Point(((formSize.Width / 2) - (scanStageTag.Width / 2) + 20), scanStageLabel.Location.Y + 40);
+                    scanStageTag.TextAlign = ContentAlignment.TopCenter;
+                }
+            }
+
+
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using System.Text.Json.Nodes;
+﻿using System.Text.Json;
+using System.Text.Json.Nodes;
 
 namespace ED_Hud_Extension
 {
@@ -17,10 +18,30 @@ namespace ED_Hud_Extension
         {
             var req = OAuth.CreateRequest(url);
             req.Method = "GET";
-            using (var response = req.GetResponse())
-            using (var stream = response.GetResponseStream()) 
+            try
             {
-                return JsonNode.Parse(stream)!.AsObject();
+                using (var response = req.GetResponse())
+                using (var stream = response.GetResponseStream())
+                {
+                    try
+                    {
+                        return JsonNode.Parse(stream)!.AsObject();
+                    }
+                    catch (JsonException)
+                    {
+                        //do nothing cos the file is either empty or fucked
+                        var failString = new JsonObject()
+                    {
+                        { "that shit", "didn't work" }
+                    };
+                        return failString;
+                    }
+                }
+            }
+            catch
+            {
+                OAuth2.Load().Refresh();
+                return Get(url); //refresh the auth token n try that shit again
             }
         }
 
