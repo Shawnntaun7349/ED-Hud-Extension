@@ -4,7 +4,7 @@ A second-monitor program for Frontier Development's *Elite: Dangerous*.
 
 *Developed by Sean Roe*   
 
-Current Version : 0.2.3.3  
+Current Version : 0.2.4.1  
 
 **--- Planned Features ---**  
 - Expansion on Combat Panel to show more player data, such as Power Distributor levels, current shield status, etc.
@@ -13,6 +13,15 @@ Current Version : 0.2.3.3
 - [Tentatively] A Color changing mechanism of some kind to allow the user to customize the appearance of their UI [in EDHE, not in-game. EDHM-UI exists and is fantastic.] [https://bluemystical.github.io/edhm-api/]
 
 **--- Update Notes ---**  
+**Version 0.2.4.1**  
+Combat Panel update, implementation of Current Session statistics view. Implementation of a handful of extra statistics that can be tracked during an active session that are not actively tracked by Elite's Commander Log, such as 'Floating' Bounties / Combat Bonds (bounties / Bonds that have been earned but not yet redeemed), & total kills. [Tracked by bounty & combat bond events. In some situations, such as the Biohazard Takedown Operation, there is no journal-bound mechanism to track kills where they carry no direct rewards but are not tracked as crimes.] Implemented mechanism for hiding / showing the Combat Details panel at the user's discretion, including an automatic rearrangement of the UI to accomadate the panel's presence. [UI rearrangement is limited to the Ship Combat panel, some details of the On Foot panel will still be covered w/ the Combat Details panel expanded. This will be reworked in a future update.]
+
+**Version 0.2.4.0**  
+Began overhaul of Combat Panel, introduction of Combat Statistics panels. Currently restricted to Career Record statistics, Session Tracking coming soon. Reworked Settings menu to allow for easy filtering of displayed statistics so that the user can select exactly what they do or do not want to see / keep track of. Reworked settings save / load flow to reduce required restarts, application restart is now required only for changing Display devices. Implemented a Lock mechanism to the primary Menu buttons to allow the user to lock a specific panel in view, preventing automatic contextual panel switching. Explanation of panel locking mechanism can be found in the Help section of the settings menu. Significant background work to continue to prevent closing-crashes. I still hate Windows.
+
+**Version 0.2.3.4**  
+Further updates to Body Detail & Star Detail View panels, added expander button to Star Detail View panel similar to Body Detail expander, appears and disappears as needed based on users' display size & the length of the data in the panel (i.e. if the information in the details panel is cutoff by the default size, the expander button will appear. if the panel *is* big enough to hold everything, the expander button will remain invisible.)
+
 **Version 0.2.3.3**  
 Corrections to application shutdown procedure to prevent some crashing / loading problems. Implementation of new LabelButton Control class to replace default Windows button. Updates to several ui components to replace aforemention Windows button. Updates to Settings menu, including a new option to skip the initial loading animations, with relevant functionality warning. Yet another attempt to correct the new and exciting ways C# is trying to cause crashes when the program shuts down.
 
