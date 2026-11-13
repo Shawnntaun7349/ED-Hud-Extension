@@ -34,6 +34,7 @@ namespace ED_Hud_Extension
         {
             combatPanel = new Panel();
             combatDetailsPanel = new Panel();
+            combatPanelDivider = new Panel();
             currentSessionPanel = new Panel();
             careerPanel = new Panel();
             detailsFilterMinder = new Panel();
@@ -48,7 +49,6 @@ namespace ED_Hud_Extension
             currentSessionButton = new LabelButton();
             combatRecordLabel = new Label();
             combatDivPanel = new Panel();
-            combatDetailsChangeButton = new LabelButton();
             onFootPanel = new Panel();
             empKeyTag = new Label();
             empTag = new Label();
@@ -87,6 +87,7 @@ namespace ED_Hud_Extension
             ofSuitModsLabel = new Label();
             weaponOneLabel = new Label();
             ofSuitLabel = new Label();
+            combatDetailsChangeButton = new LabelButton();
             combatSysAllegianceLabel = new Label();
             combatSysAllegianceTag = new Label();
             combatSysGovLabel = new Label();
@@ -97,7 +98,6 @@ namespace ED_Hud_Extension
             targetSSHealthLabel = new Label();
             targetSSTag = new Label();
             targetSubSystemLabel = new Label();
-            combatPanelDivider = new Panel();
             targetDataLabel = new Label();
             scanStageTag = new Label();
             scanStageLabel = new Label();
@@ -319,6 +319,7 @@ namespace ED_Hud_Extension
             // combatPanel
             // 
             combatPanel.Controls.Add(combatDetailsPanel);
+            combatPanel.Controls.Add(onFootPanel);
             combatPanel.Controls.Add(combatDetailsChangeButton);
             combatPanel.Controls.Add(combatSysAllegianceLabel);
             combatPanel.Controls.Add(combatSysAllegianceTag);
@@ -330,7 +331,6 @@ namespace ED_Hud_Extension
             combatPanel.Controls.Add(targetSSHealthLabel);
             combatPanel.Controls.Add(targetSSTag);
             combatPanel.Controls.Add(targetSubSystemLabel);
-            combatPanel.Controls.Add(combatPanelDivider);
             combatPanel.Controls.Add(targetDataLabel);
             combatPanel.Controls.Add(scanStageTag);
             combatPanel.Controls.Add(scanStageLabel);
@@ -352,7 +352,6 @@ namespace ED_Hud_Extension
             combatPanel.Controls.Add(targetPowerLabel);
             combatPanel.Controls.Add(targetShieldsLabel);
             combatPanel.Controls.Add(targetNameLabel);
-            combatPanel.Controls.Add(onFootPanel);
             combatPanel.Location = new Point(0, 0);
             combatPanel.Name = "combatPanel";
             combatPanel.Size = new Size(1806, 894);
@@ -362,6 +361,7 @@ namespace ED_Hud_Extension
             // combatDetailsPanel
             // 
             combatDetailsPanel.BackColor = Color.Black;
+            combatDetailsPanel.Controls.Add(combatPanelDivider);
             combatDetailsPanel.Controls.Add(currentSessionPanel);
             combatDetailsPanel.Controls.Add(careerPanel);
             combatDetailsPanel.Controls.Add(detailsFilterMinder);
@@ -375,6 +375,15 @@ namespace ED_Hud_Extension
             combatDetailsPanel.Size = new Size(649, 895);
             combatDetailsPanel.TabIndex = 93;
             combatDetailsPanel.Tag = "planetDetailList";
+            // 
+            // combatPanelDivider
+            // 
+            combatPanelDivider.BackColor = Color.FromArgb(192, 64, 0);
+            combatPanelDivider.Location = new Point(0, 0);
+            combatPanelDivider.Margin = new Padding(0);
+            combatPanelDivider.Name = "combatPanelDivider";
+            combatPanelDivider.Size = new Size(1790, 2);
+            combatPanelDivider.TabIndex = 80;
             // 
             // currentSessionPanel
             // 
@@ -543,21 +552,6 @@ namespace ED_Hud_Extension
             combatDivPanel.Name = "combatDivPanel";
             combatDivPanel.Size = new Size(2, 894);
             combatDivPanel.TabIndex = 81;
-            // 
-            // combatDetailsChangeButton
-            // 
-            combatDetailsChangeButton.Font = new Font("Oxanium ExtraBold", 14.25F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            combatDetailsChangeButton.ForeColor = Color.FromArgb(192, 64, 0);
-            combatDetailsChangeButton.HoverForeColor = Color.FromArgb(255, 204, 153);
-            combatDetailsChangeButton.Location = new Point(1100, 861);
-            combatDetailsChangeButton.Lockable = false;
-            combatDetailsChangeButton.Name = "combatDetailsChangeButton";
-            combatDetailsChangeButton.PressedForeColor = Color.White;
-            combatDetailsChangeButton.Size = new Size(55, 30);
-            combatDetailsChangeButton.TabIndex = 135;
-            combatDetailsChangeButton.Text = ">>>";
-            combatDetailsChangeButton.TextAlign = ContentAlignment.MiddleCenter;
-            combatDetailsChangeButton.Click += combatDetailsChangeButton_Click;
             // 
             // onFootPanel
             // 
@@ -1000,6 +994,21 @@ namespace ED_Hud_Extension
             ofSuitLabel.TabIndex = 93;
             ofSuitLabel.Text = "Equipped Suit : ";
             // 
+            // combatDetailsChangeButton
+            // 
+            combatDetailsChangeButton.Font = new Font("Oxanium ExtraBold", 14.25F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            combatDetailsChangeButton.ForeColor = Color.FromArgb(192, 64, 0);
+            combatDetailsChangeButton.HoverForeColor = Color.FromArgb(255, 204, 153);
+            combatDetailsChangeButton.Location = new Point(1100, 861);
+            combatDetailsChangeButton.Lockable = false;
+            combatDetailsChangeButton.Name = "combatDetailsChangeButton";
+            combatDetailsChangeButton.PressedForeColor = Color.White;
+            combatDetailsChangeButton.Size = new Size(55, 30);
+            combatDetailsChangeButton.TabIndex = 135;
+            combatDetailsChangeButton.Text = ">>>";
+            combatDetailsChangeButton.TextAlign = ContentAlignment.MiddleCenter;
+            combatDetailsChangeButton.Click += combatDetailsChangeButton_Click;
+            // 
             // combatSysAllegianceLabel
             // 
             combatSysAllegianceLabel.AutoSize = true;
@@ -1114,15 +1123,6 @@ namespace ED_Hud_Extension
             targetSubSystemLabel.Size = new Size(230, 44);
             targetSubSystemLabel.TabIndex = 81;
             targetSubSystemLabel.Text = "Sub-System:";
-            // 
-            // combatPanelDivider
-            // 
-            combatPanelDivider.BackColor = Color.FromArgb(192, 64, 0);
-            combatPanelDivider.Location = new Point(-4, 241);
-            combatPanelDivider.Margin = new Padding(0);
-            combatPanelDivider.Name = "combatPanelDivider";
-            combatPanelDivider.Size = new Size(1790, 2);
-            combatPanelDivider.TabIndex = 80;
             // 
             // targetDataLabel
             // 
